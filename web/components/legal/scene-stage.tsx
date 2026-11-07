@@ -173,7 +173,7 @@ export function SceneStage({ variant }: { variant: "privacy" | "terms" }) {
 			{/* melt the bottom of the scene into the page content below */}
 			<div
 				className="pointer-events-none absolute inset-x-0 bottom-0 h-16"
-				style={{ background: `linear-gradient(to bottom, transparent, ${PAL.paper})` }}
+				style={{ background: "linear-gradient(to bottom, transparent, var(--color-paper))" }}
 			/>
 		</div>
 	);

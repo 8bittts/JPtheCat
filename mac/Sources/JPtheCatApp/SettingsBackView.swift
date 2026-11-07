@@ -397,6 +397,7 @@ private struct SupportReportSheet: View {
             .resizable()
             .frame(width: 40, height: 40)
             .clipShape(RoundedRectangle(cornerRadius: JPAppRadius.card, style: .continuous))
+            .accessibilityHidden(true)
         }
         VStack(alignment: .leading, spacing: 3) {
           Text("Send a support report").font(JPAppFont.bodyStrong).foregroundStyle(JP.ink)
@@ -413,6 +414,7 @@ private struct SupportReportSheet: View {
           .textFieldStyle(.roundedBorder)
           .controlSize(.small)
           .font(JPAppFont.body)
+          .accessibilityLabel("Your email (optional)")
           .disabled(sending)
         Text("Only add this if you want a reply. JP does not store it in the app.")
           .font(JPAppFont.micro)

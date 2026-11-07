@@ -50,6 +50,7 @@ private struct SocialSharePopover: View {
 					Image(nsImage: mark).resizable().interpolation(.high)
 						.frame(width: 34, height: 34)
 						.clipShape(RoundedRectangle(cornerRadius: JPAppRadius.card, style: .continuous))
+						.accessibilityHidden(true)
 				}
 				VStack(alignment: .leading, spacing: 2) {
 					Text("Tell others about JP")
