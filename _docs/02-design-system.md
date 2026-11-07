@@ -4,7 +4,7 @@ Brand thesis, the homepage provider boundary, color, typography, motion, charts 
 
 **The cat that counts your agent tokens.**
 Naming and domain casing are owned by root `AGENTS.md` ("Identity & Branding").
-Exact values live in code: `web/app/globals.css` for the site, `mac/Sources/JPtheCatApp/Theme.swift` (`JPTheme`) and `JPAppDesignTokens.swift` (`JPAppColor`, `JPAppFont`, `JPAppSpacing`) for the app.
+Exact values live in code: `web/app/globals.css` for the site, `mac/Sources/JPtheCatApp/Theme.swift` (`JPTheme`) and `mac/Sources/JPtheCatApp/JPAppDesignTokens.swift` (`JPAppColor`, `JPAppFont`, `JPAppSpacing`) for the app.
 Native surface contracts live in [12-ui-surface-invariants.md](12-ui-surface-invariants.md).
 
 ## 1. Thesis
@@ -32,7 +32,7 @@ Shared controls retain semantic parity for units, provenance, badges, actions, a
 The frozen homepage Cursor illustration stays token-based and non-aggregable; OpenCode Go stays a measured, non-aggregable gateway. The native unified Grok source/accounting contract is owned by [03-data.md](03-data.md#unified-grok-plan-usage-and-cursor-local-activity); a homepage illustration never creates another native provider.
 Demo aggregate and composition figures sum only represented aggregable rows, with no hidden-provider contribution or gateway double counting.
 The full native catalog, CLI, widget eligibility, and `/library` remain independent of this boundary.
-`web/lib/homepage-providers.ts` owns the allowlist; `homepage-providers.test.tsx` pins it.
+`web/lib/homepage-providers.ts` owns the allowlist; `web/tests/homepage-providers.test.tsx` pins it.
 
 ## 2. Color
 
@@ -60,7 +60,7 @@ Accent, status, and provider color are three channels and never mix.
 ### App themes
 
 `JPTheme.all` is the catalog: Sunlit Ledger (light) and Midnight Ledger (dark) show inline in Settings; the rest (`inMoreThemes: true`) live in the More themes window. Every theme is free.
-Adding a theme is data in `Theme.swift`; color resolution and the pickers need no view changes, and the web demo catalog regenerates (`web/components/site/demo-themes.ts`).
+Adding a theme is data in `mac/Sources/JPtheCatApp/Theme.swift`; color resolution and the pickers need no view changes, and the web demo catalog regenerates (`web/components/site/demo-themes.ts`).
 Palette roles per theme: `paper`, `paper2`, `card`, `ink`, `inkSoft`, `inkFaint`, `line`, `lineStrong`, `track`, `ginger`, `gingerDeep`, `sage`, `sageSoft`, `sageDeep`, `honey`, `creamDeep`, `gold`, `cta`, `ctaDeep`, `ctaText`, `coral`.
 Derived helpers in `JPAppColor`: `trackFill` draws every groove (never `paper2`, which collapses onto the card in dark themes); `barFillOpacity` keeps a fill distinct from its track; `providerTint(_:)` lifts a too-dark brand tint on dark cards, while the icon chip keeps the raw tint; `ctaGradient` is the one accent-button gradient with `ctaText` on it (never `.white` on bright ginger).
 Every theme passes the WCAG-AA gate in `ThemeTests` and must make a recognizable choice: no `paper == card` recolor and no near-copy of another pack.
@@ -84,7 +84,7 @@ The warm palette's failure mode is two semantically different roles that look id
 
 Every number, percentage, and dollar uses tabular numerals so digits never jitter.
 Letter spacing is `0` everywhere on marketing surfaces; no negative tracking and no inline `text-[…]` arbitrary sizes on public routes (guard: `web/tests/sticker-typography.test.ts`).
-App roles live in `JPAppDesignTokens.swift`; add a role there before using a new size.
+App roles live in `mac/Sources/JPtheCatApp/JPAppDesignTokens.swift`; add a role there before using a new size.
 Money uses only `metricHero`, `metric`, and `metricSmall` ([12-ui-surface-invariants.md](12-ui-surface-invariants.md#typography)); `metricCaption` is reserved for non-money metric annotations.
 
 **Web normalization contract.** Public marketing routes (homepage Sticker Bomb shell, `/contact`, `/library` and nested pages, combined `/terms`, 404, download and support modals) use **`web/app/sticker.css` `sb-*` type roles only** — pick a role by meaning, never a one-off pixel size.
@@ -96,7 +96,7 @@ Money uses only `metricHero`, `metric`, and `metricSmall` ([12-ui-surface-invari
 - Layout widths: `sb-shell`, `reading-shell`, `copy-measure`; `<dialog>` geometry stays on `dialog-panel` in `globals.css`, with `dialog-panel-sb` for Sticker Bomb surfaces.
 - Palette: cream dot-grid canvas (`--sb-bg`), ink outlines, ginger/orange CTAs (`--sb-orange`, `--sb-orange-ink`, `--sb-honey`, `--sb-yellow`, `--sb-pink`). No mint/seafoam panel fills on public routes (guard: `web/tests/sticker-typography.test.ts`).
 The homepage **demo card** keeps Sunlit Ledger compact roles in `globals.css` (`ui-*`, `demo-*`, `compact-*`) — native parity, not the Sticker Bomb marketing scale.
-Email may duplicate values inline, but `design-system-normalization.test.ts` proves its brand colors equal the site tokens.
+Email may duplicate values inline, but `web/tests/design-system-normalization.test.ts` proves its brand colors equal the site tokens.
 
 ## 4. Motion
 
@@ -124,7 +124,7 @@ No emoji in chrome, navigation, badges, or provider identity; the first-run empt
 - The desktop card is 384px at most and shrinks to the viewport; theme variables are scoped to the card and its dialogs.
 - Chrome maps the native 32pt row to a 32px (`h-8`) row with 26px icon slots and a 4px settings gap; footer Help opens `SITE.url`.
 - It mirrors app-owned controls: the timeframe picker, settings chrome, footer quick actions, update dot, widget guidance, theme picker, and notional labels.
-`advanced-analytics-demo.tsx` mirrors the native deep-dive within the browser: 960px maximum width, 252px sidebar, intrinsic height with a viewport cap, a 14px chrome inset (no fake traffic-light gutter), and the native geometry tokens.
+`web/components/site/advanced-analytics-demo.tsx` mirrors the native deep-dive within the browser: 960px maximum width, 252px sidebar, intrinsic height with a viewport cap, a 14px chrome inset (no fake traffic-light gutter), and the native geometry tokens.
 Its Events / Tokens / $ measure drives the heatmap, peak callout, and table order; the timeframe control is real state; it opens a genuine modal `<dialog>`; CSV stays visibly disabled with an app-only explanation.
 Run `scripts/verify-app-demo-parity.sh` whenever either side changes.
 
@@ -133,21 +133,21 @@ Run `scripts/verify-app-demo-parity.sh` whenever either side changes.
 The site is light-only, server-rendered per request for the nonce CSP, and fonts self-host through `next/font`.
 - **Texture without dark crutches:** the Sticker Bomb canvas is a cream dot grid with ink outlines and offset shadows; the demo surfaces keep Sunlit Ledger ruling and paper grain; no decorative orbs or blobs.
 - **Navigation** has no download button; links are root-relative homepage anchors.
-- **Homepage scroll order:** after the hero and provider marquee, the interactive `#demo` (`Go on, poke her.`) precedes `#how` (Four small jobs) so visitors reach the product mirror first; guard: `site-copy.test.ts`.
-- **Open source:** `#open-source` sits between `#honest` and `#download`, built only from `sb-h2`, `sb-lede`, and `sb-cta-row`; it, the `open-source` FAQ entry, and the footer line link `SITE.repoUrl` and `SITE.contributingUrl` (guard: `site-copy.test.ts`).
-- **One real download path:** every homepage download button (hero, pricing, and FAQ in `components/sticker/home.tsx`) and the `/library` CTAs start the download through `DownloadCta` with `prefetch={false}`.
+- **Homepage scroll order:** after the hero and provider marquee, the interactive `#demo` (`Go on, poke her.`) precedes `#how` (Four small jobs) so visitors reach the product mirror first; guard: `web/tests/site-copy.test.ts`.
+- **Open source:** `#open-source` sits between `#honest` and `#download`, built only from `sb-h2`, `sb-lede`, and `sb-cta-row`; it, the `open-source` FAQ entry, and the footer line link `SITE.repoUrl` and `SITE.contributingUrl` (guard: `web/tests/site-copy.test.ts`).
+- **One real download path:** every homepage download button (hero, pricing, and FAQ in `web/components/sticker/home.tsx`) and the `/library` CTAs start the download through `DownloadCta` with `prefetch={false}`.
   Homebrew is a quiet secondary callout under those controls, never a conversion CTA.
-- **Footer:** `sb-shell` width, `Ping @8bit for support` (X link), one legal credit line `Built with: YEN · Bitcoin Email · Terms` (colon + spaced middots; inline nav, not flex — guard: `FOOTER_CREDITS_VISIBLE` / `site-copy.test.ts`), copyright line, the `Free and open source (MIT).` line linking the repository, and the real JP photo with `Hi, I'm JP.`; no Contact link, no bare support email, no bottom-only `@8bit`.
+- **Footer:** `sb-shell` width, `Ping @8bit for support` (X link), one legal credit line `Built with: YEN · Bitcoin Email · Terms` (colon + spaced middots; inline nav, not flex — guard: `FOOTER_CREDITS_VISIBLE` / `web/tests/site-copy.test.ts`), copyright line, the `Free and open source (MIT).` line linking the repository, and the real JP photo with `Hi, I'm JP.`; no Contact link, no bare support email, no bottom-only `@8bit`.
 
 ### Legal pages
 
-Combined `/terms` opens on the full-width three.js snow-globe scene (`components/legal/`), then switches to plain, scan-friendly content built from homepage roles: a one-line H1 and subhead, the shared "On this page" list, and headed paragraphs.
+Combined `/terms` opens on the full-width three.js snow-globe scene (`web/components/legal/`), then switches to plain, scan-friendly content built from homepage roles: a one-line H1 and subhead, the shared "On this page" list, and headed paragraphs.
 - Constraints: strict nonce CSP with 100% procedural geometry plus the one self-hosted mascot image (no GLTF, HDRI, eval, CDN, or workers); three.js loads client-only; Reduce Motion or no WebGL shows the static SVG poster with no rAF.
 - Verify every visual change with a headless screenshot.
-- `/privacy` permanently redirects to `/terms#privacy-policy`; the Vercel-telemetry disclosure sentences in that privacy section are load-bearing (`tests/site-copy.test.ts`).
+- `/privacy` permanently redirects to `/terms#privacy-policy`; the Vercel-telemetry disclosure sentences in that privacy section are load-bearing (`web/tests/site-copy.test.ts`).
 ### Email — the Owner Ledger
 
-Every email reads its tokens from `web/emails/email-styles.ts`: colors mirrored from `app/globals.css` `--color-*` and admin radii from `--radius-*`, both parity-tested; change a value there, never at a call site.
+Every email reads its tokens from `web/emails/email-styles.ts`: colors mirrored from `web/app/globals.css` `--color-*` and admin radii from `--radius-*`, both parity-tested; change a value there, never at a call site.
 JP sends no customer mail; the one shell is the owner/admin "Owner Ledger".
 
 **Owner/admin mail, the "Owner Ledger"** (`web/emails/admin-email-shell.tsx`: the daily report, download notices, support reports) is spartan and gets straight to the point.
@@ -162,7 +162,7 @@ JP sends no customer mail; the one shell is the owner/admin "Owner Ledger".
 - Every value, list item, and block uses the same body text; the mono face marks only the uppercase section labels (guard: `web/tests/admin-email-shell.test.tsx`).
 - An absent value uses the one vocabulary `OWNER_VALUE` in `web/lib/email/owner-vocabulary.ts`, where each word means one thing (`not configured` never ran, `failed` errored, `none in this window` ran and found nothing); a real zero prints as a number (`0`), never a word.
 
-Client robustness: Row/Column tables, an explicit background on every surface, `color-scheme: light` plus the dark-mode re-assertion CSS through the shared `email-head.tsx`, AA-passing pairs, absolute `https://jpthecat.com/*` images with size and alt, HTML well under Gmail's 102KB clip, and a curated plain-text part.
+Client robustness: Row/Column tables, an explicit background on every surface, `color-scheme: light` plus the dark-mode re-assertion CSS through the shared `web/emails/email-head.tsx`, AA-passing pairs, absolute `https://jpthecat.com/*` images with size and alt, HTML well under Gmail's 102KB clip, and a curated plain-text part.
 One download template renders exactly two channel variants.
 Guard: `web/tests/admin-email-shell.test.tsx`.
 

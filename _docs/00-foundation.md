@@ -345,7 +345,7 @@ A homepage side-by-side caught it, which is why gold is mascot-only and every de
 
 #### Hook crash in site-copy tests
 
-`tests/site-copy.test.ts` renders some components as raw calls (`Hero()`), which throws once the component adopts a hook.
+`web/tests/site-copy.test.ts` renders some components as raw calls (`Hero()`), which throws once the component adopts a hook.
 Before adding a hook to such a component, convert its call site to `createElement(Component, props)`; it bit `Nav` and `StickyPriceBar`.
 
 #### Responsive overflow
