@@ -21,7 +21,7 @@
 		"test": "bun test",
 		"a11y": "bun scripts/a11y-audit.ts",
 		"knip": "knip",
-		"doctor": "react-doctor . --verbose",
+		"doctor": "react-doctor . --verbose --blocking warning",
 		"doctor:diff": "react-doctor . --verbose --scope changed --base main",
 		"quality": "bun run check && bun run test && bun run knip && bun run doctor && bun run build"
 	},

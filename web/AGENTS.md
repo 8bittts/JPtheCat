@@ -22,7 +22,7 @@ bun run format       # biome format --write
 bun run check        # tsc --noEmit && biome check
 bun test             # Bun's native test runner over tests/
 bun run knip         # dead-code / unused-dependency check
-bun run doctor       # react-doctor . --verbose
+bun run doctor       # react-doctor . --verbose --blocking warning
 bun run doctor:diff  # react-doctor . --verbose --scope changed --base main
 bun run quality      # check && test && knip && doctor && build — the full gate, in that order
 bun run scan:secrets # byte-scan the built browser output for secret VALUES (last step of build)
@@ -36,7 +36,7 @@ It byte-scans `.next/static` and `.next/server/app` for every credential-shaped 
 **[CRITICAL] A green/READY Vercel deploy is NOT proof the quality gate passed — run `bun run quality` locally before any web-touching push.**
 Vercel's build runs only `next build`, not `bun test`, knip, or react-doctor, so a failing test or doctor regression ships while Vercel still shows READY.
 `.github/workflows/ci.yml` is disabled on purpose, so the local run is the only gate; a WCAG target-size failure once deployed "green" this way.
-`react-doctor` must score 100/100 to deploy; justified exceptions live in `doctor.config.json` — never suppress a finding the code could fix instead.
+`react-doctor` must score 100/100 to deploy; `--blocking warning` makes any warning fail `bun run doctor`, because the tool exits 0 on warnings by default. Justified exceptions live in `doctor.config.json` — never suppress a finding the code could fix instead.
 
 Every tool in the `quality` chain (Biome, knip, react-doctor) is a pinned devDependency resolved from `node_modules/.bin` — never reintroduce `bunx <tool>@latest`.
 Playwright is pinned on the same terms but is NOT in the `quality` chain and has no browser specs; consumers are `scripts/generate-og-image.mjs` (OG/Twitter card) and asset guards in `tests/social-assets.test.ts`. Regenerate PWA PNGs with `scripts/generate-web-icons.mjs` (macOS can still use repo-root `./scripts/generate-brand-icons.sh`).

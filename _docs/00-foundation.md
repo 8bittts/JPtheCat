@@ -40,6 +40,10 @@ Shell gates had the same shape: a command left of `&&` is `set -e`-exempt, a `ca
 Mutation-test every new guard: break what it protects and watch it fail.
 Three guards failed that check on first write (`PackageResourceBundleTests`, `testColdStartSkipsFingerprintReadViaPersistedCtime` before `Stats.fingerprintReads` existed, and the `[notes]` guard before it ran the real awk).
 
+**A score gate must fail on the score it promises.**
+`react-doctor` exits 0 on warnings, so `bun run quality` and the release script's "react-doctor 100/100" step passed a 97/100 run (a non-component export in a component file).
+`bun run doctor` now passes `--blocking warning`, which exits 1 on that same run.
+
 **Do not bulk-delete source-pin tests on a "formatting pins" premise.**
 `SettingsCopyTests` and `DashboardChromePlacementTests` alone own the spaced-name settings copy, the VoiceOver cycle-row subtitle, chrome ORDER (the parity script's `grep -Fq` is order-blind), the switch-slot contract, and "Test meow fires with interactive sounds off".
 Migrate an invariant to an executable form before deleting its grep.
