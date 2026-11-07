@@ -139,6 +139,13 @@ struct SettingsBackView: View {
       ) {
         openSupportReport()
       }
+      SettingsRow(
+        icon: "chevron.left.forwardslash.chevron.right",
+        title: "Open source",
+        subtitle: "MIT licensed — read the code and contribute on GitHub"
+      ) {
+        Self.open(Self.repositoryURL)
+      }
     }
   }
 
@@ -343,6 +350,8 @@ struct SettingsBackView: View {
     launchAtLogin = LoginItem.isEnabled()
     launchAtLoginStatus = LoginItem.statusDescription()
   }
+
+  static let repositoryURL = "https://github.com/8bittts/JPtheCat"
 
   static func open(_ urlString: String) {
     guard let url = URL(string: urlString) else { return }

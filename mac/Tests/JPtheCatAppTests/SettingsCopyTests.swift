@@ -262,6 +262,14 @@ final class SettingsCopyTests: XCTestCase {
 		XCTAssertFalse(source.contains("Something look off?"))
 	}
 
+	func testSettingsGeneralSectionLinksTheOpenSourceRepository() throws {
+		let surface = try AppSourceScanner.typeSurface("SettingsBackView")
+		XCTAssertTrue(surface.contains(#"static let repositoryURL = "https://github.com/8bittts/JPtheCat""#))
+		let general = try AppSourceScanner.body(of: "private var generalSection: some View {")
+		XCTAssertTrue(general.contains(#"title: "Open source""#))
+		XCTAssertTrue(general.contains("Self.open(Self.repositoryURL)"))
+	}
+
 	/// [Regression guard] `WidgetGalleryButton` was the ONLY chrome icon with an ALWAYS-ON background +
 	/// border chip — every sibling only shows a chip on hover. Pin the hover-gated recipe so it can't
 	/// silently regress back to a permanently-highlighted icon.

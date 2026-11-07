@@ -125,6 +125,11 @@ describe("public launch copy", () => {
 		expect(footer).toContain("Free and open source (MIT).");
 		expect(footer).toContain(`href="${SITE.repoUrl}"`);
 
+		// Settings → General → Open source mirrors the native SettingsBackView row.
+		const demoSettings = await Bun.file("components/site/menubar-demo-settings.tsx").text();
+		expect(demoSettings).toContain('title="Open source"');
+		expect(demoSettings).toContain('window.open(SITE.repoUrl, "_blank", "noopener,noreferrer")');
+
 		expect(JP_COMPETITOR_ROW.oss).toBe(true);
 		for (const file of ["lib/library/content/alternatives.ts", "public/llms.txt"]) {
 			expect((await Bun.file(file).text()).toLowerCase()).not.toContain("closed source");

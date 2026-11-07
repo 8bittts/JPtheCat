@@ -143,6 +143,7 @@ The Settings face is intrinsic-height with NO scrolling (guard: `DashboardSizing
 Fold small disclosures into an existing section rather than adding a header.
 The Appearance picker is ONE compact row (2 free themes + "More themes"), and "Live data" is ONE `Providers & live limits` row opening the Live Data window; never re-inline either list (web: `NavRow` opening `LiveDataPopup`).
 Support is ONE General-section `Support report` row (no honey promo card at the top of the face; web demo: `NavRow` opening the redacted support modal).
+The `Open source` row follows it and opens the public repository (`SettingsBackView.repositoryURL`; web demo: `NavRow` opening `SITE.repoUrl`).
 
 The provider opt-in rows (Claude live limits, Grok live limits, Copilot OTel, Cursor hook) are ONE `ProviderOptInRow` driven by `ProviderOptInDescriptor` values; add a descriptor, never copy the row.
 `ProviderOptInIntent.resolve(requested:isOn:state:)` lets only `.installable` reach the install alert; `reconcileStaleCapture` stays optional (Claude and Grok only).

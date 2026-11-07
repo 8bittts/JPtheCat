@@ -2,6 +2,7 @@
 
 import { type CSSProperties, useEffect, useId, useRef, useState } from "react";
 import { trapDialogTab } from "@/lib/dialog-focus-trap";
+import { SITE } from "@/lib/site";
 import { BrandMark } from "./brand";
 import { type DemoTheme, getDemoTheme, THEME_CATALOG } from "./demo-themes";
 import { Icon } from "./icon";
@@ -139,6 +140,12 @@ export function SettingsFace({
 						title="Support report"
 						subtitle="Send a redacted report — no prompts or code leave your Mac"
 						onOpen={onSupport}
+					/>
+					<NavRow
+						icon="code"
+						title="Open source"
+						subtitle="MIT licensed — read the code and contribute on GitHub"
+						onOpen={() => window.open(SITE.repoUrl, "_blank", "noopener,noreferrer")}
 					/>
 					<CycleRow
 						icon="menubar"
