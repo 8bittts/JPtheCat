@@ -52,7 +52,8 @@ The 30-day PII redaction nulls `ip`, `ua`, and `referer`; `is_bot`, `is_mac`, an
 - `web/scripts/growth-extra.ts [days] [--json]` — the per-layer filter table and Vercel Web Analytics; it reads the Vercel CLI's own auth, so no token is copied into `.env.local`, and it prints aggregates only.
 - `web/scripts/analytics-pull.ts` — Search Console queries, pages, trends, and countries; run at 30 and 90 days to diff rising queries.
   The OAuth refresh token is per Google account, so the existing DeathNote client with `webmasters.readonly` is reused; a clean worktree without credentials prints a setup notice and exits 0.
-- **Website traffic** is Vercel Web Analytics and Speed Insights (no GA4); custom events (`download_cta_clicked`, `library_download_cta_clicked`, `download_modal_opened`, `library_download_modal_opened`) are not bot-filtered.
+- **Website traffic** is Vercel Web Analytics and Speed Insights (no GA4); custom events (`download_cta_clicked`, `library_download_cta_clicked`, `download_modal_opened`, `library_download_modal_opened`, `repo_link_clicked`) are not bot-filtered.
+  `repo_link_clicked` fires from every public-repository link through `components/site/repo-link.tsx`, with `placement` (`home_callout`, `faq`, `footer`, `demo_settings`) and `target` (`repo`, `contributing`).
   They were Title Case until 2026-10-22; `LEGACY_PRODUCT_EVENT_NAMES` lets the digest count both spellings until no window reaches back that far.
   Every custom event goes through `trackProductEvent` in `web/lib/analytics/product-analytics.ts`; its `ProductEventName` union also types the digest's `countFor`, so a renamed event fails typecheck, and `web/tests/product-analytics.test.ts` fails if any other file imports `track` from `@vercel/analytics`.
 - **24-hour ground truth:** Supabase Storage logs show real DMG byte fetches for one day; redirect rows without a fetch are bots.
@@ -69,15 +70,20 @@ Any skipped or failed send returns non-200 so Vercel Cron shows the failure; the
 Previews use `?sample&sample_id=<slug>` (add `sample=all` for both trend sections); they skip the clock gate and carry `[Sample]` subjects and separate idempotency keys.
 A preview call needs the real `CRON_SECRET`, which no env pull returns; without it, call `runGrowthDigestRequest` from `web/` with a one-time local `CRON_SECRET`, and supply `VERCEL_TOKEN`, which `.env.local` lacks, or the Vercel leg reads `not configured`.
 
-The report leads with a `Needs attention` block from `buildIssues` (a failed data leg or a blind hosting filter), and its subject counts Mac downloads and issues; a `not configured` leg (no credentials) is a choice, not an issue.
-Everything stays aggregate: download spine, Vercel analytics, and Search Console.
+The report leads with a `Needs attention` block from `buildIssues` (a failed data leg or a blind hosting filter), and its subject counts Mac downloads, open-source items to triage, and issues; a `not configured` leg (no credentials) is a choice, not an issue.
+The `Open source (GitHub)` section follows Health, so contributions are read before downloads.
+`lib/analytics/growth-source-github.ts` reads the public repository behind `SITE.repoUrl`: stars, forks, open issues and pull requests, new and merged work in the window, community contributors, and a `Triage first` list of up to five open items.
+Community means not the repository owner and not a bot; the owner's own items never enter the triage list or the contributor counts.
+Triage order is a security label, then a ready pull request, then a bug label, then other issues, then drafts; ties go to more comments and reactions, then the longest wait (guard: `web/tests/growth-sources.test.ts`).
+The leg needs no credentials; an optional `GITHUB_TOKEN` only lifts the shared-IP rate limit, and a refused request fails soft into `Needs attention`.
+Everything else stays aggregate: download spine, Vercel analytics, and Search Console; the GitHub section shows only metadata GitHub already publishes (item numbers, titles, and author logins).
 It never includes prompts, code, transcripts, token history, costs, credentials, project paths, raw IPs, or the local usage database.
 Search Console queries and pages rank by clicks, then impressions.
 
 Immediate notices are limited to customer messages: the in-app support report. Downloads never email one by one beyond the owner download notice.
 Owner-notice idempotency keys come from body-visible event fields plus a hashed identity, never an hourly bucket.
 
-**Production env:** `CRON_SECRET`; `RESEND_API_KEY` with `RESEND_FROM_EMAIL` and the `*_NOTIFICATION_TO` / `GROWTH_DIGEST_TO` overrides; `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`; `VERCEL_TOKEN`; `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`, `GSC_SITE_URL`.
+**Production env:** `CRON_SECRET`; `RESEND_API_KEY` with `RESEND_FROM_EMAIL` and the `*_NOTIFICATION_TO` / `GROWTH_DIGEST_TO` overrides; `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`; `VERCEL_TOKEN`; `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`, `GSC_SITE_URL`; optional `GITHUB_TOKEN`.
 
 ## 5. Operating notes
 

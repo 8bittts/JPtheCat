@@ -115,20 +115,24 @@ describe("public launch copy", () => {
 		expect(callout).toContain("MIT-licensed");
 		expect(callout).toContain(`href="${SITE.repoUrl}"`);
 		expect(callout).toContain(`href="${SITE.contributingUrl}"`);
+		expect(callout.match(/data-analytics-event="repo_link_clicked"/g)).toHaveLength(2);
 
 		const faq = home.slice(home.indexOf('id="faq-open-source"'));
 		expect(faq).toContain("Is JP the Cat open source?");
 		expect(faq).toContain(`href="${SITE.repoUrl}"`);
 		expect(faq).toContain(`href="${SITE.contributingUrl}"`);
+		expect(faq).toContain('data-analytics-event="repo_link_clicked"');
 
 		const footer = renderToStaticMarkup(Footer());
 		expect(footer).toContain("Free and open source (MIT).");
 		expect(footer).toContain(`href="${SITE.repoUrl}"`);
+		expect(footer).toContain('data-analytics-event="repo_link_clicked"');
 
 		// Settings → General → Open source mirrors the native SettingsBackView row.
 		const demoSettings = await Bun.file("components/site/menubar-demo-settings.tsx").text();
 		expect(demoSettings).toContain('title="Open source"');
 		expect(demoSettings).toContain('window.open(SITE.repoUrl, "_blank", "noopener,noreferrer")');
+		expect(demoSettings).toContain('trackRepoLink("demo_settings", "repo")');
 
 		expect(JP_COMPETITOR_ROW.oss).toBe(true);
 		for (const file of ["lib/library/content/alternatives.ts", "public/llms.txt"]) {
@@ -606,7 +610,7 @@ describe("public launch copy", () => {
 		expect(layout).toContain("<Analytics />");
 		expect(layout).toContain("<SpeedInsights />");
 		expect(normalizedPrivacy).toContain("Vercel Web Analytics and Speed Insights");
-		expect(normalizedPrivacy).toContain("CTA click events");
+		expect(normalizedPrivacy).toContain("download and repository link click events");
 		expect(normalizedPrivacy).toContain(
 			"Successful non-bot downloads may send an owner notification",
 		);

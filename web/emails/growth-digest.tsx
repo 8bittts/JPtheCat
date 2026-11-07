@@ -12,6 +12,7 @@ import type {
 	GrowthDigest,
 	GrowthLegStatus,
 	GrowthMetricGroup,
+	OpenSourcePriority,
 } from "@/lib/analytics/growth-digest";
 import { OWNER_VALUE } from "@/lib/email/owner-vocabulary";
 
@@ -30,6 +31,10 @@ const STATUS_LABEL: Record<GrowthLegStatus, string> = {
 
 function counted(value: number, unit: string): string {
 	return `${value.toLocaleString("en-US")} ${unit}${value === 1 ? "" : "s"}`;
+}
+
+function countedNullable(value: number | null, unit: string): string {
+	return value === null ? OWNER_VALUE.notAvailable : counted(value, unit);
 }
 
 function formatNullable(value: number | null) {
@@ -101,8 +106,53 @@ function healthSection(rollup: GrowthDigest): AdminSection {
 				label: "Search Console",
 				value: legStatus(rollup.searchConsole.status, rollup.searchConsole.message),
 			},
+			{ label: "GitHub", value: legStatus(rollup.github.status, rollup.github.message) },
 			...metricRows(rollup, "health"),
 		],
+	};
+}
+
+const PRIORITY_KIND: Record<OpenSourcePriority["kind"], string> = {
+	issue: "Issue",
+	pull_request: "PR",
+};
+
+function priorityItems(rows: OpenSourcePriority[]): AdminListItem[] {
+	return rows.map((row) => ({
+		detail: `${row.reason} · by ${row.author} · ${counted(row.ageDays, "day")} old · ${counted(row.engagement, "comment or reaction")}`,
+		href: row.url,
+		text: `${PRIORITY_KIND[row.kind]} #${row.number}: ${row.title}`,
+	}));
+}
+
+function openSourceRows(rollup: GrowthDigest): AdminRow[] {
+	const github = rollup.github;
+	return [
+		rankedRow("Triage first", priorityItems(github.priorities)),
+		{
+			label: "New in window",
+			value: `${countedNullable(github.newIssues, "issue")} · ${countedNullable(github.newPullRequests, "pull request")} · ${formatNullable(github.mergedPullRequests)} merged`,
+		},
+		{
+			label: "Community contributors",
+			value: `${formatNullable(github.windowContributors)} in window · ${formatNullable(github.codeContributors)} with merged code`,
+		},
+		{
+			label: "Open issues / pull requests",
+			value: `${formatNullable(github.openIssues)} / ${formatNullable(github.openPullRequests)}`,
+		},
+		{
+			label: "Stars / forks",
+			value: `${formatNullable(github.stars)} / ${formatNullable(github.forks)}`,
+		},
+		{ label: "Repo link clicks", value: formatNullable(rollup.vercel.repoLinkClicks) },
+	];
+}
+
+function openSourceSection(rollup: GrowthDigest): AdminSection {
+	return {
+		title: "Open source (GitHub)",
+		rows: rollup.github.status === "ok" ? openSourceRows(rollup) : [],
 	};
 }
 
@@ -178,6 +228,7 @@ function growthContent(rollup: GrowthDigest): AdminEmailContent {
 		preview: rollup.preview,
 		sections: [
 			healthSection(rollup),
+			openSourceSection(rollup),
 			downloadsSection(rollup),
 			trafficSection(rollup),
 			searchSection(rollup),

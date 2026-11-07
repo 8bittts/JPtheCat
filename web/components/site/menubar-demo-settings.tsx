@@ -1,6 +1,7 @@
 "use client";
 
 import { type CSSProperties, useEffect, useId, useRef, useState } from "react";
+import { trackRepoLink } from "@/lib/analytics/product-analytics";
 import { trapDialogTab } from "@/lib/dialog-focus-trap";
 import { SITE } from "@/lib/site";
 import { BrandMark } from "./brand";
@@ -145,7 +146,10 @@ export function SettingsFace({
 						icon="code"
 						title="Open source"
 						subtitle="MIT licensed — read the code and contribute on GitHub"
-						onOpen={() => window.open(SITE.repoUrl, "_blank", "noopener,noreferrer")}
+						onOpen={() => {
+							trackRepoLink("demo_settings", "repo");
+							window.open(SITE.repoUrl, "_blank", "noopener,noreferrer");
+						}}
 					/>
 					<CycleRow
 						icon="menubar"

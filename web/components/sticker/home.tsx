@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 import { DownloadCta } from "@/components/site/download-cta";
 import { MenubarDemo } from "@/components/site/menubar-demo";
+import { RepoLink } from "@/components/site/repo-link";
 import { HOMEBREW_INSTALL_COMMANDS } from "@/lib/homebrew";
 import { HOMEPAGE_PROVIDERS } from "@/lib/homepage-providers";
 import { SITE } from "@/lib/site";
@@ -119,24 +120,14 @@ const FAQ: { id: string; q: string; a: ReactNode }[] = [
 		a: (
 			<>
 				Yes. The code for the Mac app and this website is{" "}
-				<a
-					href={SITE.repoUrl}
-					target="_blank"
-					rel="noopener noreferrer"
-					className="font-bold underline"
-				>
+				<RepoLink placement="faq" target="repo" className="font-bold underline">
 					open source on GitHub
-				</a>{" "}
+				</RepoLink>{" "}
 				under the MIT license, so you can read exactly what she reads and what she never sends.
 				Issues and pull requests are welcome — start with the{" "}
-				<a
-					href={SITE.contributingUrl}
-					target="_blank"
-					rel="noopener noreferrer"
-					className="font-bold underline"
-				>
+				<RepoLink placement="faq" target="contributing" className="font-bold underline">
 					contributing guide
-				</a>
+				</RepoLink>
 				. The JP the Cat name, logo, and mascot art stay hers.
 			</>
 		),
@@ -444,22 +435,12 @@ export function StickerHome() {
 					request — contributions are welcome, and she reviews every one. Picky, but fair.
 				</p>
 				<div className="sb-cta-row">
-					<a
-						href={SITE.repoUrl}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="sb-btn sb-btn--small"
-					>
+					<RepoLink placement="home_callout" target="repo" className="sb-btn sb-btn--small">
 						<span className="sb-trim">View on GitHub ↗</span>
-					</a>
-					<a
-						href={SITE.contributingUrl}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="sb-link"
-					>
+					</RepoLink>
+					<RepoLink placement="home_callout" target="contributing" className="sb-link">
 						how to contribute →
-					</a>
+					</RepoLink>
 				</div>
 			</section>
 

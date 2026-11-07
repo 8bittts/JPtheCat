@@ -53,6 +53,66 @@ describe("growth digest", () => {
 		expect(html).not.toContain("Traffic (Vercel Web Analytics)");
 	});
 
+	it("leads with open-source triage after Health and counts it in the subject", () => {
+		const source = sourceFixture();
+		const rollup = buildGrowthDigest(
+			{
+				...source,
+				github: {
+					...source.github,
+					codeContributors: 2,
+					newIssues: 1,
+					newPullRequests: 1,
+					priorities: [
+						{
+							ageDays: 3,
+							author: "alice",
+							engagement: 1,
+							kind: "pull_request",
+							number: 12,
+							reason: "pull request awaiting review",
+							title: "Add a theme",
+							url: "https://github.com/8bittts/JPtheCat/pull/12",
+						},
+					],
+					windowContributors: 1,
+				},
+			},
+			"daily",
+		);
+
+		expect(rollup.subject).toBe(
+			"JP the Cat daily report: 3 Mac downloads · 1 open-source item to triage",
+		);
+		const html = renderToStaticMarkup(<GrowthDigestEmail rollup={rollup} />);
+		const text = GrowthDigestPlainText({ rollup });
+		expect(html.indexOf("Health")).toBeLessThan(html.indexOf("Open source (GitHub)"));
+		expect(html.indexOf("Open source (GitHub)")).toBeLessThan(html.indexOf("Downloads"));
+		expect(html).toContain('href="https://github.com/8bittts/JPtheCat/pull/12"');
+		expect(text).toContain(
+			"Triage first:\n  1. PR #12: Add a theme — https://github.com/8bittts/JPtheCat/pull/12 (pull request awaiting review · by alice · 3 days old · 1 comment or reaction)",
+		);
+		expect(text).toContain("New in window: 1 issue · 1 pull request · 0 merged");
+		expect(text).toContain("Community contributors: 1 in window · 2 with merged code");
+		expect(text).toContain("Repo link clicks: 3");
+		expect(text).toContain("GitHub: connected");
+	});
+
+	it("reports a failed GitHub leg as an issue and drops its section", () => {
+		const source = sourceFixture();
+		const rollup = buildGrowthDigest(
+			{
+				...source,
+				github: { ...source.github, message: "GitHub / returned 403", status: "error" },
+			},
+			"daily",
+		);
+
+		expect(rollup.issues).toEqual(["GitHub failed: GitHub / returned 403."]);
+		const html = renderToStaticMarkup(<GrowthDigestEmail rollup={rollup} />);
+		expect(html).not.toContain("Open source (GitHub)");
+	});
+
 	it("lists ranked rows as numbered items with units, and links pages", () => {
 		const html = renderToStaticMarkup(
 			<GrowthDigestEmail rollup={buildGrowthDigest(sourceFixture(), "weekly")} />,
@@ -164,6 +224,20 @@ function sourceFixture(): GrowthDigestSourceData {
 			topPages: [{ count: 18, label: "/" }],
 			topReferrers: [{ count: 5, label: "news.ycombinator.com" }],
 			visitors: 20,
+			repoLinkClicks: 3,
+		},
+		github: {
+			codeContributors: 0,
+			forks: 0,
+			mergedPullRequests: 0,
+			newIssues: 0,
+			newPullRequests: 0,
+			openIssues: 0,
+			openPullRequests: 0,
+			priorities: [],
+			stars: 0,
+			status: "ok",
+			windowContributors: 0,
 		},
 		searchConsole: {
 			clicks: 0,

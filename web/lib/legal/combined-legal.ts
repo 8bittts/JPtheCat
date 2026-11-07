@@ -14,7 +14,7 @@ export const POLICY_SECTIONS = [
 	{
 		id: "website-telemetry",
 		title: "Website telemetry",
-		body: "This website uses Vercel Web Analytics and Speed Insights for aggregate page traffic, CTA click events, and performance telemetry. Website telemetry does not include prompts, code, transcripts, token history, computed costs, provider credentials, or local usage database contents from the Mac app.",
+		body: "This website uses Vercel Web Analytics and Speed Insights for aggregate page traffic, download and repository link click events, and performance telemetry. Website telemetry does not include prompts, code, transcripts, token history, computed costs, provider credentials, or local usage database contents from the Mac app.",
 	},
 	{
 		id: "downloads-and-updates",

@@ -9,6 +9,19 @@ export type GrowthCountRow = {
 	count: number;
 };
 
+/** One open GitHub issue or pull request from someone other than the owner, ranked for triage. */
+export type OpenSourcePriority = {
+	kind: "issue" | "pull_request";
+	number: number;
+	title: string;
+	author: string;
+	url: string;
+	reason: string;
+	ageDays: number;
+	/** Comments plus reactions. */
+	engagement: number;
+};
+
 export type GrowthDigestSourceData = {
 	generatedAt: string;
 	windowDays: number;
@@ -47,6 +60,23 @@ export type GrowthDigestSourceData = {
 		topPages: GrowthCountRow[];
 		topReferrers: GrowthCountRow[];
 		visitors: number | null;
+		repoLinkClicks: number | null;
+		message?: string;
+	};
+	github: {
+		status: GrowthLegStatus;
+		stars: number | null;
+		forks: number | null;
+		openIssues: number | null;
+		openPullRequests: number | null;
+		newIssues: number | null;
+		newPullRequests: number | null;
+		mergedPullRequests: number | null;
+		/** Distinct non-owner, non-bot people who opened or merged work in the window. */
+		windowContributors: number | null;
+		/** Distinct non-owner, non-bot commit authors on the default branch, all time. */
+		codeContributors: number | null;
+		priorities: OpenSourcePriority[];
 		message?: string;
 	};
 	searchConsole: {
@@ -97,6 +127,7 @@ export type GrowthDigest = {
 	byLocation: GrowthCountRow[];
 	botUserAgents: GrowthCountRow[];
 	vercel: GrowthDigestSourceData["vercel"];
+	github: GrowthDigestSourceData["github"];
 	searchConsole: GrowthDigestSourceData["searchConsole"];
 };
 
@@ -191,6 +222,7 @@ function pluralS(count: number | null): string {
 }
 
 const LEG_NAMES = {
+	github: "GitHub",
 	searchConsole: "Search Console",
 	vercel: "Vercel Web Analytics",
 } as const;
@@ -204,6 +236,7 @@ function buildIssues(data: GrowthDigestSourceData): string[] {
 	const unflagged = flaggable - data.headline.networkFlagged;
 	return [
 		...legIssue(LEG_NAMES.vercel, data.vercel.status, data.vercel.message),
+		...legIssue(LEG_NAMES.github, data.github.status, data.github.message),
 		...legIssue(LEG_NAMES.searchConsole, data.searchConsole.status, data.searchConsole.message),
 		// The datacenter/VPN rule is only as good as the ipapi.is lookup behind it. The keyless free
 		// tier stopped returning the flags on 2026-09-01 and the metric silently rose 36%; any gap in
@@ -283,12 +316,14 @@ export function buildGrowthDigest(
 	const rollingDelta = formatDelta(data.macRolling.deltaPct);
 	const issues = buildIssues(data);
 	const issueSuffix = issues.length ? ` · ${issues.length} issue${pluralS(issues.length)}` : "";
+	const triage = data.github.priorities.length;
+	const triageSuffix = triage ? ` · ${triage} open-source item${pluralS(triage)} to triage` : "";
 
 	return {
 		frequency,
 		trends,
 		title: `${label} JP the Cat report`,
-		subject: `JP the Cat ${lowerLabel} report: ${formatNumber(macDownloads)} Mac download${pluralS(macDownloads)}${issueSuffix}`,
+		subject: `JP the Cat ${lowerLabel} report: ${formatNumber(macDownloads)} Mac download${pluralS(macDownloads)}${triageSuffix}${issueSuffix}`,
 		preview: `${label} report: ${formatNumber(macDownloads)} Mac download${pluralS(macDownloads)}, ${rollingDelta} vs prior window.`,
 		generatedAt: data.generatedAt,
 		windowDays: data.windowDays,
@@ -301,6 +336,7 @@ export function buildGrowthDigest(
 		byLocation: data.byLocation,
 		botUserAgents: data.botUserAgents,
 		vercel: data.vercel,
+		github: data.github,
 		searchConsole: data.searchConsole,
 	};
 }

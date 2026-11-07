@@ -10,13 +10,14 @@ export type ProductEventName =
 	| "download_cta_clicked"
 	| "download_modal_opened"
 	| "library_download_cta_clicked"
-	| "library_download_modal_opened";
+	| "library_download_modal_opened"
+	| "repo_link_clicked";
 
 /**
  * The Title Case names these events carried until 2026-10-22. The digest counts both so its
  * rolling windows stay continuous; drop this map once no window reaches back before that date.
  */
-export const LEGACY_PRODUCT_EVENT_NAMES: Readonly<Record<ProductEventName, string>> = {
+export const LEGACY_PRODUCT_EVENT_NAMES: Readonly<Partial<Record<ProductEventName, string>>> = {
 	download_cta_clicked: "Download CTA Clicked",
 	download_modal_opened: "Download Newsletter Modal Opened",
 	library_download_cta_clicked: "Library Download CTA Clicked",
@@ -40,6 +41,9 @@ function sanitizeProperties(properties: ProductEventProperties): Record<string, 
 	return sanitized;
 }
 
+export type RepoLinkPlacement = "home_callout" | "faq" | "footer" | "demo_settings";
+export type RepoLinkTarget = "repo" | "contributing";
+
 /** The one entry point for custom events; analytics must never break a CTA. */
 export function trackProductEvent(
 	name: ProductEventName,
@@ -50,4 +54,8 @@ export function trackProductEvent(
 	} catch {
 		// Analytics must never block the visitor's workflow.
 	}
+}
+
+export function trackRepoLink(placement: RepoLinkPlacement, target: RepoLinkTarget): void {
+	trackProductEvent("repo_link_clicked", { placement, target });
 }

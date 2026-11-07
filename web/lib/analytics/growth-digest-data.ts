@@ -7,6 +7,7 @@ import {
 	type Fetcher,
 } from "./growth-digest-common";
 import { queryDownloadData } from "./growth-source-downloads";
+import { loadGitHubActivity } from "./growth-source-github";
 import { loadSearchConsole } from "./growth-source-search-console";
 import { loadVercelAnalytics } from "./growth-source-vercel";
 
@@ -28,10 +29,11 @@ export async function loadGrowthDigestSourceData({
 	// zero-risk forward-compat step. `max: 1` already avoids any pool-exhaustion concern here.
 	const sql = postgres(buildGrowthPostgresConnectionString(source), { max: 1, prepare: false });
 	try {
-		const [downloads, vercel, searchConsole] = await Promise.all([
+		const [downloads, vercel, searchConsole, github] = await Promise.all([
 			queryDownloadData(sql, windowDays, now),
 			loadVercelAnalytics(windowDays, now, source, fetcher),
 			loadSearchConsole(windowDays, now, source, fetcher),
+			loadGitHubActivity(windowDays, now, source, fetcher),
 		]);
 
 		return {
@@ -40,6 +42,7 @@ export async function loadGrowthDigestSourceData({
 			bySource: downloads.bySource,
 			byVersion: downloads.byVersion,
 			generatedAt: now.toISOString(),
+			github,
 			headline: downloads.headline,
 			macRolling: downloads.macRolling,
 			rolling: downloads.rolling,

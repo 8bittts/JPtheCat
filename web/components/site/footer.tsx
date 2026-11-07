@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { RepoLink } from "@/components/site/repo-link";
 import { SITE } from "@/lib/site";
 
 /** Visible copy: Built with: YEN · Bitcoin Email · Terms (spaces are explicit JSX — not flex). */
@@ -36,14 +37,9 @@ export function Footer() {
 						</p>
 						<p>
 							Free and open source (MIT).{" "}
-							<a
-								href={SITE.repoUrl}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="underline underline-offset-4"
-							>
+							<RepoLink placement="footer" target="repo" className="underline underline-offset-4">
 								Contribute on GitHub
-							</a>
+							</RepoLink>
 						</p>
 						<nav aria-label="Footer links" className="sb-footer-credits">
 							Built with:{" "}

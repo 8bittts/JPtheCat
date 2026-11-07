@@ -48,8 +48,14 @@ export function hasValue(row: AdminRow): boolean {
 	return hasItems(row) || (row.value !== null && row.value !== "");
 }
 
+/** A link whose text is only its own path prints the URL alone; any other text keeps its words. */
+function itemLabel(item: AdminListItem): string {
+	if (!item.href) return item.text;
+	return item.href.endsWith(item.text) ? item.href : `${item.text} — ${item.href}`;
+}
+
 function itemLine(item: AdminListItem, index: number): string {
-	return `  ${index + 1}. ${item.href ?? item.text}${item.detail ? ` (${item.detail})` : ""}`;
+	return `  ${index + 1}. ${itemLabel(item)}${item.detail ? ` (${item.detail})` : ""}`;
 }
 
 function rowLines(row: AdminRow): string[] {

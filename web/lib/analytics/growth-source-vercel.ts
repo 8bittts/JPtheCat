@@ -96,6 +96,7 @@ export async function loadVercelAnalytics(
 			downloadCtaClicks: null,
 			libraryDownloadCtaClicks: null,
 			pageViews: null,
+			repoLinkClicks: null,
 			status: "skipped",
 			topCountries: [],
 			topPages: [],
@@ -146,6 +147,7 @@ export async function loadVercelAnalytics(
 			downloadCtaClicks: countFor("download_cta_clicked"),
 			libraryDownloadCtaClicks: countFor("library_download_cta_clicked"),
 			pageViews: numericField(visitCount, ["pageviews", "pageViews", "count", "total"]),
+			repoLinkClicks: countFor("repo_link_clicked"),
 			status: "ok",
 			topCountries: vercelRows(topCountriesData, ["country"], ["pageviews", "pageViews", "count"]),
 			topPages: vercelRows(
@@ -169,6 +171,7 @@ export async function loadVercelAnalytics(
 			libraryDownloadCtaClicks: null,
 			message,
 			pageViews: null,
+			repoLinkClicks: null,
 			status: "error",
 			topCountries: [],
 			topPages: [],
