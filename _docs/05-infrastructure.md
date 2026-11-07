@@ -8,7 +8,7 @@ The Sparkle release-notes rule lives in root `AGENTS.md`.
 
 ## Release pipeline
 
-One command owns it: `bash mac/scripts/release-jpthecat.sh [version]` (also `/jp release`, see `.claude/commands/jp.md`).
+One command owns it: `bash mac/scripts/release-jpthecat.sh [version]` (also `/jp release`, the operator-local `.claude/commands/jp.md`).
 
 - **Signing:** Developer ID Application (team `GRNGR33Z8A`), hardened runtime, no sandbox; `mac/JPtheCat.entitlements` carries only the `com.apple.security.application-groups` array for the widget snapshot.
   Sign inner to outer (Sparkle XPC services → `Updater.app` → framework → app) and never use `--deep`, which corrupts the XPC signatures.
@@ -19,9 +19,10 @@ One command owns it: `bash mac/scripts/release-jpthecat.sh [version]` (also `/jp
   Drag-to-Applications un-quarantines the copy and avoids app translocation; a notarized, stapled app still shows one friendly first-launch prompt.
 - **Versions:** `CFBundleVersion` is a monotonic integer floored above the latest published `<sparkle:version>`, because Sparkle compares build numbers; the bump math is covered by `VersionBumpTests`.
 - **Appcast:** `generate-appcast.sh` publishes exactly one `<item>` (`--maximum-versions 1`), feeds the last five DMGs in only to build deltas, and purges Sparkle's never-pruned extraction cache on every run.
-- **Hosting:** the public Supabase Storage `releases` bucket behind `https://api.jpthecat.com`, because the repository is private.
+- **Hosting:** the public Supabase Storage `releases` bucket behind `https://api.jpthecat.com`.
   `/download` (`web/app/download/route.ts`) validates `version.json` (sha256, release date, trusted host) and redirects; it trusts `api.jpthecat.com` and the raw project host as a rollback fallback.
   The release uploads with `supabase storage`, so read [supabase/AGENTS.md](../supabase/AGENTS.md) § Keys before changing the project's signing keys.
+- **Source:** the public `github.com/8bittts/JPtheCat` repository, whose `main` the Vercel project `jpthecat` (root `web/`) is Git-connected to; the `[deploy]` subject marker gates its builds.
 - **Manifest:** the release rewrites `web/public/stable/{version.json,appcast.xml}`, the README markers, and all three cask copies, then commits `release: JPtheCat vX [deploy]` plus a tag from a dedicated worktree (root `AGENTS.md`).
 
 Invariants:

@@ -2,10 +2,6 @@
 	"ignore": {
 		"overrides": [
 			{
-				"files": ["components/site/reveal.tsx"],
-				"rules": ["react-doctor/no-initialize-state"]
-			},
-			{
 				"comment": "Native <dialog> backdrop-click-to-close is progressive enhancement; Esc + the explicit close button provide the keyboard paths.",
 				"files": [
 					"components/site/download-cta.tsx",
@@ -21,11 +17,7 @@
 			},
 			{
 				"comment": "React Email templates are server-rendered transactional modules, never Fast Refresh boundaries; colocated plain-text exports are the canonical paired email API.",
-				"files": [
-					"emails/growth-digest.tsx",
-					"emails/purchase-notification.tsx",
-					"emails/support-report.tsx"
-				],
+				"files": ["emails/growth-digest.tsx", "emails/support-report.tsx"],
 				"rules": ["react-doctor/only-export-components"]
 			}
 		]

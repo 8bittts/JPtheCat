@@ -3,7 +3,9 @@ import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { CtaBlock } from "@/components/library/cta-block";
+import { Footer } from "@/components/site/footer";
 import { StickerHome } from "@/components/sticker/home";
+import { JP_COMPETITOR_ROW } from "@/lib/library/competitors-registry";
 import { NAV, PROVIDER_COUNTS, PROVIDERS, SITE } from "@/lib/site";
 
 async function collectTsxFiles(directory: string): Promise<string[]> {
@@ -102,6 +104,32 @@ describe("public launch copy", () => {
 		expect(SITE.twitter).toBe("@8bit");
 		expect(SITE.photo).toBe("/jp-the-cat.jpeg");
 		expect(SITE.domain).toBe("JPtheCat.com");
+	});
+
+	it("points the homepage callout, FAQ, and footer at the public MIT repository", async () => {
+		expect(SITE.repoUrl).toBe("https://github.com/8bittts/JPtheCat");
+		expect(SITE.contributingUrl).toBe(`${SITE.repoUrl}/blob/main/CONTRIBUTING.md`);
+
+		const home = renderToStaticMarkup(StickerHome());
+		const callout = home.slice(home.indexOf('id="open-source"'), home.indexOf('id="download"'));
+		expect(callout).toContain("MIT-licensed");
+		expect(callout).toContain(`href="${SITE.repoUrl}"`);
+		expect(callout).toContain(`href="${SITE.contributingUrl}"`);
+
+		const faq = home.slice(home.indexOf('id="faq-open-source"'));
+		expect(faq).toContain("Is JP the Cat open source?");
+		expect(faq).toContain(`href="${SITE.repoUrl}"`);
+		expect(faq).toContain(`href="${SITE.contributingUrl}"`);
+
+		const footer = renderToStaticMarkup(Footer());
+		expect(footer).toContain("Free and open source (MIT).");
+		expect(footer).toContain(`href="${SITE.repoUrl}"`);
+
+		expect(JP_COMPETITOR_ROW.oss).toBe(true);
+		for (const file of ["lib/library/content/alternatives.ts", "public/llms.txt"]) {
+			expect((await Bun.file(file).text()).toLowerCase()).not.toContain("closed source");
+		}
+		expect(await Bun.file("../LICENSE").text()).toStartWith("MIT License");
 	});
 
 	it("routes non-legal support email links through the contact page", async () => {
@@ -405,20 +433,6 @@ describe("public launch copy", () => {
 		expect(css).not.toContain("animation-iteration-count: 1 !important");
 	});
 
-	it("keeps reduced-motion mascot users on the poster without loading video sources", async () => {
-		const mascot = await Bun.file("components/site/mascot-video.tsx").text();
-		const wrapper = await Bun.file("components/site/cat-animation.tsx").text();
-
-		expect(mascot).toContain('window.matchMedia("(prefers-reduced-motion: reduce)")');
-		expect(mascot).toContain('shouldReduceMotion.addEventListener("change", syncMotionPreference)');
-		expect(mascot).toContain("const stopAndUnload = () =>");
-		expect(mascot).toContain('video.removeAttribute("src")');
-		expect(mascot).toContain('preload="none"');
-		expect(mascot).toContain("video.src = selectedSource()");
-		expect(mascot).not.toContain("<source src=");
-		expect(wrapper).toContain("motion-reduce:block");
-	});
-
 	it("keeps legal WebGL scenes off for reduced-motion visitors", async () => {
 		const stage = await Bun.file("components/legal/scene-stage.tsx").text();
 		const engine = await Bun.file("components/legal/engine.ts").text();
@@ -684,12 +698,9 @@ describe("public launch copy", () => {
 		expect(css).not.toContain("animation-duration: 0.001ms !important");
 	});
 
-	it("keeps the mascot animation autoplay retry and packaged meow hover hooks wired", async () => {
-		const mascotVideo = await Bun.file("components/site/mascot-video.tsx").text();
+	it("keeps the packaged meow hover hooks wired", async () => {
 		const purr = await Bun.file("components/site/purr-on-hover.tsx").text();
 
-		expect(mascotVideo).toContain("video.play()");
-		expect(mascotVideo).toContain("data-mascot-video");
 		expect(purr).toContain('const MEOW_AUDIO_SRC = "/meow.m4a"');
 		expect(purr).toContain("new Audio(MEOW_AUDIO_SRC)");
 		expect(purr).toContain('trigger.addEventListener("pointerenter", play)');
@@ -699,33 +710,6 @@ describe("public launch copy", () => {
 		expect(await Bun.file("public/meow.m4a").exists()).toBe(true);
 		expect(await Bun.file("public/meow-1.mp3").exists()).toBe(true);
 		expect(await Bun.file("public/meow-2.mp3").exists()).toBe(true);
-	});
-
-	it("routes WebKit to the HEVC-with-alpha MP4 so Safari never shows a yellow square", async () => {
-		// Modern Safari plays the VP9/WebM source but ignores its alpha, painting the
-		// mascot's transparent corners as an opaque honey square. It must be steered to
-		// the hvc1 MP4 (the only format WebKit alphas). See docs/02-design-system.md.
-		const mascotVideo = await Bun.file("components/site/mascot-video.tsx").text();
-
-		expect(mascotVideo).toContain("GestureEvent");
-		expect(mascotVideo).toContain('codecs="hvc1"');
-		expect(mascotVideo).toContain("? mp4 : webm");
-		expect(mascotVideo).toContain("video.src = selectedSource()");
-		// No autoPlay attribute — the effect drives playback after selecting one
-		// engine-specific source, so Safari never paints a WebM (yellow) frame.
-		expect(mascotVideo).not.toContain("autoPlay");
-		// Both transparent sources must ship for the per-engine selection to work.
-		expect(await Bun.file("public/jp-paw-lick-purr.webm").exists()).toBe(true);
-		expect(await Bun.file("public/jp-paw-lick-purr.mp4").exists()).toBe(true);
-	});
-
-	it("keeps scroll-reveal content visible before browser observers run", async () => {
-		const css = await Bun.file("app/globals.css").text();
-		const revealBlock = css.match(/\.reveal \{[^}]+\}/)?.[0] ?? "";
-
-		expect(revealBlock).toContain("opacity: 1");
-		expect(revealBlock).toContain("transform: none");
-		expect(revealBlock).not.toContain("opacity: 0");
 	});
 
 	it("scopes Muse Spark to OpenCode on this Mac across public marketing copy", async () => {

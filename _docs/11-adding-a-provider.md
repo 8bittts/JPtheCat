@@ -3,7 +3,7 @@
 The canonical pattern for adding or promoting a provider, from research to the homepage.
 
 The playbook for parsing, accounting, native presentation, and web parity when a provider is added or promoted.
-`$jp-models` (`.agents/skills/jp-models/SKILL.md`) is the condensed checklist built from this doc.
+The operator-local `$jp-models` skill (`.agents/skills/jp-models/SKILL.md`, gitignored) is the condensed checklist built from this doc.
 `ProviderCatalog.swift` owns catalog metadata, root `AGENTS.md` owns the public support boundary, and [03-data.md](03-data.md) records each source format.
 Reuse the existing block for every step; the most recent full builds to grep as templates are Grok and Muse Spark (`grok`, `muse`, `museSpark`), and a missing entry after your change is the tell that a surface was dropped.
 

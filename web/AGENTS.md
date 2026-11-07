@@ -132,8 +132,6 @@ The combined `/terms` page uses `components/legal/legal-document.tsx` and opens 
 Always verify visual changes there with a headless screenshot.
 
 The homepage mascot renders with NO thought bubbles — that treatment is native-app-only, guarded by `tests/site-copy.test.ts`.
-The mascot video renders transparent outside the badge in every browser: `components/site/mascot-video.tsx` routes WebKit to the HEVC-with-alpha MP4 and everyone else to the VP9 WebM, with no `autoPlay` attribute ([_docs/02-design-system.md](../_docs/02-design-system.md#browser-source-selection)).
-Verify against the real macOS decoder, never Playwright's WebKit, which cannot decode HEVC.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

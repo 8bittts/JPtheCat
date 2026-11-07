@@ -34,6 +34,17 @@ export function Footer() {
 						<p>
 							{year} © {SITE.seoName}. Not affiliated with AI providers.
 						</p>
+						<p>
+							Free and open source (MIT).{" "}
+							<a
+								href={SITE.repoUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="underline underline-offset-4"
+							>
+								Contribute on GitHub
+							</a>
+						</p>
 						<nav aria-label="Footer links" className="sb-footer-credits">
 							Built with:{" "}
 							<a

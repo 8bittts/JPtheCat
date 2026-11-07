@@ -105,9 +105,9 @@ Calm and physical; motion confirms, never decorates.
 - Idle heartbeats are slow (the all-providers pulse is a 28s round trip) and share one radar-ping with the chart end dot.
 - Gauges fill by width only; height never animates.
 - Threshold crossings may get one gentle pulse; when nothing changes, nothing moves.
-- Reduce Motion collapses everything to static states on both platforms: tickers, marquees, card floats, pulse riders, reveal, face-enter, and the mascot video.
+- Reduce Motion collapses everything to static states on both platforms: tickers, marquees, card floats, pulse riders, and face-enter.
 - Never animate a wrapper that contains live controls; animate decorative layers instead.
-The mascot loop is a low-frequency marketing accent with no sound; the homepage mascot meows on hover or focus only after a real user activation unlocks audio, and the global logo stays silent.
+The homepage mascot meows on hover or focus only after a real user activation unlocks audio, and the global logo stays silent.
 
 ## 5. Charts and icons
 
@@ -134,9 +134,10 @@ The site is light-only, server-rendered per request for the nonce CSP, and fonts
 - **Texture without dark crutches:** the Sticker Bomb canvas is a cream dot grid with ink outlines and offset shadows; the demo surfaces keep Sunlit Ledger ruling and paper grain; no decorative orbs or blobs.
 - **Navigation** has no download button; links are root-relative homepage anchors.
 - **Homepage scroll order:** after the hero and provider marquee, the interactive `#demo` (`Go on, poke her.`) precedes `#how` (Four small jobs) so visitors reach the product mirror first; guard: `site-copy.test.ts`.
+- **Open source:** `#open-source` sits between `#honest` and `#download`, built only from `sb-h2`, `sb-lede`, and `sb-cta-row`; it, the `open-source` FAQ entry, and the footer line link `SITE.repoUrl` and `SITE.contributingUrl` (guard: `site-copy.test.ts`).
 - **One real download path:** every homepage download button (hero, pricing, and FAQ in `components/sticker/home.tsx`) and the `/library` CTAs start the download through `DownloadCta` with `prefetch={false}`.
   Homebrew is a quiet secondary callout under those controls, never a conversion CTA.
-- **Footer:** `sb-shell` width, `Ping @8bit for support` (X link), one legal credit line `Built with: YEN · Bitcoin Email · Terms` (colon + spaced middots; inline nav, not flex — guard: `FOOTER_CREDITS_VISIBLE` / `site-copy.test.ts`), copyright line, and the real JP photo with `Hi, I'm JP.`; no Contact link, no bare support email, no bottom-only `@8bit`.
+- **Footer:** `sb-shell` width, `Ping @8bit for support` (X link), one legal credit line `Built with: YEN · Bitcoin Email · Terms` (colon + spaced middots; inline nav, not flex — guard: `FOOTER_CREDITS_VISIBLE` / `site-copy.test.ts`), copyright line, the `Free and open source (MIT).` line linking the repository, and the real JP photo with `Hi, I'm JP.`; no Contact link, no bare support email, no bottom-only `@8bit`.
 
 ### Legal pages
 
@@ -194,7 +195,7 @@ Regenerate the icon family from `brand/jp-eyes.png` with `./scripts/generate-bra
 
 ### Canonical JP appearance
 
-Real-photo references live in `brand/reference/` (metadata stripped): `jp-core-view-loaf.jpeg` for face and expression; `jp-dark-paws-close.jpeg`, `jp-full-body-dark-paws.jpeg`, and `jp-real-photo-dark-paws.jpeg` for forelegs and body.
+Real-photo references live in the operator-local, gitignored `brand/reference/` (metadata stripped): `jp-core-view-loaf.jpeg` for face and expression; `jp-dark-paws-close.jpeg`, `jp-full-body-dark-paws.jpeg`, and `jp-real-photo-dark-paws.jpeg` for forelegs and body.
 JP is a tortoiseshell with mottled black, deep brown, orange, tan, and cream markings, green-gold eyes, a dark center face blaze, orange-cream cheek and chest patches, and asymmetric patterning.
 
 **[HARD REQUIREMENT] Front paws stay dark.** Viewer-left is dark mottled tortoiseshell with warm patches and darker toes; viewer-right is nearly solid black.
@@ -223,30 +224,19 @@ shasum -a 256 web/public/meow.m4a mac/Sources/JPtheCatApp/Resources/jp-meow.m4a 
 ### Mascot animation
 
 The canonical loop is v4: JP sits, gently licks a dark paw, and rests, with transparency outside the white circular badge.
-The yellow badge and white ring are artwork; only the corners outside the badge are transparent, so a broken render shows a yellow square.
+The web and app ship only its transparent poster still; the video masters stay in the operator-local, gitignored `brand/generated/`.
+The yellow badge and white ring are artwork; only the corners outside the badge are transparent.
 
 | Path | Purpose |
 |---|---|
-| `brand/generated/jp-cat-paw-lick-purr-v4-start.png` | Corrected still, used as both the start and end image |
-| `brand/generated/jp-cat-paw-lick-purr-v4.mp4` + `.higgsfield-cli.json` | Generated video (960×960, about 8s) and its exact parameters |
-| `brand/generated/jp-paw-lick-purr-v4-source.mp4` | 640px normalized source for the alpha pass |
-| `brand/generated/transparent/jp-paw-lick-purr-v4-transparent.{mov,webm}` | ProRes 4444 alpha master and VP9 alpha export |
-| `brand/generated/transparent/jp-paw-lick-purr-v4-transparent-alpha.mp4` | HEVC-with-alpha export |
-| `web/public/jp-paw-lick-purr.{webm,mp4}`, `jp-paw-lick-purr-poster.webp` | Website copies and the transparent poster |
+| `brand/generated/jp-cat-paw-lick-purr-v4-start.png` | Corrected still, used as both the start and end image (local-only) |
+| `brand/generated/transparent/jp-paw-lick-purr-v4-transparent.mov` | ProRes 4444 alpha master (local-only) |
+| `web/public/jp-paw-lick-purr-poster.webp` | Transparent poster, used by the `/terms` scene and its static fallback |
 | `mac/Sources/JPtheCatApp/Resources/jp-first-run-peek.png` | First-run app derivative of the poster |
 | `brand/jp-cat-paw-lick-purr-v4-still.prompt.txt`, `brand/jp-cat-paw-lick-purr-v4.prompt.txt` | Exact still and video prompts |
 
 **Exposure drift:** a badge that starts light and darkens is model drift in the source video, not an export bug; generate from a corrected still passed as both start and end image with the background color and brightness locked.
 Reference order for the still: the illustrated mascot for style, the core real-JP view for the face, then the paw and body photos.
-
-#### Browser source selection
-
-No single codec is transparent everywhere: VP9 WebM alpha works only in Chrome and Firefox, HEVC-with-alpha MP4 only in Safari, and Chromium decodes HEVC opaque.
-Safari can play the WebM but its VP9 decoder drops alpha and paints a yellow square, so it must be steered to the MP4 explicitly.
-`MascotVideo` (`web/components/site/mascot-video.tsx`) therefore renders no `<source>` children and no `autoPlay`; on mount it picks the MP4 only for WebKit with `hvc1` support, sets `video.src` once, and drives playback gated on Reduce Motion and `document.hidden`.
-Never add a WebM-first `<source>` list or put the MP4 first (guard: `web/tests/site-copy.test.ts`).
-
-Playwright's WebKit cannot decode HEVC, so verify against the real macOS decoder: decode a frame through `AVAssetReader` and confirm transparent corners, load the page in an offscreen `WKWebView` and confirm `currentSrc` is the MP4 with `videoWidth === 640`, and check alpha with `ffprobe`.
 
 #### Regeneration
 
@@ -255,23 +245,16 @@ Playwright's WebKit cannot decode HEVC, so verify against the real macOS decoder
 ffmpeg -y -i brand/generated/jp-cat-paw-lick-purr-v4.mp4 -vf "scale=640:640" -c:v libx265 -tag:v hvc1 \
   -pix_fmt yuv420p -crf 28 -preset medium -an brand/generated/jp-paw-lick-purr-v4-source.mp4
 
-# 2. Build the ProRes and VP9 alpha exports
+# 2. Build the ProRes alpha master
 python3 -m venv /tmp/jp-alpha-venv
 /tmp/jp-alpha-venv/bin/python -m pip install -r scripts/requirements-alpha.txt
 /tmp/jp-alpha-venv/bin/python scripts/make_jp_transparent_alpha.py \
   --input brand/generated/jp-paw-lick-purr-v4-source.mp4 --output-stem jp-paw-lick-purr-v4-transparent \
   --circle-center-x 320 --circle-center-y 320 --circle-radius 292 --feather 2.5
 
-# 3. Publish the web copies
-cp brand/generated/transparent/jp-paw-lick-purr-v4-transparent.webm web/public/jp-paw-lick-purr.webm
+# 3. Publish the poster and its app derivative
 ffmpeg -y -i brand/generated/transparent/jp-paw-lick-purr-v4-transparent.mov -vf "scale=640:640" -frames:v 1 /tmp/jp-cat-v4-poster.png
 cwebp -q 86 /tmp/jp-cat-v4-poster.png -o web/public/jp-paw-lick-purr-poster.webp
-ffmpeg -y -i brand/generated/transparent/jp-paw-lick-purr-v4-transparent.mov -map 0:v:0 -vf "format=bgra" \
-  -c:v hevc_videotoolbox -tag:v hvc1 -alpha_quality 0.9 -b:v 1400k -allow_sw 1 -an \
-  brand/generated/transparent/jp-paw-lick-purr-v4-transparent-alpha.mp4
-cp brand/generated/transparent/jp-paw-lick-purr-v4-transparent-alpha.mp4 web/public/jp-paw-lick-purr.mp4
-
-# 4. App first-run derivative
 sips -s format png web/public/jp-paw-lick-purr-poster.webp --out mac/Sources/JPtheCatApp/Resources/jp-first-run-peek.png
 ```
 

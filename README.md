@@ -9,9 +9,9 @@
 A calm, light macOS menu-bar app that shows Claude Code spend, Codex rate-limit usage, a unified
 Grok view for Grok Build / Cursor / Grok Bot activity and optional official plan pools, Muse Spark
 notional list-price cost, and OpenCode Zen / Go gateway usage, with a labelled provider catalog.
-Native, local-first, private, and free.
+Native, local-first, private, free, and open source under the MIT license.
 
-`macOS 14+` · `Apple Silicon` · `Free` · `No account`
+`macOS 14+` · `Apple Silicon` · `Free` · `No account` · `MIT`
 
 <!-- version-badge -->
 **Stable release:** `v1.148`
@@ -58,7 +58,7 @@ JPtheCat/
 ├── web/      Marketing and /library pSEO site — Next.js 16 on Vercel
 ├── supabase/ Migrations — release storage, download growth table, rate limit
 ├── Casks/    Homebrew cask, pinned to the published DMG
-├── brand/    Source brand assets and generated mascot animation
+├── brand/    Mascot art and generation prompts
 ├── scripts/  Asset generation and repo-level guards
 └── _docs/    Owner docs — start at _docs/00-docs-map.md
 ```
@@ -84,7 +84,18 @@ The app also writes `~/Library/Application Support/JPtheCat/latest-snapshot.json
 - [`AGENTS.md`](AGENTS.md) — the enforceable engineering contract.
 - [`_docs/todos.md`](_docs/todos.md) — the only active backlog.
 
-The repository stays private.
+## Contributing
+
+JP the Cat is open source, and contributions are welcome.
+Read [`CONTRIBUTING.md`](CONTRIBUTING.md) for the gates and hard rules, then open an issue or a pull request.
+
+## License
+
+The source code is licensed under the [MIT License](LICENSE).
+The JP the Cat name, logo, app icon, and JP's mascot images and sounds are not covered by the MIT License and stay reserved.
+Forks must use their own name, icon, and mascot.
+Provider names and logos belong to their owners.
+Sparkle is bundled under its own MIT license in [`mac/tools/sparkle/LICENSE`](mac/tools/sparkle/LICENSE).
 
 ---
 

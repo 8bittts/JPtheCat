@@ -110,8 +110,9 @@ Source of truth for the numbers: `web/lib/site.ts` (`SITE`), `mac/Sources/JPtheC
 > No. It's free: every feature, no account, no trial.
 
 **"Open source?"**
-> Not today. It's a free, notarized app; the trust model is least-privilege + local-only, verifiable by
-> Little Snitch / Network monitoring (you'll see it stay quiet).
+> Yes. The Mac app and website code is MIT-licensed at github.com/8bittts/JPtheCat, and contributions are welcome.
+> The JP the Cat name, logo, and mascot art stay reserved.
+> The trust model is still least-privilege and local-only, and a network monitor will show it stay quiet.
 
 ---
 

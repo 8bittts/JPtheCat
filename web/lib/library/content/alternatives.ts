@@ -70,7 +70,7 @@ export function alternativesLeaf(anchor: CompetitorEntry): LeafContent {
 			{
 				question: `Is there a free alternative to ${anchor.name}?`,
 				answer:
-					"Yes — several (ccusage, CodexBar, CodeBurn) are free and open source. JP the Cat is free too (closed source) and leads on light design, honest provenance, and correct cache-cost accounting.",
+					"Yes — several (ccusage, CodexBar, CodeBurn) are free and open source. JP the Cat is free and MIT-licensed open source too, and leads on light design, honest provenance, and correct cache-cost accounting.",
 			},
 		],
 		related: [

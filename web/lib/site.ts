@@ -21,6 +21,8 @@ export const SITE = {
 	supportSocialUrl: "https://x.com/8bit",
 	yenUrl: "https://yen.chat/",
 	btcEmailUrl: "https://btc.email",
+	repoUrl: "https://github.com/8bittts/JPtheCat",
+	contributingUrl: "https://github.com/8bittts/JPtheCat/blob/main/CONTRIBUTING.md",
 	downloadCtaLabel: "Download Meow",
 	downloadCtaHref: "/download",
 	ogImage: "/og.jpg",
@@ -30,14 +32,6 @@ export const SITE = {
 	// metadata surfaces (PWA manifest, viewport theme-color) that can't read CSS vars.
 	// Sticker Bomb canvas (`--sb-bg` in sticker.css) — manifest + theme-color.
 	paperHex: "#fff6e6",
-	// Animated mascot, transcoded from the ProRes master in brand/.
-	// WebM is the primary browser source; HEVC MP4 is kept as a Safari/macOS fallback.
-	// See docs/02-design-system.md.
-	catAnim: {
-		webm: "/jp-paw-lick-purr.webm",
-		mp4: "/jp-paw-lick-purr.mp4",
-		poster: "/jp-paw-lick-purr-poster.webp",
-	},
 } as const;
 
 export type Provider = {

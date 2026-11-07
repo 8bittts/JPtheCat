@@ -3,7 +3,7 @@
 Bot filtering, the download spine, readers, the owner digest, and the /library programmatic SEO strategy.
 
 How the acquisition funnel is measured and kept honest.
-The `/growth` command (`.claude/commands/growth.md`) is the runbook; dated reports live in `_docs/growth/`.
+The `/growth` command (`.claude/commands/growth.md`) is the runbook; dated reports live in the gitignored `_docs/growth/`; the command and reports stay operator-local.
 JP the Cat is free and app usage stays local, so the server-side spine is narrow: download rows plus aggregate web traffic and search.
 
 ```
@@ -35,6 +35,9 @@ The 30-day PII redaction nulls `ip`, `ua`, and `referer`; `is_bot`, `is_mac`, an
   The insert policy pins `exclusion` to null, so the web key can never stamp a row.
 - **Write path:** `web/app/download/route.ts` builds a bot-classified record (`web/lib/analytics/downloads-store.ts`) and POSTs it to PostgREST inside `after()`, sending the publishable key (`SUPABASE_PUBLISHABLE_KEY`) on the `apikey` header only.
   Persistence and email run under `Promise.allSettled`, so telemetry never breaks the download; bot rows persist but never email.
+- **Sources:** the route stores only `direct`, `pricing`, `library`, and `production-test` (`ALLOWED_DOWNLOAD_SOURCES`); any other value becomes `external`.
+  Every homepage CTA (hero, pricing, FAQ) sends `pricing` on purpose so the by-source trend stays continuous with older rows; `hero` and `nav` are retired values.
+  Splitting homepage placements would start a new series, so do it only by explicit decision.
 - **Enrichment:** coarse Vercel edge headers (city, region, country, timezone; postcode is not stored since 2026-11-06) plus a fail-soft ipapi.is lookup for ASN and hosting flags; no latitude or longitude is stored.
   **`IPAPI_IS_KEY` is required for the hosting filter, not optional:** since 2026-09-01 the keyless free tier returns a string `asn`, no `is_datacenter`, and no `is_vpn`, and caps at 30 lookups per client IP per day, so without a key every row carries `null` flags and the datacenter rule is blind.
   A free ipapi.is account restores the flags at 1,000 lookups a day; set the key in Vercel Production and ship a `[deploy]`.
@@ -60,7 +63,7 @@ The 30-day PII redaction nulls `ip`, `ua`, and `referer`; `is_bot`, `is_mac`, an
 `GET /api/cron/growth-digest` is the one owner report per day.
 Vercel Cron calls it at `0 3 * * *` and `0 4 * * *` UTC behind `CRON_SECRET`; `lib/analytics/rollup-schedule.ts` lets through only the firing that is 20:00 in Los Angeles, so the report follows the Pacific clock through daylight saving.
 It covers the last 24 hours; a Pacific Monday adds a `Trend: last 7 days` section and the Pacific 1st adds `Trend: last 30 days`, which replaced the separate weekly and monthly digests.
-It renders `web/emails/growth-digest.tsx` through `web/lib/email/send-helper.tsx` (Resend idempotency plus transient retry) to `GROWTH_DIGEST_TO`, else `DOWNLOAD_NOTIFICATION_TO`, else the owner inbox.
+It renders `web/emails/growth-digest.tsx` through `web/lib/email/send-helper.tsx` (Resend idempotency plus transient retry) to `GROWTH_DIGEST_TO`, else `DOWNLOAD_NOTIFICATION_TO`; with neither set it sends nothing and returns 503 `RECIPIENT_NOT_CONFIGURED`.
 The idempotency key is the Los Angeles date plus a body fingerprint, so a same-day re-run with moved data does not collide in Resend.
 Any skipped or failed send returns non-200 so Vercel Cron shows the failure; the off-hour firing returns `200 {"due":false}`.
 Previews use `?sample&sample_id=<slug>` (add `sample=all` for both trend sections); they skip the clock gate and carry `[Sample]` subjects and separate idempotency keys.
@@ -81,7 +84,7 @@ Owner-notice idempotency keys come from body-visible event fields plus a hashed 
 - `/growth` is read-only and never deploys.
 - `vercel env pull` never returns a Sensitive value: it writes an empty string or a bracketed placeholder (measured for `CRON_SECRET`), so a pulled value is neither the secret nor evidence that it is missing; a `(skipped: … not set)` line means the local shell lacks it.
 - Vercel snapshots env per deployment: after adding or rotating `CRON_SECRET`, ship a fresh `[deploy]` before treating it as live.
-- Reports go to `_docs/growth/<YYYY-MM-DD>-growth.md` (overwrite on a same-day re-run) with a row in `_docs/growth/README.md`; they hold real funnel metrics and are never copied to a public backup.
+- Reports go to `_docs/growth/<YYYY-MM-DD>-growth.md` (overwrite on a same-day re-run) with a row in `_docs/growth/README.md`; they hold real funnel metrics, so the folder is gitignored and never public.
   Read current numbers from the newest report, never from this doc.
 
 ## SEO & Programmatic SEO — the `/library` Hub

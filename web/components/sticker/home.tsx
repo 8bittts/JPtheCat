@@ -114,6 +114,34 @@ const FAQ: { id: string; q: string; a: ReactNode }[] = [
 		),
 	},
 	{
+		id: "open-source",
+		q: "Is JP the Cat open source?",
+		a: (
+			<>
+				Yes. The code for the Mac app and this website is{" "}
+				<a
+					href={SITE.repoUrl}
+					target="_blank"
+					rel="noopener noreferrer"
+					className="font-bold underline"
+				>
+					open source on GitHub
+				</a>{" "}
+				under the MIT license, so you can read exactly what she reads and what she never sends.
+				Issues and pull requests are welcome — start with the{" "}
+				<a
+					href={SITE.contributingUrl}
+					target="_blank"
+					rel="noopener noreferrer"
+					className="font-bold underline"
+				>
+					contributing guide
+				</a>
+				. The JP the Cat name, logo, and mascot art stay hers.
+			</>
+		),
+	},
+	{
 		id: "requirements",
 		q: "What do I need to run it?",
 		a: "macOS 14 (Sonoma) or newer on an Apple Silicon Mac, plus Claude Code, Codex, and/or Grok Build. Any combination makes her happy. Cursor CLI is optional.",
@@ -402,6 +430,36 @@ export function StickerHome() {
 							<p>{p.b}</p>
 						</article>
 					))}
+				</div>
+			</section>
+
+			<section id="open-source" className="sb-section sb-shell">
+				<h2 className="sb-h2">
+					Open source.
+					<br />
+					Read every line.
+				</h2>
+				<p className="sb-lede">
+					{SITE.name} is MIT-licensed on GitHub. Check how she counts, file an issue, or send a pull
+					request — contributions are welcome, and she reviews every one. Picky, but fair.
+				</p>
+				<div className="sb-cta-row">
+					<a
+						href={SITE.repoUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="sb-btn sb-btn--small"
+					>
+						<span className="sb-trim">View on GitHub ↗</span>
+					</a>
+					<a
+						href={SITE.contributingUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="sb-link"
+					>
+						how to contribute →
+					</a>
 				</div>
 			</section>
 

@@ -26,9 +26,13 @@ out/
 # Release artifacts are uploaded to storage, never committed
 *.dmg
 
-# Agent-local state
-.claude/settings.local.json
-.claude/scheduled_tasks.lock
+# Operator-local runbooks, skills, and agent state (absolute paths, private skills)
+.claude/
+.agents/
+
+# Operator-local private data: customer-data archive and real funnel snapshots
+_docs/legacy-backup/
+_docs/growth/
 
 # Logs
 *.log
@@ -37,14 +41,9 @@ out/
 __pycache__/
 *.pyc
 
-# Generated verification/intermediate frames
-brand/generated/frames/
-brand/generated/transparent/raw-frames/
-brand/generated/transparent/rgba-frames/
-
-# Noncanonical local brand-reference scratch crops
-brand/reference/jp3.png
-brand/reference/jp4.png
+# Operator-local brand masters: generated video renders and real photos of JP
+brand/generated/
+brand/reference/
 
 # Editor
 .vscode/

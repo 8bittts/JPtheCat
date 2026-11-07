@@ -10,6 +10,7 @@ Dates are the evidence in this doc; the owner docs carry none.
 - 2026-07-01: the Codex provider and the usage index land, the dashboard becomes a real Dock window with a demo top bar, and the first SwiftUI dashboard popover ships.
 - 2026-07-02: the macOS widget, launch at login, notifications by the book and the pSEO `/library` engine land.
 - 2026-07-03: the full `/library` pSEO site ships, and the remote pricing layer lands.
+- 2026-11-06: the source goes public under MIT as a fresh repository with a new root commit, because the old history held customer emails, Stripe IDs, and device hashes; that history lives only in the private `8bittts/JPtheCat-archive`.
 - The rest of the record is the engineering log below: each entry states what broke, the rule now, and the guard that holds it, while the contract it protects lives in its owner doc.
 
 ## Decisions
@@ -96,7 +97,7 @@ Guards: `PlanTierKeychainReadTests`, `ClaudeRateLimitTests.testDecodedSnapshotCl
 **Pricing coverage is emitted-ID coverage.**
 Audits found rows copied from the wrong sibling (`gpt-5.6-luna` and `terra` at Sol's rates, a 5x overcount), documented aliases missing, and hyphenated snapshot dates the Claude-only normalizer missed.
 Spot-check family-specific rates, aliases, and snapshots; a list-presence test would not have caught Luna.
-`.agents/skills/jp-models/scripts/audit_model_coverage.py` inventories locally emitted ids, and `OpenCodeGoProviderTests.testEveryRoutedAccountingIDIsAnExactPriceRow` covers the accounting ids gateways derive.
+The operator-local `.agents/skills/jp-models/scripts/audit_model_coverage.py` inventories locally emitted ids, and `OpenCodeGoProviderTests.testEveryRoutedAccountingIDIsAnExactPriceRow` covers the accounting ids gateways derive.
 
 **A new generation is a distinct row until its rates prove otherwise.**
 Fable 5.1 and Mythos 5.1 bill cache reads at 0.025x input and Opus 5.5 at 0.05x, so normalizing them onto Fable 5 or Opus 5 would overbill the largest token class.

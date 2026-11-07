@@ -1,7 +1,7 @@
 # AGENTS.md — jpthecat/supabase
 
 The Postgres migrations for the project behind `api.jpthecat.com` (release storage, the `downloads` growth table, `request_throttle`, and the growth cron jobs).
-JP the Cat is free: there are no edge functions, no checkout, no license, trial, or Stripe tables (dropped in `0012_drop_license_server.sql`; the final rows are archived in `../_docs/legacy-backup/`).
+JP the Cat is free: there are no edge functions, no checkout, no license, trial, or Stripe tables (dropped in `0012_drop_license_server.sql`; the final rows are archived in the operator-local, gitignored `_docs/legacy-backup/`).
 The repo root's [AGENTS.md](../AGENTS.md) owns the cross-cutting rules (branding, worktrees, release, privacy).
 
 ## Migrations

@@ -292,7 +292,7 @@ git -C "$REL_WORKTREE" tag -a "$TAG" -m "${APP_NAME} ${VERSION}"
 git -C "$REL_WORKTREE" push origin "$TAG"
 step "pushed HEAD + ${TAG}"
 
-# --- Sync the public Homebrew tap. The product/source repo stays private, so the public install path is
+# --- Sync the public Homebrew tap. The public install path is
 # `brew tap 8bittts/jpthecat && brew trust 8bittts/jpthecat && brew install --cask jpthecat`; this
 # keeps that tap pinned to the same notarized DMG + SHA as `/download` and Sparkle.
 info "Sync Homebrew tap"

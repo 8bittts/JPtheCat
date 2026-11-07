@@ -92,12 +92,6 @@
 		--shadow-card: 0 1px 2px rgba(76, 52, 16, 0.05), 0 18px 40px -22px rgba(96, 64, 22, 0.28);
 		--shadow-soft: 0 1px 2px rgba(76, 52, 16, 0.04), 0 10px 30px -18px rgba(96, 64, 22, 0.22);
 		--shadow-pop: 0 2px 4px rgba(60, 40, 12, 0.06), 0 30px 60px -28px rgba(70, 46, 14, 0.4);
-		/* JP-mascot drop-shadows (filter, not box-shadow) — the warm ginger cast under the
-		   CatAnimation mascot. Two roles: the large presiding hero mascot (hero + 404) and the
-		   smaller mascot cresting a membership/contact card. Tokenized so the five call sites
-		   can't drift the offset/blur/alpha independently. */
-		--drop-mascot-hero: 0 24px 40px rgba(120, 70, 20, 0.2);
-		--drop-mascot-card: 0 22px 34px rgba(120, 70, 20, 0.22);
 		--bar-fill-opacity: 0.55;
 	}
 
@@ -784,22 +778,6 @@
 	will-change: transform;
 }
 
-/* Scroll reveal (toggled by IntersectionObserver). Content stays visible by
-   default so no-JS, full-page QA screenshots, and observer failures never leave
-   homepage sections blank. */
-.reveal {
-	opacity: 1;
-	transform: none;
-	transition:
-		opacity 0.7s var(--ease-out-soft),
-		transform 0.7s var(--ease-out-soft);
-	transition-delay: var(--reveal-delay, 0ms);
-}
-.reveal.in {
-	opacity: 1;
-	transform: none;
-}
-
 /* Staggered entrance primitive — set --rise-delay inline for the stagger.
    Replaces repeated inline `style={{ animation: "rise-in ..." }}`. */
 .rise-in {
@@ -849,20 +827,15 @@
 
 /* Honor prefers-reduced-motion (AGENTS.md: "no autoplaying looping motion for
    reduced-motion users"). A universal reset neutralizes every looping/entrance
-   animation — marquee, float, float-shadow, rise-in, reveal, and any future
-   motion — in one place. The float-shadow base box-shadow is already the settled
-   state, so stopping the animation leaves a correct static shadow, and reveal
-   content is forced visible in case its observer never fires. */
+   animation — marquee, float, float-shadow, rise-in, and any future motion — in
+   one place. The float-shadow base box-shadow is already the settled state, so
+   stopping the animation leaves a correct static shadow. */
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,
 	*::after {
 		animation: none !important;
 		transition-duration: 0.01ms !important;
-	}
-	.reveal {
-		opacity: 1;
-		transform: none;
 	}
 	/* Confetti is pure motion — hide it entirely rather than leaving static dots parked at the top. */
 	.demo-confetti-piece {

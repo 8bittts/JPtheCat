@@ -1,7 +1,6 @@
 {
 	"$schema": "https://unpkg.com/knip@6/schema.json",
-	"entry": ["tests/**/*.test.ts", "tests/preload.ts", "scripts/**/*.ts"],
+	"entry": ["tests/**/*.test.ts", "scripts/**/*.ts"],
 	"project": ["**/*.{ts,tsx}", "*.mjs"],
-	"ignoreDependencies": ["tailwindcss"],
-	"ignore": ["components/site/cat-animation.tsx", "components/site/mascot-video.tsx"]
+	"ignoreDependencies": ["tailwindcss"]
 }
