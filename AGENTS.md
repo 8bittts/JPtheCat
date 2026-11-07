@@ -33,7 +33,7 @@ For design work, read `_docs/02-design-system.md` first, then the affected contr
 
 **Documentation policy:**
 - `_docs/todos.md` is the only backlog; no TODOs or future plans in owner docs.
-  The only dated files are the operator-local, gitignored `_docs/growth/` snapshots and `_docs/legacy-backup/` archive.
+  The only dated files are the archives in the operator-local, gitignored `_docs/legacy-backup/`.
 - No changelog, release-evidence, or research files; git history is authoritative.
 - One owner per fact; other docs point to it.
   A rule here stays terse and names its guard; the incident goes in `_docs/00-foundation.md` as a short entry.
@@ -156,7 +156,8 @@ The app's least-privilege posture (no Full Disk Access, no Accessibility) is a s
 Never commit secrets, API keys, OAuth tokens, signing keys, notary credentials, or local credential state.
 
 **[HARD REQUIREMENT] The repository is public; never track the operator-local paths.**
-`_docs/legacy-backup/` (customer data), `_docs/growth/` (real funnel metrics), `brand/generated/`, `brand/reference/`, `.claude/`, and `.agents/` stay gitignored.
+`_docs/legacy-backup/` (customer data), `brand/generated/`, and `brand/reference/` stay gitignored.
+The tracked runbooks in `.claude/` and `.agents/` are public, so they never hold home paths, account details, or metrics.
 The pre-open-source history lives only in the private `8bittts/JPtheCat-archive`; never push it, rebase it onto, or merge it into the public repository (guard: the local `pre-push` hook rejects any push that contains an archive root commit).
 
 **Never edit agent-harness config ad hoc; use only the explicit opt-in setup paths. `~/.claude/settings.json` remains read-only.**

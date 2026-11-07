@@ -26,13 +26,12 @@ out/
 # Release artifacts are uploaded to storage, never committed
 *.dmg
 
-# Operator-local runbooks, skills, and agent state (absolute paths, private skills)
-.claude/
-.agents/
+# Local agent state; the runbooks under .claude/ and .agents/ are tracked
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
 
-# Operator-local private data: customer-data archive and real funnel snapshots
+# Operator-local private data: the customer-data archive
 _docs/legacy-backup/
-_docs/growth/
 
 # Logs
 *.log

@@ -81,7 +81,7 @@ Custom hex palettes skip the system Increase Contrast variants; promote only if 
 ### SEO snippet CTR re-check
 
 Due: the 2026-09-02 title and description changes have been live more than 30 days.
-Re-check CTR for `/library/compare/jp-the-cat-vs-tokens-4-breakfast` and `/library/alternatives/codexbar` in the next `/growth`; leave deep-ranked model-compare pages alone.
+Re-check CTR for `/library/compare/jp-the-cat-vs-tokens-4-breakfast` and `/library/alternatives/codexbar` in Search Console; leave deep-ranked model-compare pages alone.
 No locale or geographic pSEO: search demand is not geo-shaped.
 
 ### Provider Expansion

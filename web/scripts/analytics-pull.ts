@@ -140,11 +140,11 @@ async function main() {
 	if (!token) {
 		console.log(
 			"=== Search Console leg is dormant ===\n" +
-				"No Google OAuth credentials configured. To enable keyword growth for /growth:\n" +
+				"No Google OAuth credentials configured. To enable keyword growth:\n" +
 				"  1. Verify https://jpthecat.com/ as a Search Console property for the owner Google account.\n" +
 				"  2. Reuse the shared Google OAuth client already used for the operator account and store\n" +
 				"     GOOGLE_OAUTH_CLIENT_ID / _SECRET / _REFRESH_TOKEN in web/.env.local\n" +
-				"     (see .claude/commands/growth.md → Recovery).\n" +
+				"     (see _docs/08-growth.md → Readers).\n" +
 				"Traffic in the meantime: Vercel Web Analytics API/dashboard (custom events; NOT bot-filtered).",
 		);
 		return;

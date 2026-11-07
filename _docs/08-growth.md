@@ -3,7 +3,7 @@
 Bot filtering, the download spine, readers, the owner digest, and the /library programmatic SEO strategy.
 
 How the acquisition funnel is measured and kept honest.
-The `/growth` command (`.claude/commands/growth.md`) is the runbook; dated reports live in the gitignored `_docs/growth/`; the command and reports stay operator-local.
+The daily owner digest email is the growth record; no dated growth reports are kept in the repository.
 JP the Cat is free and app usage stays local, so the server-side spine is narrow: download rows plus aggregate web traffic and search.
 
 ```
@@ -81,11 +81,10 @@ Owner-notice idempotency keys come from body-visible event fields plus a hashed 
 
 ## 5. Operating notes
 
-- `/growth` is read-only and never deploys.
+- A `/growth` review is read-only, never deploys, and saves no report file.
 - `vercel env pull` never returns a Sensitive value: it writes an empty string or a bracketed placeholder (measured for `CRON_SECRET`), so a pulled value is neither the secret nor evidence that it is missing; a `(skipped: … not set)` line means the local shell lacks it.
 - Vercel snapshots env per deployment: after adding or rotating `CRON_SECRET`, ship a fresh `[deploy]` before treating it as live.
-- Reports go to `_docs/growth/<YYYY-MM-DD>-growth.md` (overwrite on a same-day re-run) with a row in `_docs/growth/README.md`; they hold real funnel metrics, so the folder is gitignored and never public.
-  Read current numbers from the newest report, never from this doc.
+- Read current numbers from the newest owner digest or a fresh reader run, never from this doc.
 
 ## SEO & Programmatic SEO — the `/library` Hub
 

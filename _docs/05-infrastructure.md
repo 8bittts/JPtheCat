@@ -8,7 +8,7 @@ The Sparkle release-notes rule lives in root `AGENTS.md`.
 
 ## Release pipeline
 
-One command owns it: `bash mac/scripts/release-jpthecat.sh [version]` (also `/jp release`, the operator-local `.claude/commands/jp.md`).
+One command owns it: `bash mac/scripts/release-jpthecat.sh [version]` (also `/jp release`, `.claude/commands/jp.md`).
 
 - **Signing:** Developer ID Application (team `GRNGR33Z8A`), hardened runtime, no sandbox; `mac/JPtheCat.entitlements` carries only the `com.apple.security.application-groups` array for the widget snapshot.
   Sign inner to outer (Sparkle XPC services → `Updater.app` → framework → app) and never use `--deep`, which corrupts the XPC signatures.

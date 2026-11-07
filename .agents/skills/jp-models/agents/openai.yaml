@@ -1,0 +1,4 @@
+interface:
+  display_name: "JP Models"
+  short_description: "Audit and update JP model pricing coverage"
+  default_prompt: "Use $jp-models to investigate unpriced Claude or Codex models and update JP the Cat safely."

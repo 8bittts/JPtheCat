@@ -13,7 +13,6 @@ const AGENT_DOCS = [
 	"../README.md",
 ];
 // Every top-level owner doc, derived rather than listed, so a renamed or added doc stays covered.
-// The dated `_docs/growth/` reports are historical snapshots and are deliberately not scanned.
 const OWNER_DOC_DIR = "../_docs";
 const MIN_OWNER_DOCS = 10;
 const TEXT_EXTENSIONS = new Set([".ts", ".tsx", ".md", ".txt", ".swift"]);
