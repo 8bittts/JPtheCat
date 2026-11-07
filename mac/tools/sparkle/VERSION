@@ -1,0 +1,29 @@
+# Sparkle vendored-framework pin
+#
+# Used by scripts/build-dmg.sh preflight to detect tampering or accidental
+# truncation of the vendored framework. Update whenever Sparkle is re-vendored
+# (see BUILD.md "Upgrading the Sparkle framework").
+
+sparkle_version=2.10.1
+sparkle_build=2065
+sparkle_source=https://github.com/sparkle-project/Sparkle/releases/download/2.10.1/Sparkle-2.10.1.tar.xz
+
+# SHA-256 of the main framework Mach-O. Stable per Sparkle release.
+sparkle_binary_sha256=9c78b2046e7637efeb8ca505d63170bc1557651925dbbfd45ac236845732b05a
+
+# Required helpers that must be present after vendoring. Missing any of these
+# breaks in-app updates at runtime (the 0.014/0.015 regression that lost
+# Updater.app shipped because nothing checked).
+required_paths=(
+    "Sparkle.framework/Versions/B/Sparkle"
+    "Sparkle.framework/Versions/B/Autoupdate"
+    "Sparkle.framework/Versions/B/Updater.app"
+    "Sparkle.framework/Versions/B/XPCServices/Installer.xpc"
+    "Sparkle.framework/Versions/B/XPCServices/Downloader.xpc"
+    # Top-level symlink that NSBundle.URLForAuxiliaryExecutable() walks to
+    # find Updater.app. Without it Sparkle's installer launcher returns nil
+    # for "Updater.app" and aborts with "Cannot retrieve path for auxiliary
+    # tool" -- the symptom that bit 0.014-0.020. Symlink target:
+    # Versions/Current/Updater.app
+    "Sparkle.framework/Updater.app"
+)

@@ -1,0 +1,3 @@
+/* The name macOS shows for the app in Finder, Spotlight, and the widget gallery. */
+CFBundleDisplayName = "JP the Cat";
+CFBundleName = "JP the Cat";

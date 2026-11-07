@@ -1,0 +1,236 @@
+{
+	"_comment": "Shared model-id display cases. mac ModelIdentityTests and web model-identity.test.ts both read this file, so the app, the homepage demo, and /library cannot drift. presentation = grouping key (ModelIdentity.presentationID / presentationModelId); short = compact tile label; analytics = Advanced Analytics label; effort = tier from ModelEffort.levels / MODEL_EFFORT_LEVELS, or null when the model is unclassified.",
+	"cases": [
+		{
+			"model": "claude-opus-4-5-20251101",
+			"presentation": "claude-opus-4-5",
+			"short": "opus-4-5",
+			"analytics": "opus-4-5",
+			"effort": "high"
+		},
+		{
+			"model": "claude-haiku-4-5-20251001",
+			"presentation": "claude-haiku-4-5",
+			"short": "haiku-4-5",
+			"analytics": "haiku-4-5",
+			"effort": "low"
+		},
+		{
+			"model": "claude-opus-4-6[1m]",
+			"presentation": "claude-opus-4-6",
+			"short": "opus-4-6",
+			"analytics": "opus-4-6",
+			"effort": "high"
+		},
+		{
+			"model": "anthropic/claude-sonnet-4-5",
+			"presentation": "claude-sonnet-4-5",
+			"short": "sonnet-4-5",
+			"analytics": "sonnet-4-5",
+			"effort": "high"
+		},
+		{
+			"model": "claude-Opus-Preview-20251101",
+			"presentation": "claude-Opus-Preview",
+			"short": "Opus-Preview",
+			"analytics": "Opus-Preview",
+			"effort": null
+		},
+		{
+			"model": "openai/gpt-5.6-sol-2026-07-01",
+			"presentation": "gpt-5.6-sol",
+			"short": "5.6-sol",
+			"analytics": "gpt-5.6-sol",
+			"effort": "high"
+		},
+		{
+			"model": "gpt-5.3-codex-spark",
+			"presentation": "gpt-5.3-codex-spark",
+			"short": "5.3-spark",
+			"analytics": "gpt-5.3-spark",
+			"effort": "high"
+		},
+		{
+			"model": "gpt-5-codex",
+			"presentation": "gpt-5-codex",
+			"short": "5",
+			"analytics": "gpt-5",
+			"effort": "medium"
+		},
+		{
+			"model": "gpt-5.6",
+			"presentation": "gpt-5.6",
+			"short": "5.6",
+			"analytics": "gpt-5.6",
+			"effort": "high"
+		},
+		{
+			"model": "gpt-reserve",
+			"presentation": "gpt-reserve",
+			"short": "reserve",
+			"analytics": "gpt-reserve",
+			"effort": "high"
+		},
+		{
+			"model": "gpt-5-mini",
+			"presentation": "gpt-5-mini",
+			"short": "5-mini",
+			"analytics": "gpt-5-mini",
+			"effort": null
+		},
+		{
+			"model": "grok-4.7-build",
+			"presentation": "grok-4.7-build",
+			"short": "4.7",
+			"analytics": "4.7",
+			"effort": "high"
+		},
+		{
+			"model": "grok-4.6-latest",
+			"presentation": "grok-4.6-latest",
+			"short": "4.6-latest",
+			"analytics": "4.6-latest",
+			"effort": "high"
+		},
+		{
+			"model": "grok-build",
+			"presentation": "grok-build",
+			"short": "build",
+			"analytics": "build",
+			"effort": "high"
+		},
+		{
+			"model": "grok-4.7-opencode",
+			"presentation": "grok-4.7",
+			"short": "4.7",
+			"analytics": "4.7",
+			"effort": "high"
+		},
+		{
+			"model": "gpt-5-codex-zen",
+			"presentation": "gpt-5-codex",
+			"short": "5",
+			"analytics": "gpt-5",
+			"effort": "medium"
+		},
+		{
+			"model": "deepseek-v4-flash-go-peak",
+			"presentation": "deepseek-v4-flash",
+			"short": "deepseek-v4-flash",
+			"analytics": "deepseek-v4-flash",
+			"effort": null
+		},
+		{
+			"model": "deepseek-v4.1-flash-peak",
+			"presentation": "deepseek-v4.1-flash",
+			"short": "deepseek-v4.1-flash",
+			"analytics": "deepseek-v4.1-flash",
+			"effort": null
+		},
+		{
+			"model": "deepseek-v4.1-flash-zen",
+			"presentation": "deepseek-v4.1-flash",
+			"short": "deepseek-v4.1-flash",
+			"analytics": "deepseek-v4.1-flash",
+			"effort": null
+		},
+		{
+			"model": "mimo-v2.5-free",
+			"presentation": "mimo-v2.5-free",
+			"short": "mimo-v2.5 free",
+			"analytics": "mimo-v2.5 free",
+			"effort": "low"
+		},
+		{
+			"model": "muse-spark-1.3-contributor-free",
+			"presentation": "muse-spark-1.3-contributor-free",
+			"short": "muse-spark-1.3-contributor free",
+			"analytics": "muse-spark-1.3-contributor free",
+			"effort": "high"
+		},
+		{
+			"model": "nemotron-3-ultra-free",
+			"presentation": "nemotron-3-ultra-free",
+			"short": "nemotron-3-ultra free",
+			"analytics": "nemotron-3-ultra free",
+			"effort": null
+		},
+		{
+			"model": "claude-opus-5-5-fast-mode",
+			"presentation": "claude-opus-5-5",
+			"short": "opus-5-5",
+			"analytics": "opus-5-5",
+			"effort": "high"
+		},
+		{
+			"model": "claude-opus-5-5-fast-mode-us-inference",
+			"presentation": "claude-opus-5-5",
+			"short": "opus-5-5",
+			"analytics": "opus-5-5",
+			"effort": "high"
+		},
+		{
+			"model": "claude-sonnet-5-5-us-inference",
+			"presentation": "claude-sonnet-5-5",
+			"short": "sonnet-5-5",
+			"analytics": "sonnet-5-5",
+			"effort": "high"
+		},
+		{
+			"model": "grok-composer-2.5-fast",
+			"presentation": "grok-composer-2.5-fast",
+			"short": "composer-2.5-fast",
+			"analytics": "composer-2.5-fast",
+			"effort": "high"
+		},
+		{
+			"model": "space-bunny",
+			"presentation": "space-bunny",
+			"short": "space-bunny",
+			"analytics": "space-bunny",
+			"effort": null
+		},
+		{
+			"model": "composer-2.5-fast",
+			"presentation": "composer-2.5-fast",
+			"short": "composer-2.5-fast",
+			"analytics": "composer-2.5-fast",
+			"effort": "high"
+		},
+		{
+			"model": "muse-spark",
+			"presentation": "muse-spark",
+			"short": "muse-spark",
+			"analytics": "muse-spark",
+			"effort": "high"
+		},
+		{
+			"model": "big-pickle",
+			"presentation": "big-pickle",
+			"short": "big-pickle",
+			"analytics": "big-pickle",
+			"effort": null
+		},
+		{
+			"model": "auto",
+			"presentation": "auto",
+			"short": "auto",
+			"analytics": "auto",
+			"effort": null
+		},
+		{
+			"model": "claude-sonnet-5-5-zen",
+			"presentation": "claude-sonnet-5-5",
+			"short": "sonnet-5-5",
+			"analytics": "sonnet-5-5",
+			"effort": "high"
+		},
+		{
+			"model": "anthropic/claude-haiku-5-5[1m]",
+			"presentation": "claude-haiku-5-5",
+			"short": "haiku-5-5",
+			"analytics": "haiku-5-5",
+			"effort": "medium"
+		}
+	]
+}

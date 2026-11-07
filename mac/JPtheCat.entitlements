@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Developer ID + hardened runtime, NO App Sandbox: JPtheCat reads dotfolders
+     (~/.claude, ~/.codex) which are not TCC-protected, so no file entitlement is needed.
+     The App Group is for the WidgetKit snapshot only; the extension is sandboxed. -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>GRNGR33Z8A.com.8bittts.jpthecat</string>
+	</array>
+</dict>
+</plist>

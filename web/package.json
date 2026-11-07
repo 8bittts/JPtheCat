@@ -1,0 +1,59 @@
+{
+	"name": "jpthecat-web",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"packageManager": "bun@1.4.4",
+	"engines": {
+		"node": "24.x"
+	},
+	"description": "JP the Cat — the cat that counts your agent tokens. Marketing site.",
+	"scripts": {
+		"dev": "lsof -ti:4444 | xargs kill -9 2>/dev/null || true && rm -rf .next && next dev -p 4444",
+		"build": "next build && bun run scan:secrets",
+		"scan:secrets": "bun run scripts/scan-client-bundle-secrets.ts",
+		"start": "next start -p 4444",
+		"lint": "biome check --write",
+		"lint:check": "biome check",
+		"format": "biome format --write",
+		"type-check": "tsc --noEmit",
+		"check": "tsc --noEmit && biome check",
+		"test": "bun test",
+		"a11y": "bun scripts/a11y-audit.ts",
+		"knip": "knip",
+		"doctor": "react-doctor . --verbose",
+		"doctor:diff": "react-doctor . --verbose --scope changed --base main",
+		"quality": "bun run check && bun run test && bun run knip && bun run doctor && bun run build"
+	},
+	"dependencies": {
+		"@react-email/components": "^1.0.12",
+		"@vercel/analytics": "2.0.1",
+		"@vercel/speed-insights": "2.1.0",
+		"next": "^16.4.5",
+		"postgres": "^4.1.0",
+		"react": "^19.3.1",
+		"react-dom": "^19.3.1",
+		"resend": "^6.37.0",
+		"three": "^0.187.0"
+	},
+	"devDependencies": {
+		"@axe-core/playwright": "^4.14.0",
+		"@biomejs/biome": "^2.6.6",
+		"@playwright/test": "^1.65.0",
+		"@tailwindcss/postcss": "^4.3.5",
+		"@types/bun": "^1.4.4",
+		"@types/node": "^26.6.6",
+		"@types/react": "^19.3.0",
+		"@types/react-dom": "^19.3.0",
+		"@types/three": "^0.187.0",
+		"knip": "^6.44.1",
+		"postcss": "^8.5.32",
+		"react-doctor": "0.9.22",
+		"sharp": "^0.35.5",
+		"tailwindcss": "^4.3.5",
+		"typescript": "^7.0.2"
+	},
+	"overrides": {
+		"minimatch": "11.0.4"
+	}
+}

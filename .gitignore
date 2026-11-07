@@ -1,0 +1,61 @@
+# macOS
+.DS_Store
+
+# Node / Next (web/ has its own .gitignore too)
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# SwiftPM build output. mac/.gitignore already covers mac/; this bare pattern
+# matches at any depth, so a stray `swift build` from the repo root cannot
+# leave an untracked .build/ behind.
+.build/
+
+# Env & secrets
+.env
+.env*
+!.env.example
+*.pem
+*.p12
+*.p8
+*.cer
+*.mobileprovision
+*.provisionprofile
+
+# Release artifacts are uploaded to storage, never committed
+*.dmg
+
+# Agent-local state
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+
+# Logs
+*.log
+
+# Python scratch
+__pycache__/
+*.pyc
+
+# Generated verification/intermediate frames
+brand/generated/frames/
+brand/generated/transparent/raw-frames/
+brand/generated/transparent/rgba-frames/
+
+# Noncanonical local brand-reference scratch crops
+brand/reference/jp3.png
+brand/reference/jp4.png
+
+# Editor
+.vscode/
+.idea/
+
+# Local task worktrees. These are intentionally rooted under the canonical checkout.
+workstreams/
+.worktrees/
+
+.vercel
+
+# Supabase CLI scratch (project-ref cache written during functions deploy)
+supabase/.temp/
+

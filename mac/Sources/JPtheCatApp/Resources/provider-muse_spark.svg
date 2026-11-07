@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <!-- White spark glyph for Meta Muse Spark (sits on Meta-blue brand chip). -->
+  <path fill="#FFFFFF" d="M12 2.2l1.35 6.05L19.4 9.6l-4.95 3.6L15.8 19.8 12 16.35 8.2 19.8l1.35-6.6L4.6 9.6l6.05-1.35L12 2.2z"/>
+  <circle cx="12" cy="12" r="2.1" fill="#FFFFFF"/>
+</svg>

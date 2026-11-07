@@ -1,0 +1,806 @@
+{
+	"pricing_revision": 2,
+	"_comment": "Per-token USD rates. Legacy above_200k field names use each row's context_tier_threshold and context_tier_inclusive. Omitted cache fields are not verified rates; see _docs/03-data.md for provenance and limitations.",
+	"_comment_openai": "gpt-*/gpt-*-codex are OpenAI API LIST prices; cached input is model-specific (GPT-6.1 Sol uses 0.05x input, while the other priced direct rows use 0.1x). GPT-6 and GPT-5.6 bill 30-minute cache writes at 1.25x input (cache_creation_input_token_cost) and 12-hour writes at 2x the 30-minute rate (cache_creation_input_token_cost_above_1hr); Codex logs report no extended-retention writes, so the second field never prices a Codex turn today. Older entries use calculator fallbacks. GPT-6.1 Terra is 1/5/cached 0.05 (long 2/7.50/0.10). GPT-6 Astra launched at 10/50. GPT-5.6 Luna and Terra were cut on 2026-07-30 (Luna 1/6 -> 0.20/1.20, Terra 2.50/15 -> 2/12); Sol promotional pricing later cut 5/30 -> 4/20. For a Codex ChatGPT subscription (plan_type=pro) these produce a NOTIONAL 'what it would cost at API rates' figure, not real spend \u2014 always label it as such. Rates verified from official OpenAI pricing (2026). Long-context rates use context_tier_threshold=272000; legacy above_200k field names hold those rates. GPT-6 Sol and Luna use current official Standard API prices. Source: https://developers.openai.com/api/docs/pricing.",
+	"_comment_gemini": "gemini-* are Google Gemini API LIST prices (per-MTok: 2.5-pro 1.25/10, 2.5-flash 0.30/2.50, 2.5-flash-lite 0.10/0.40, 3-pro 2/12, 3-flash 0.50/3; cached input ~0.1x). Gemini CLI on OAuth / Gemini Code Assist is a subscription, so these produce a NOTIONAL figure, never real spend \u2014 always label it as such. Pro tiers carry the >200K-context surcharge (2.5-pro 2.5/15, 3-pro 4/18): Gemini's cliff IS at 200K, matching CostCalculator's threshold, so *_above_200k fields are correct here (unlike OpenAI's 272K). Flash tiers are flat. Gemini exposes no cache-creation split, so no cache_creation fields. Verified against ai.google.dev/pricing (2026). 2026-09-26 audit: gemini-3.1-pro (2/12/cached 0.20, >200K 4/18/0.40), gemini-3.5-flash (1.50/9/0.15), and gemini-3.5-flash-lite (0.30/2.50/0.03) carry the SAME rates on ai.google.dev/gemini-api/docs/pricing and opencode.ai/docs/zen, so one row serves Gemini CLI and Zen-routed turns; gemini-3.1-pro-preview and Zen's gemini-3-flash are aliases. Gemini 3.6/3.7/3.8 Flash stay unpriced: Google bills 0.75/3.75 through 2026-12-31 while Zen bills 1.50/7.50, so one row cannot serve both routes.",
+	"_comment_grok": "grok-* are xAI API LIST prices from https://docs.x.ai/developers/pricing (per-MTok). Official cached-input rates are model-specific (NOT a flat 0.1x): grok-4.7 and grok-4.6 2.00/0.50/6.00, grok-4.5 2.00/0.30/6.00, grok-4.3 and 4.20 family 1.25/0.20/2.50, grok-build-0.1 code API 1.00/0.20/2.00. Grok Build CLI on SuperGrok / X Premium+ is a subscription, so these produce a NOTIONAL figure, never real spend \u2014 always label it as such. Aliases: locally emitted grok-4.7-build \u2192 grok-4.7 (xAI documents no grok-4.7 alias); locally emitted grok-4.6-build plus official grok-4.6-latest \u2192 grok-4.6; locally emitted grok-4.5-build plus official grok-4.5-latest/grok-build-latest/grok-build \u2192 grok-4.5; grok-4.3-latest/grok-latest \u2192 grok-4.3; grok-code-fast* \u2192 grok-build-0.1; common grok-4.20-* aliases \u2192 grok-4.20-0309-reasoning. No cache-creation split. xAI applies a 200K-prompt premium (2x input/cached/output for grok-4.7, grok-4.6 and grok-4.5, 2x for the 4.3/4.20/build family) billed across the WHOLE request; that threshold is exactly CostCalculator's 200000 tier, so *_above_200k fields are correct here (unlike OpenAI's 272K). grok-composer-* are Cursor rates with no published cliff, so they carry no tier. Source: docs.x.ai/developers/pricing + per-model pages.",
+	"_comment_grok_composer": "grok-composer-* are Cursor Composer 2.5 on-demand rates from https://cursor.com/changelog/composer-2-5 (Fast default $3/$15; Standard $0.50/$2.50 per MTok). Grok Build emits these IDs in updates.jsonl modelUsage when routing to Cursor's agent \u2014 still NOTIONAL against the subscription/credit pool, never real API spend. Cursor publishes no cached-input rate; omit cache_read here and let CostCalculator fall back to 0.1\u00d7 input.",
+	"_comment_opencode": "OpenCode-family rows. deepseek-v4-flash, deepseek-v4-flash-vision-exp, deepseek-v4-pro, muse-spark-1.2 and muse-spark-1.3 are OpenCode Zen gateway LIST prices from https://opencode.ai/docs/zen/ (per-MTok: V4 Flash 0.14/0.28/cached 0.028, V4 Pro 1.74/3.48/cached 0.145, Muse Spark 1.25/4.25/cached 0.15); the Zen page is the operative list for ids JP only ever sees through OpenCode. deepseek-v4.1-flash is the Go accounting id and carries DeepSeek's own OFF-PEAK API rate from https://api-docs.deepseek.com/quick_start/pricing (0.15/0.60/cached 0.003; peak is 2x). deepseek-v4-flash-go, deepseek-v4-flash-vision-exp-go and deepseek-v4-pro-go are Go LIST prices from https://opencode.ai/docs/go/ (per-MTok: V4 Pro 0.66/1.98/cached 0.022, V4 Flash 0.15/0.60/cached 0.003) and are reached ONLY by parse-time `-go` suffixing of Go-routed turns (OpenCodeGateway) \u2014 the base ids stay Zen prices. OpenCode Go models (glm-5.x, kimi-k2.x, qwen3.x, minimax-m2.x/m3, mimo-v2.5, longcat-2.0, hy3, hy4-preview, union-alpha) use the published per-token rates from https://opencode.ai/docs/go/ (per-MTok as listed). big-pickle and union-alpha are OpenCode's free house models (0/0). FREE-TIER ids (`-free`, `-contributor-free`) are deliberately UNPRICED on every row \u2014 gateway and model-brand alike \u2014 never mapped to a paid base row (ModelIdentity.isFreeTier). mimo-v2.5 and nemotron-3-ultra have NO row on Zen (Zen serves both only as free tiers), but mimo-v2.5 is priced on Go so it carries a Go rate here. muse-spark-1.3-contributor and muse-spark-1.2-contributor are the Meta contributor-tier rates served through Go (0.10/0.20/cached 0.002), distinct from the non-contributor Zen/Meta rates. Legacy aliases muse-spark / meta-muse-spark-1.1 / meta/muse-spark-1.1 normalize to muse-spark-1.1 (pricing aliases). muse-wonder-1.0 is the Meta Model API list rate (4/20/cached 0.20, dev.meta.ai/products/meta-model-api, 2026-11-04), which Zen matches; it bills on the Muse Spark row. Audit correction: Go MiMo V2.6 Flash/Pro use published Go rates. Qwen Plus tiers use context_tier_threshold=256000. Zen DeepSeek V4.1 Flash is 0.30/1.20/0.006 under the -zen accounting id. Go DeepSeek -peak accounting ids apply the published 2x rate at request creation during weekday UTC 01:00-04:00 and 06:00-10:00. All other Go DeepSeek requests use off-peak rates. Zen Sonnet 5.5 uses the distinct claude-sonnet-5-5-zen row: cache reads remain 0.20 per MTok while direct Anthropic reads are 0.10. Zen publishes no one-hour cache-write price, so that field is omitted. Historical GPT 5 Codex and GPT 5.1 Codex Zen routes use explicit -zen rows at 1.07/8.50/0.107 per MTok, distinct from direct OpenAI list rates. qwen3.5-plus is the Zen list price (0.20/1.20/cached 0.02/write 0.25, opencode.ai/docs/zen, 2026-09-26). space-bunny is the Go list price (0.15/0.60/cached 0.03, opencode.ai/docs/go, 2026-10-06); its Zen twin space-bunny-free is free and stays unpriced. kimi-k3.1-pro (2/10/cached 0.20/write 2.00), step-5-preview (1/2.70/cached 0.10) and minimax-m3.1-flash (0.15/0.60/cached 0.015) are Go list prices (opencode.ai/docs/go, 2026-10-30). gemini-4-argon carries the billed 50%-off promotional rate (2/10/cached 0.10; list 4/20/0.20) that Go and Zen both publish; Go dates the discount through 2026-11-30 (opencode.ai/docs/go, 2026-11-04), so the list rate is due from 2026-12-01; Google publishes no direct rate yet.",
+	"_comment_claude_fast_mode": "claude-*-fast-mode rows are Claude API fast-mode rates (research preview) from https://platform.claude.com/docs/en/about-claude/pricing (per-MTok: Opus 5.5 8/40, Opus 5 and Opus 4.8 10/50), with the standard prompt-caching multipliers stacked on top (5-minute write 1.25x, 1-hour write 2x, read 0.1x, and 0.05x on Opus 5.5). They apply across the full context window. ClaudeProvider reaches them ONLY when a turn logs usage.speed \"fast\" (ModelIdentity.fastModeID); a fast id with no row stays unpriced instead of billing at the standard rate.",
+	"_comment_rate_multipliers": "rate_multipliers maps an accounting suffix to a factor on every rate of the id it decorates, so a premium that covers whole model families needs no row per model. -us-inference is Claude US-only inference (usage.inference_geo \"us\"), billed at 1.1x in every token category on Claude 4.6 and later models and stacked on fast mode, from https://platform.claude.com/docs/en/build-with-claude/data-residency. Earlier models reject the parameter, so the suffix never reaches them. PricingTable prices the decorated id first; when that id is unpriced, the turn stays unpriced.",
+	"_comment_aliases": "Documented or locally emitted model ids that bill at another row's rate. Keys are matched after ModelIdentity removes a vendor/ prefix, Claude Code's [1m] selector, and a -YYYYMMDD or -YYYY-MM-DD snapshot date. Aliases never apply to a free-tier id and never point at another alias. Consumers: PricingTable and ModelEffort (app), web/lib/library/pricing-data.ts (website), and .agents/skills/jp-models/scripts/audit_model_coverage.py. gpt-reserve is the Codex CLI id for GPT-5.6 Luna Reserve; grok-*-build ids are Grok Build's local names; the rest are xAI, Cursor, and legacy Meta aliases.",
+	"rate_multipliers": {
+		"-us-inference": 1.1
+	},
+	"aliases": {
+		"gpt-5.6": "gpt-5.6-sol",
+		"gpt-reserve": "gpt-5.6-luna",
+		"grok-4.7-build": "grok-4.7",
+		"grok-4.6-build": "grok-4.6",
+		"grok-4.6-latest": "grok-4.6",
+		"grok-4.5-build": "grok-4.5",
+		"grok-4.5-latest": "grok-4.5",
+		"grok-build": "grok-4.5",
+		"grok-build-latest": "grok-4.5",
+		"grok-4.3-latest": "grok-4.3",
+		"grok-latest": "grok-4.3",
+		"grok-code-fast": "grok-build-0.1",
+		"grok-code-fast-1": "grok-build-0.1",
+		"grok-code-fast-1-0825": "grok-build-0.1",
+		"grok-4.20": "grok-4.20-0309-reasoning",
+		"grok-4.20-0309": "grok-4.20-0309-reasoning",
+		"grok-4.20-reasoning": "grok-4.20-0309-reasoning",
+		"grok-4.20-reasoning-latest": "grok-4.20-0309-reasoning",
+		"grok-4.20-beta": "grok-4.20-0309-reasoning",
+		"grok-4.20-beta-latest": "grok-4.20-0309-reasoning",
+		"grok-4.20-beta-reasoning": "grok-4.20-0309-reasoning",
+		"grok-4.20-beta-latest-reasoning": "grok-4.20-0309-reasoning",
+		"grok-4.20-beta-0309": "grok-4.20-0309-reasoning",
+		"grok-4.20-beta-0309-reasoning": "grok-4.20-0309-reasoning",
+		"grok-4.20-non-reasoning": "grok-4.20-0309-non-reasoning",
+		"grok-4.20-non-reasoning-latest": "grok-4.20-0309-non-reasoning",
+		"composer-2.5": "grok-composer-2.5",
+		"cursor-composer-2.5": "grok-composer-2.5",
+		"composer-2.5-fast": "grok-composer-2.5-fast",
+		"cursor-composer-2.5-fast": "grok-composer-2.5-fast",
+		"muse-spark": "muse-spark-1.1",
+		"meta-muse-spark-1.1": "muse-spark-1.1",
+		"gemini-3.1-pro-preview": "gemini-3.1-pro",
+		"gemini-3-flash": "gemini-3-flash-preview"
+	},
+	"models": {
+		"claude-opus-5-5": {
+			"input_cost_per_token": 4e-06,
+			"output_cost_per_token": 2e-05,
+			"cache_creation_input_token_cost": 5e-06,
+			"cache_creation_input_token_cost_above_1hr": 8e-06,
+			"cache_read_input_token_cost": 2e-07
+		},
+		"claude-opus-5": {
+			"input_cost_per_token": 5e-06,
+			"output_cost_per_token": 2.5e-05,
+			"cache_creation_input_token_cost": 6.25e-06,
+			"cache_creation_input_token_cost_above_1hr": 1e-05,
+			"cache_read_input_token_cost": 5e-07
+		},
+		"claude-opus-4-8": {
+			"input_cost_per_token": 5e-06,
+			"output_cost_per_token": 2.5e-05,
+			"cache_creation_input_token_cost": 6.25e-06,
+			"cache_creation_input_token_cost_above_1hr": 1e-05,
+			"cache_read_input_token_cost": 5e-07
+		},
+		"claude-opus-5-5-fast-mode": {
+			"input_cost_per_token": 8e-06,
+			"output_cost_per_token": 4e-05,
+			"cache_creation_input_token_cost": 1e-05,
+			"cache_creation_input_token_cost_above_1hr": 1.6e-05,
+			"cache_read_input_token_cost": 4e-07
+		},
+		"claude-opus-5-fast-mode": {
+			"input_cost_per_token": 1e-05,
+			"output_cost_per_token": 5e-05,
+			"cache_creation_input_token_cost": 1.25e-05,
+			"cache_creation_input_token_cost_above_1hr": 2e-05,
+			"cache_read_input_token_cost": 1e-06
+		},
+		"claude-opus-4-8-fast-mode": {
+			"input_cost_per_token": 1e-05,
+			"output_cost_per_token": 5e-05,
+			"cache_creation_input_token_cost": 1.25e-05,
+			"cache_creation_input_token_cost_above_1hr": 2e-05,
+			"cache_read_input_token_cost": 1e-06
+		},
+		"claude-opus-4-7": {
+			"input_cost_per_token": 5e-06,
+			"output_cost_per_token": 2.5e-05,
+			"cache_creation_input_token_cost": 6.25e-06,
+			"cache_creation_input_token_cost_above_1hr": 1e-05,
+			"cache_read_input_token_cost": 5e-07
+		},
+		"claude-opus-4-6": {
+			"input_cost_per_token": 5e-06,
+			"output_cost_per_token": 2.5e-05,
+			"cache_creation_input_token_cost": 6.25e-06,
+			"cache_creation_input_token_cost_above_1hr": 1e-05,
+			"cache_read_input_token_cost": 5e-07
+		},
+		"claude-opus-4-5": {
+			"input_cost_per_token": 5e-06,
+			"output_cost_per_token": 2.5e-05,
+			"cache_creation_input_token_cost": 6.25e-06,
+			"cache_creation_input_token_cost_above_1hr": 1e-05,
+			"cache_read_input_token_cost": 5e-07
+		},
+		"claude-fable-5-1": {
+			"input_cost_per_token": 1e-05,
+			"output_cost_per_token": 5e-05,
+			"cache_creation_input_token_cost": 1.25e-05,
+			"cache_creation_input_token_cost_above_1hr": 2e-05,
+			"cache_read_input_token_cost": 2.5e-07
+		},
+		"claude-mythos-5-1": {
+			"input_cost_per_token": 1e-05,
+			"output_cost_per_token": 5e-05,
+			"cache_creation_input_token_cost": 1.25e-05,
+			"cache_creation_input_token_cost_above_1hr": 2e-05,
+			"cache_read_input_token_cost": 2.5e-07
+		},
+		"claude-fable-5": {
+			"input_cost_per_token": 1e-05,
+			"output_cost_per_token": 5e-05,
+			"cache_creation_input_token_cost": 1.25e-05,
+			"cache_creation_input_token_cost_above_1hr": 2e-05,
+			"cache_read_input_token_cost": 1e-06
+		},
+		"claude-mythos-5": {
+			"input_cost_per_token": 1e-05,
+			"output_cost_per_token": 5e-05,
+			"cache_creation_input_token_cost": 1.25e-05,
+			"cache_creation_input_token_cost_above_1hr": 2e-05,
+			"cache_read_input_token_cost": 1e-06
+		},
+		"claude-sonnet-5-5-zen": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 1e-05,
+			"cache_creation_input_token_cost": 2.5e-06,
+			"cache_read_input_token_cost": 2e-07
+		},
+		"claude-sonnet-5-5": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 1e-05,
+			"cache_creation_input_token_cost": 2.5e-06,
+			"cache_creation_input_token_cost_above_1hr": 4e-06,
+			"cache_read_input_token_cost": 1e-07
+		},
+		"claude-sonnet-5": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 1e-05,
+			"cache_creation_input_token_cost": 2.5e-06,
+			"cache_creation_input_token_cost_above_1hr": 4e-06,
+			"cache_read_input_token_cost": 2e-07
+		},
+		"claude-sonnet-4-6": {
+			"input_cost_per_token": 3e-06,
+			"output_cost_per_token": 1.5e-05,
+			"cache_creation_input_token_cost": 3.75e-06,
+			"cache_creation_input_token_cost_above_1hr": 6e-06,
+			"cache_read_input_token_cost": 3e-07
+		},
+		"claude-sonnet-4-5": {
+			"input_cost_per_token": 3e-06,
+			"output_cost_per_token": 1.5e-05,
+			"cache_creation_input_token_cost": 3.75e-06,
+			"cache_creation_input_token_cost_above_1hr": 6e-06,
+			"cache_read_input_token_cost": 3e-07,
+			"input_cost_per_token_above_200k_tokens": 6e-06,
+			"output_cost_per_token_above_200k_tokens": 2.25e-05,
+			"cache_creation_input_token_cost_above_200k_tokens": 7.5e-06,
+			"cache_creation_input_token_cost_above_1hr_above_200k_tokens": 1.2e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 6e-07
+		},
+		"claude-haiku-5-5": {
+			"input_cost_per_token": 1e-07,
+			"output_cost_per_token": 5e-07,
+			"cache_creation_input_token_cost": 1.25e-07,
+			"cache_creation_input_token_cost_above_1hr": 2e-07,
+			"cache_read_input_token_cost": 1e-08,
+			"context_tier_threshold": 100000,
+			"input_cost_per_token_above_200k_tokens": 5e-07,
+			"output_cost_per_token_above_200k_tokens": 2.5e-06,
+			"cache_creation_input_token_cost_above_200k_tokens": 6.25e-07,
+			"cache_creation_input_token_cost_above_1hr_above_200k_tokens": 1e-06,
+			"cache_read_input_token_cost_above_200k_tokens": 5e-08
+		},
+		"claude-haiku-4-5": {
+			"input_cost_per_token": 1e-06,
+			"output_cost_per_token": 5e-06,
+			"cache_creation_input_token_cost": 1.25e-06,
+			"cache_creation_input_token_cost_above_1hr": 2e-06,
+			"cache_read_input_token_cost": 1e-07
+		},
+		"gpt-6-astra": {
+			"input_cost_per_token": 1e-05,
+			"output_cost_per_token": 5e-05,
+			"cache_read_input_token_cost": 1e-06,
+			"context_tier_threshold": 272000,
+			"input_cost_per_token_above_200k_tokens": 2e-05,
+			"output_cost_per_token_above_200k_tokens": 7.5e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 2e-06,
+			"cache_creation_input_token_cost_above_200k_tokens": 2.5e-05,
+			"cache_creation_input_token_cost_above_1hr_above_200k_tokens": 5e-05,
+			"cache_creation_input_token_cost": 1.25e-05,
+			"cache_creation_input_token_cost_above_1hr": 2.5e-05
+		},
+		"gpt-5.6-sol": {
+			"input_cost_per_token": 4e-06,
+			"output_cost_per_token": 2e-05,
+			"cache_read_input_token_cost": 4e-07,
+			"context_tier_threshold": 272000,
+			"input_cost_per_token_above_200k_tokens": 8e-06,
+			"output_cost_per_token_above_200k_tokens": 3e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 8.000000000000001e-07,
+			"cache_creation_input_token_cost_above_200k_tokens": 1e-05,
+			"cache_creation_input_token_cost_above_1hr_above_200k_tokens": 2e-05,
+			"cache_creation_input_token_cost": 5e-06,
+			"cache_creation_input_token_cost_above_1hr": 1e-05
+		},
+		"gpt-5.6-luna": {
+			"input_cost_per_token": 2e-07,
+			"output_cost_per_token": 1.2e-06,
+			"cache_read_input_token_cost": 2e-08,
+			"context_tier_threshold": 272000,
+			"input_cost_per_token_above_200k_tokens": 4.0000000000000003e-07,
+			"output_cost_per_token_above_200k_tokens": 1.8000000000000001e-06,
+			"cache_read_input_token_cost_above_200k_tokens": 4e-08,
+			"cache_creation_input_token_cost_above_200k_tokens": 5e-07,
+			"cache_creation_input_token_cost_above_1hr_above_200k_tokens": 1e-06,
+			"cache_creation_input_token_cost": 2.5e-07,
+			"cache_creation_input_token_cost_above_1hr": 5e-07
+		},
+		"gpt-5.6-terra": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 1.2e-05,
+			"cache_read_input_token_cost": 2e-07,
+			"context_tier_threshold": 272000,
+			"input_cost_per_token_above_200k_tokens": 4e-06,
+			"output_cost_per_token_above_200k_tokens": 1.8e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 4.0000000000000003e-07,
+			"cache_creation_input_token_cost_above_200k_tokens": 5e-06,
+			"cache_creation_input_token_cost_above_1hr_above_200k_tokens": 1e-05,
+			"cache_creation_input_token_cost": 2.5e-06,
+			"cache_creation_input_token_cost_above_1hr": 5e-06
+		},
+		"gpt-5.5": {
+			"input_cost_per_token": 5e-06,
+			"output_cost_per_token": 3e-05,
+			"cache_read_input_token_cost": 5e-07,
+			"context_tier_threshold": 272000,
+			"input_cost_per_token_above_200k_tokens": 1e-05,
+			"output_cost_per_token_above_200k_tokens": 4.5e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 1e-06
+		},
+		"gpt-5.4": {
+			"input_cost_per_token": 2.5e-06,
+			"output_cost_per_token": 1.5e-05,
+			"cache_read_input_token_cost": 2.5e-07,
+			"context_tier_threshold": 272000,
+			"input_cost_per_token_above_200k_tokens": 5e-06,
+			"output_cost_per_token_above_200k_tokens": 2.25e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 5e-07
+		},
+		"gpt-5.4-mini": {
+			"input_cost_per_token": 7.5e-07,
+			"output_cost_per_token": 4.5e-06,
+			"cache_read_input_token_cost": 7.5e-08
+		},
+		"gpt-5.3-codex": {
+			"input_cost_per_token": 1.75e-06,
+			"output_cost_per_token": 1.4e-05,
+			"cache_read_input_token_cost": 1.75e-07
+		},
+		"gpt-5.3-codex-spark": {
+			"input_cost_per_token": 1.75e-06,
+			"output_cost_per_token": 1.4e-05,
+			"cache_read_input_token_cost": 1.75e-07
+		},
+		"gpt-5.2": {
+			"input_cost_per_token": 1.75e-06,
+			"output_cost_per_token": 1.4e-05,
+			"cache_read_input_token_cost": 1.75e-07
+		},
+		"gpt-5.2-codex": {
+			"input_cost_per_token": 1.75e-06,
+			"output_cost_per_token": 1.4e-05,
+			"cache_read_input_token_cost": 1.75e-07
+		},
+		"gpt-5.1-codex": {
+			"input_cost_per_token": 1.25e-06,
+			"output_cost_per_token": 1e-05,
+			"cache_read_input_token_cost": 1.25e-07
+		},
+		"gpt-5.1-codex-max": {
+			"input_cost_per_token": 1.25e-06,
+			"output_cost_per_token": 1e-05,
+			"cache_read_input_token_cost": 1.25e-07
+		},
+		"gpt-5.1-codex-mini": {
+			"input_cost_per_token": 2.5e-07,
+			"output_cost_per_token": 2e-06,
+			"cache_read_input_token_cost": 2.5e-08
+		},
+		"gpt-5-codex": {
+			"input_cost_per_token": 1.25e-06,
+			"output_cost_per_token": 1e-05,
+			"cache_read_input_token_cost": 1.25e-07
+		},
+		"gemini-3-pro-preview": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 1.2e-05,
+			"cache_read_input_token_cost": 2e-07,
+			"input_cost_per_token_above_200k_tokens": 4e-06,
+			"output_cost_per_token_above_200k_tokens": 1.8e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 4e-07
+		},
+		"gemini-3": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 1.2e-05,
+			"cache_read_input_token_cost": 2e-07,
+			"input_cost_per_token_above_200k_tokens": 4e-06,
+			"output_cost_per_token_above_200k_tokens": 1.8e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 4e-07
+		},
+		"gemini-3-flash-preview": {
+			"input_cost_per_token": 5e-07,
+			"output_cost_per_token": 3e-06,
+			"cache_read_input_token_cost": 5e-08
+		},
+		"gemini-2.5-pro": {
+			"input_cost_per_token": 1.25e-06,
+			"output_cost_per_token": 1e-05,
+			"cache_read_input_token_cost": 1.25e-07,
+			"input_cost_per_token_above_200k_tokens": 2.5e-06,
+			"output_cost_per_token_above_200k_tokens": 1.5e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 2.5e-07
+		},
+		"gemini-2.5-flash": {
+			"input_cost_per_token": 3e-07,
+			"output_cost_per_token": 2.5e-06,
+			"cache_read_input_token_cost": 3e-08
+		},
+		"gemini-2.5-flash-lite": {
+			"input_cost_per_token": 1e-07,
+			"output_cost_per_token": 4e-07,
+			"cache_read_input_token_cost": 1e-08
+		},
+		"gemini-3.1-pro": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 1.2e-05,
+			"cache_read_input_token_cost": 2e-07,
+			"input_cost_per_token_above_200k_tokens": 4e-06,
+			"output_cost_per_token_above_200k_tokens": 1.8e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 4e-07
+		},
+		"gemini-3.5-flash": {
+			"input_cost_per_token": 1.5e-06,
+			"output_cost_per_token": 9e-06,
+			"cache_read_input_token_cost": 1.5e-07
+		},
+		"gemini-3.5-flash-lite": {
+			"input_cost_per_token": 3e-07,
+			"output_cost_per_token": 2.5e-06,
+			"cache_read_input_token_cost": 3e-08
+		},
+		"grok-4.7": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 6e-06,
+			"cache_read_input_token_cost": 5e-07,
+			"input_cost_per_token_above_200k_tokens": 4e-06,
+			"output_cost_per_token_above_200k_tokens": 1.2e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 1e-06,
+			"context_tier_inclusive": true
+		},
+		"grok-4.6": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 6e-06,
+			"cache_read_input_token_cost": 5e-07,
+			"input_cost_per_token_above_200k_tokens": 4e-06,
+			"output_cost_per_token_above_200k_tokens": 1.2e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 1e-06,
+			"context_tier_inclusive": true
+		},
+		"grok-4.5": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 6e-06,
+			"cache_read_input_token_cost": 3e-07,
+			"input_cost_per_token_above_200k_tokens": 4e-06,
+			"output_cost_per_token_above_200k_tokens": 1.2e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 6e-07,
+			"context_tier_inclusive": true
+		},
+		"grok-4.3": {
+			"input_cost_per_token": 1.25e-06,
+			"output_cost_per_token": 2.5e-06,
+			"cache_read_input_token_cost": 2e-07,
+			"input_cost_per_token_above_200k_tokens": 2.5e-06,
+			"output_cost_per_token_above_200k_tokens": 5e-06,
+			"cache_read_input_token_cost_above_200k_tokens": 4e-07,
+			"context_tier_inclusive": true
+		},
+		"grok-4.20-0309-reasoning": {
+			"input_cost_per_token": 1.25e-06,
+			"output_cost_per_token": 2.5e-06,
+			"cache_read_input_token_cost": 2e-07,
+			"input_cost_per_token_above_200k_tokens": 2.5e-06,
+			"output_cost_per_token_above_200k_tokens": 5e-06,
+			"cache_read_input_token_cost_above_200k_tokens": 4e-07,
+			"context_tier_inclusive": true
+		},
+		"grok-4.20-0309-non-reasoning": {
+			"input_cost_per_token": 1.25e-06,
+			"output_cost_per_token": 2.5e-06,
+			"cache_read_input_token_cost": 2e-07,
+			"input_cost_per_token_above_200k_tokens": 2.5e-06,
+			"output_cost_per_token_above_200k_tokens": 5e-06,
+			"cache_read_input_token_cost_above_200k_tokens": 4e-07,
+			"context_tier_inclusive": true
+		},
+		"grok-4.20-multi-agent-0309": {
+			"input_cost_per_token": 1.25e-06,
+			"output_cost_per_token": 2.5e-06,
+			"cache_read_input_token_cost": 2e-07,
+			"input_cost_per_token_above_200k_tokens": 2.5e-06,
+			"output_cost_per_token_above_200k_tokens": 5e-06,
+			"cache_read_input_token_cost_above_200k_tokens": 4e-07,
+			"context_tier_inclusive": true
+		},
+		"grok-build-0.1": {
+			"input_cost_per_token": 1e-06,
+			"output_cost_per_token": 2e-06,
+			"cache_read_input_token_cost": 2e-07,
+			"input_cost_per_token_above_200k_tokens": 2e-06,
+			"output_cost_per_token_above_200k_tokens": 4e-06,
+			"cache_read_input_token_cost_above_200k_tokens": 4e-07,
+			"context_tier_inclusive": true
+		},
+		"grok-composer-2.5-fast": {
+			"input_cost_per_token": 3e-06,
+			"output_cost_per_token": 1.5e-05
+		},
+		"grok-composer-2.5": {
+			"input_cost_per_token": 5e-07,
+			"output_cost_per_token": 2.5e-06
+		},
+		"muse-spark-1.1": {
+			"input_cost_per_token": 1.25e-06,
+			"output_cost_per_token": 4.25e-06,
+			"cache_read_input_token_cost": 1.5e-07
+		},
+		"muse-spark-1.2": {
+			"input_cost_per_token": 1.25e-06,
+			"output_cost_per_token": 4.25e-06,
+			"cache_read_input_token_cost": 1.5e-07
+		},
+		"muse-spark-1.3": {
+			"input_cost_per_token": 1.25e-06,
+			"output_cost_per_token": 4.25e-06,
+			"cache_read_input_token_cost": 1.5e-07
+		},
+		"muse-wonder-1.0": {
+			"input_cost_per_token": 4e-06,
+			"output_cost_per_token": 2e-05,
+			"cache_read_input_token_cost": 2e-07
+		},
+		"deepseek-v4-flash": {
+			"input_cost_per_token": 1.4e-07,
+			"output_cost_per_token": 2.8e-07,
+			"cache_read_input_token_cost": 2.8e-08
+		},
+		"deepseek-v4-flash-vision-exp": {
+			"input_cost_per_token": 1.4e-07,
+			"output_cost_per_token": 2.8e-07,
+			"cache_read_input_token_cost": 2.8e-08
+		},
+		"deepseek-v4-pro": {
+			"input_cost_per_token": 1.74e-06,
+			"output_cost_per_token": 3.48e-06,
+			"cache_read_input_token_cost": 1.45e-07
+		},
+		"deepseek-v4.1-flash": {
+			"input_cost_per_token": 1.5e-07,
+			"output_cost_per_token": 6e-07,
+			"cache_read_input_token_cost": 3e-09
+		},
+		"deepseek-v4-flash-go": {
+			"input_cost_per_token": 1.5e-07,
+			"output_cost_per_token": 6e-07,
+			"cache_read_input_token_cost": 3e-09
+		},
+		"deepseek-v4-flash-vision-exp-go": {
+			"input_cost_per_token": 1.5e-07,
+			"output_cost_per_token": 6e-07,
+			"cache_read_input_token_cost": 3e-09
+		},
+		"deepseek-v4-pro-go": {
+			"input_cost_per_token": 6.6e-07,
+			"output_cost_per_token": 1.98e-06,
+			"cache_read_input_token_cost": 2.2e-08
+		},
+		"big-pickle": {
+			"input_cost_per_token": 0,
+			"output_cost_per_token": 0
+		},
+		"glm-5.3-flash": {
+			"input_cost_per_token": 1.5e-07,
+			"output_cost_per_token": 5e-07,
+			"cache_read_input_token_cost": 3e-08
+		},
+		"glm-5.3": {
+			"input_cost_per_token": 1.4e-06,
+			"output_cost_per_token": 4.4e-06,
+			"cache_read_input_token_cost": 2.6e-07
+		},
+		"glm-5.2": {
+			"input_cost_per_token": 1.4e-06,
+			"output_cost_per_token": 4.4e-06,
+			"cache_read_input_token_cost": 2.6e-07
+		},
+		"glm-5.1": {
+			"input_cost_per_token": 1.4e-06,
+			"output_cost_per_token": 4.4e-06,
+			"cache_read_input_token_cost": 2.6e-07
+		},
+		"kimi-k3": {
+			"input_cost_per_token": 3e-06,
+			"output_cost_per_token": 1.5e-05,
+			"cache_read_input_token_cost": 3e-07,
+			"cache_creation_input_token_cost": 3e-06
+		},
+		"kimi-k2.7-code": {
+			"input_cost_per_token": 9.5e-07,
+			"output_cost_per_token": 4e-06,
+			"cache_read_input_token_cost": 1.9e-07
+		},
+		"kimi-k2.6": {
+			"input_cost_per_token": 9.5e-07,
+			"output_cost_per_token": 4e-06,
+			"cache_read_input_token_cost": 1.6e-07
+		},
+		"longcat-2.0": {
+			"input_cost_per_token": 3e-07,
+			"output_cost_per_token": 1.2e-06,
+			"cache_read_input_token_cost": 6e-09
+		},
+		"mimo-v2.5": {
+			"input_cost_per_token": 1.4e-07,
+			"output_cost_per_token": 2.8e-07,
+			"cache_read_input_token_cost": 2.8e-09
+		},
+		"mimo-v2.5-pro": {
+			"input_cost_per_token": 4.35e-07,
+			"output_cost_per_token": 8.7e-07,
+			"cache_read_input_token_cost": 3.625e-09
+		},
+		"minimax-m3": {
+			"input_cost_per_token": 3e-07,
+			"output_cost_per_token": 1.2e-06,
+			"cache_read_input_token_cost": 6e-08
+		},
+		"minimax-m2.7": {
+			"input_cost_per_token": 3e-07,
+			"output_cost_per_token": 1.2e-06,
+			"cache_read_input_token_cost": 6e-08,
+			"cache_creation_input_token_cost": 3.75e-07
+		},
+		"qwen3.8-max": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 6e-06,
+			"cache_read_input_token_cost": 2.5e-07,
+			"cache_creation_input_token_cost": 2.5e-06
+		},
+		"qwen3.8-flash": {
+			"input_cost_per_token": 1.5e-07,
+			"output_cost_per_token": 4.7e-07,
+			"cache_read_input_token_cost": 1.6e-08,
+			"cache_creation_input_token_cost": 2e-07
+		},
+		"qwen3.7-max": {
+			"input_cost_per_token": 2.5e-06,
+			"output_cost_per_token": 7.5e-06,
+			"cache_read_input_token_cost": 5e-07,
+			"cache_creation_input_token_cost": 3.125e-06
+		},
+		"qwen3.7-plus": {
+			"input_cost_per_token": 4e-07,
+			"output_cost_per_token": 1.6e-06,
+			"cache_read_input_token_cost": 4e-08,
+			"cache_creation_input_token_cost": 5e-07,
+			"context_tier_threshold": 256000,
+			"input_cost_per_token_above_200k_tokens": 1.2e-06,
+			"output_cost_per_token_above_200k_tokens": 4.8e-06,
+			"cache_read_input_token_cost_above_200k_tokens": 1.2e-07,
+			"cache_creation_input_token_cost_above_200k_tokens": 1.5e-06,
+			"cache_creation_input_token_cost_above_1hr_above_200k_tokens": 1.5e-06
+		},
+		"qwen3.6-plus": {
+			"input_cost_per_token": 5e-07,
+			"output_cost_per_token": 3e-06,
+			"cache_read_input_token_cost": 5e-08,
+			"cache_creation_input_token_cost": 6.25e-07,
+			"context_tier_threshold": 256000,
+			"input_cost_per_token_above_200k_tokens": 2e-06,
+			"output_cost_per_token_above_200k_tokens": 6e-06,
+			"cache_read_input_token_cost_above_200k_tokens": 2.0000000000000002e-07,
+			"cache_creation_input_token_cost_above_200k_tokens": 2.5e-06,
+			"cache_creation_input_token_cost_above_1hr_above_200k_tokens": 2.5e-06
+		},
+		"qwen3.5-plus": {
+			"input_cost_per_token": 2e-07,
+			"output_cost_per_token": 1.2e-06,
+			"cache_read_input_token_cost": 2e-08,
+			"cache_creation_input_token_cost": 2.5e-07
+		},
+		"hy4-preview": {
+			"input_cost_per_token": 8.34e-07,
+			"output_cost_per_token": 2.501e-06,
+			"cache_read_input_token_cost": 4.2e-08
+		},
+		"hy3": {
+			"input_cost_per_token": 1.4e-07,
+			"output_cost_per_token": 5.8e-07,
+			"cache_read_input_token_cost": 3.5e-08
+		},
+		"space-bunny": {
+			"input_cost_per_token": 1.5e-07,
+			"output_cost_per_token": 6e-07,
+			"cache_read_input_token_cost": 3e-08
+		},
+		"muse-spark-1.3-contributor": {
+			"input_cost_per_token": 1e-07,
+			"output_cost_per_token": 2e-07,
+			"cache_read_input_token_cost": 2e-09
+		},
+		"muse-spark-1.2-contributor": {
+			"input_cost_per_token": 1e-07,
+			"output_cost_per_token": 2e-07,
+			"cache_read_input_token_cost": 2e-09
+		},
+		"minimax-m2.5": {
+			"input_cost_per_token": 3e-07,
+			"output_cost_per_token": 1.2e-06,
+			"cache_read_input_token_cost": 6e-08,
+			"cache_creation_input_token_cost": 3.75e-07
+		},
+		"union-alpha": {
+			"input_cost_per_token": 0,
+			"output_cost_per_token": 0
+		},
+		"gpt-6.1-sol": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 1e-05,
+			"cache_read_input_token_cost": 1e-07,
+			"cache_creation_input_token_cost": 2.5e-06,
+			"cache_creation_input_token_cost_above_1hr": 5e-06,
+			"context_tier_threshold": 272000,
+			"input_cost_per_token_above_200k_tokens": 4e-06,
+			"output_cost_per_token_above_200k_tokens": 1.5e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 2e-07,
+			"cache_creation_input_token_cost_above_200k_tokens": 5e-06,
+			"cache_creation_input_token_cost_above_1hr_above_200k_tokens": 1e-05
+		},
+		"gpt-6.1-terra": {
+			"input_cost_per_token": 1e-06,
+			"output_cost_per_token": 5e-06,
+			"cache_read_input_token_cost": 5e-08,
+			"cache_creation_input_token_cost": 1.25e-06,
+			"cache_creation_input_token_cost_above_1hr": 2.5e-06,
+			"context_tier_threshold": 272000,
+			"input_cost_per_token_above_200k_tokens": 2e-06,
+			"output_cost_per_token_above_200k_tokens": 7.5e-06,
+			"cache_read_input_token_cost_above_200k_tokens": 1e-07,
+			"cache_creation_input_token_cost_above_200k_tokens": 2.5e-06,
+			"cache_creation_input_token_cost_above_1hr_above_200k_tokens": 5e-06
+		},
+		"gpt-6-sol": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 1e-05,
+			"cache_read_input_token_cost": 2.0000000000000002e-07,
+			"cache_creation_input_token_cost": 2.5e-06,
+			"cache_creation_input_token_cost_above_1hr": 5e-06,
+			"context_tier_threshold": 272000,
+			"input_cost_per_token_above_200k_tokens": 4e-06,
+			"output_cost_per_token_above_200k_tokens": 1.5e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 4.0000000000000003e-07,
+			"cache_creation_input_token_cost_above_200k_tokens": 5e-06,
+			"cache_creation_input_token_cost_above_1hr_above_200k_tokens": 1e-05
+		},
+		"gpt-6-luna": {
+			"input_cost_per_token": 1.0000000000000001e-07,
+			"output_cost_per_token": 5e-07,
+			"cache_read_input_token_cost": 1e-08,
+			"cache_creation_input_token_cost": 1.25e-07,
+			"cache_creation_input_token_cost_above_1hr": 2.5e-07,
+			"context_tier_threshold": 272000,
+			"input_cost_per_token_above_200k_tokens": 2.0000000000000002e-07,
+			"output_cost_per_token_above_200k_tokens": 7.5e-07,
+			"cache_read_input_token_cost_above_200k_tokens": 2e-08,
+			"cache_creation_input_token_cost_above_200k_tokens": 2.5e-07,
+			"cache_creation_input_token_cost_above_1hr_above_200k_tokens": 5e-07
+		},
+		"mimo-v2.6-flash": {
+			"input_cost_per_token": 1.4e-07,
+			"output_cost_per_token": 2.8e-07,
+			"cache_read_input_token_cost": 2.8e-09
+		},
+		"mimo-v2.6-pro": {
+			"input_cost_per_token": 4.35e-07,
+			"output_cost_per_token": 8.7e-07,
+			"cache_read_input_token_cost": 3.625e-09
+		},
+		"deepseek-v4.1-flash-zen": {
+			"input_cost_per_token": 3e-07,
+			"output_cost_per_token": 1.2e-06,
+			"cache_read_input_token_cost": 6e-09
+		},
+		"deepseek-v4.1-flash-peak": {
+			"input_cost_per_token": 3e-07,
+			"output_cost_per_token": 1.2e-06,
+			"cache_read_input_token_cost": 6e-09
+		},
+		"deepseek-v4-flash-go-peak": {
+			"input_cost_per_token": 3e-07,
+			"output_cost_per_token": 1.2e-06,
+			"cache_read_input_token_cost": 6e-09
+		},
+		"deepseek-v4-flash-vision-exp-go-peak": {
+			"input_cost_per_token": 3e-07,
+			"output_cost_per_token": 1.2e-06,
+			"cache_read_input_token_cost": 6e-09
+		},
+		"deepseek-v4-pro-go-peak": {
+			"input_cost_per_token": 1.32e-06,
+			"output_cost_per_token": 3.96e-06,
+			"cache_read_input_token_cost": 4.4e-08
+		},
+		"gpt-5-codex-zen": {
+			"input_cost_per_token": 1.07e-06,
+			"output_cost_per_token": 8.5e-06,
+			"cache_read_input_token_cost": 1.07e-07
+		},
+		"gpt-5.1-codex-zen": {
+			"input_cost_per_token": 1.07e-06,
+			"output_cost_per_token": 8.5e-06,
+			"cache_read_input_token_cost": 1.07e-07
+		},
+		"grok-4.7-opencode": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 6e-06,
+			"cache_read_input_token_cost": 5e-07,
+			"input_cost_per_token_above_200k_tokens": 4e-06,
+			"output_cost_per_token_above_200k_tokens": 1.2e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 1e-06
+		},
+		"grok-4.6-opencode": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 6e-06,
+			"cache_read_input_token_cost": 5e-07,
+			"input_cost_per_token_above_200k_tokens": 4e-06,
+			"output_cost_per_token_above_200k_tokens": 1.2e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 1e-06
+		},
+		"grok-4.5-opencode": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 6e-06,
+			"cache_read_input_token_cost": 3e-07,
+			"input_cost_per_token_above_200k_tokens": 4e-06,
+			"output_cost_per_token_above_200k_tokens": 1.2e-05,
+			"cache_read_input_token_cost_above_200k_tokens": 6e-07
+		},
+		"grok-build-0.1-opencode": {
+			"input_cost_per_token": 1e-06,
+			"output_cost_per_token": 2e-06,
+			"cache_read_input_token_cost": 2e-07
+		},
+		"kimi-k3.1-pro": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 1e-05,
+			"cache_read_input_token_cost": 2e-07,
+			"cache_creation_input_token_cost": 2e-06
+		},
+		"step-5-preview": {
+			"input_cost_per_token": 1e-06,
+			"output_cost_per_token": 2.7e-06,
+			"cache_read_input_token_cost": 1e-07
+		},
+		"minimax-m3.1-flash": {
+			"input_cost_per_token": 1.5e-07,
+			"output_cost_per_token": 6e-07,
+			"cache_read_input_token_cost": 1.5e-08
+		},
+		"gemini-4-argon": {
+			"input_cost_per_token": 2e-06,
+			"output_cost_per_token": 1e-05,
+			"cache_read_input_token_cost": 1e-07
+		}
+	}
+}

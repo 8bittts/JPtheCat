@@ -1,0 +1,21 @@
+# SwiftPM
+.build/
+.swiftpm/
+Package.resolved
+
+# staged local app + release artifacts
+build/
+
+# Vendored Sparkle ships Updater.app (the installer/authorization helper) inside the
+# framework. If a `*.app` ignore is ever added above, these keep the load-bearing
+# top-level symlink + Versions payload tracked — without them, in-app updates fail at
+# runtime with "Cannot retrieve path for auxiliary tool" (dockishOS burned releases on this).
+!tools/sparkle/Sparkle.framework/Updater.app
+!tools/sparkle/Sparkle.framework/Versions/*/Updater.app
+!tools/sparkle/Sparkle.framework/Versions/*/Updater.app/**
+
+# macOS
+.DS_Store
+
+# Supabase CLI link state (release upload only)
+supabase/

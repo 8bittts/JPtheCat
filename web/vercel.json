@@ -1,0 +1,135 @@
+{
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"framework": "nextjs",
+	"regions": ["iad1"],
+	"buildCommand": "node scripts/run-pinned-bun.cjs build",
+	"installCommand": "node scripts/run-pinned-bun.cjs install",
+	"ignoreCommand": "if echo \"$VERCEL_GIT_COMMIT_MESSAGE\" | head -1 | grep -q '\\[deploy\\]'; then exit 1; fi",
+	"crons": [
+		{
+			"path": "/api/cron/growth-digest",
+			"schedule": "0 3 * * *"
+		},
+		{
+			"path": "/api/cron/growth-digest",
+			"schedule": "0 4 * * *"
+		}
+	],
+	"redirects": [
+		{
+			"source": "/:path*",
+			"has": [
+				{
+					"type": "host",
+					"value": "www.jpthecat.com"
+				}
+			],
+			"destination": "https://jpthecat.com/:path*",
+			"permanent": true
+		}
+	],
+	"headers": [
+		{
+			"source": "/robots.txt",
+			"headers": [
+				{
+					"key": "Access-Control-Allow-Origin",
+					"value": "https://jpthecat.com"
+				},
+				{
+					"key": "Cross-Origin-Resource-Policy",
+					"value": "same-origin"
+				}
+			]
+		},
+		{
+			"source": "/sitemap.xml",
+			"headers": [
+				{
+					"key": "Access-Control-Allow-Origin",
+					"value": "https://jpthecat.com"
+				},
+				{
+					"key": "Cross-Origin-Resource-Policy",
+					"value": "same-origin"
+				}
+			]
+		},
+		{
+			"source": "/manifest.webmanifest",
+			"headers": [
+				{
+					"key": "Access-Control-Allow-Origin",
+					"value": "https://jpthecat.com"
+				},
+				{
+					"key": "Cross-Origin-Resource-Policy",
+					"value": "same-origin"
+				}
+			]
+		},
+		{
+			"source": "/llms.txt",
+			"headers": [
+				{
+					"key": "Access-Control-Allow-Origin",
+					"value": "https://jpthecat.com"
+				},
+				{
+					"key": "Cross-Origin-Resource-Policy",
+					"value": "same-origin"
+				}
+			]
+		},
+		{
+			"source": "/stable/:path*",
+			"headers": [
+				{
+					"key": "Access-Control-Allow-Origin",
+					"value": "*"
+				},
+				{
+					"key": "Access-Control-Allow-Methods",
+					"value": "GET, HEAD, OPTIONS"
+				},
+				{
+					"key": "Access-Control-Allow-Headers",
+					"value": "Content-Type, Range"
+				},
+				{
+					"key": "Cross-Origin-Resource-Policy",
+					"value": "cross-origin"
+				}
+			]
+		},
+		{
+			"source": "/(.*)",
+			"headers": [
+				{
+					"key": "Strict-Transport-Security",
+					"value": "max-age=63072000; includeSubDomains; preload"
+				},
+				{
+					"key": "X-Content-Type-Options",
+					"value": "nosniff"
+				},
+				{
+					"key": "X-Frame-Options",
+					"value": "DENY"
+				},
+				{
+					"key": "Cross-Origin-Opener-Policy",
+					"value": "same-origin"
+				},
+				{
+					"key": "Referrer-Policy",
+					"value": "strict-origin-when-cross-origin"
+				},
+				{
+					"key": "Permissions-Policy",
+					"value": "camera=(), microphone=(), geolocation=(), browsing-topics=(), interest-cohort=(), payment=(), usb=(), serial=(), bluetooth=(), hid=(), midi=()"
+				}
+			]
+		}
+	]
+}

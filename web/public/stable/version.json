@@ -1,0 +1,8 @@
+{
+  "version": "1.148",
+  "url": "https://api.jpthecat.com/storage/v1/object/public/releases/JPtheCat-1.148.dmg",
+  "sha256": "1d4c375bb702d3dd4f58d659f35085c146d470c3a3c03daa5800e7e86cd15c2e",
+  "notes": "Sparkle release notes are generated from git history in JP's strict-but-cute voice.",
+  "minOS": "14.0",
+  "releaseDate": "2026-11-07"
+}

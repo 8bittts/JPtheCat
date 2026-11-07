@@ -1,0 +1,871 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   JPtheCat — "Sunlit Ledger" design system
+   A warm, daylight identity. Deliberately the opposite of dark dev-tool UIs.
+   Palette: cream paper, warm ink, ginger-cat amber accent, sage / coral signals.
+   Type:    Fraunces (display serif), Hanken Grotesk (body), JetBrains Mono (numbers)
+   ============================================================================= */
+
+@theme {
+	/* Surfaces */
+	--color-paper: #faf6ec;
+	--color-paper-2: #f4ecda;
+	--color-card: #fffdf7;
+	--color-ink: #221d15;
+	--color-ink-soft: #6c6253;
+	--color-ink-faint: #756a55;
+
+	/* Rules / borders (warm) */
+	--color-line: #e8ddc7;
+	--color-line-strong: #d9ccae;
+
+	/* Brand — JP's ginger fur + her gold badge */
+	--color-ginger: #df7a2e;
+	--color-ginger-deep: #a84d14;
+	--color-honey: #edb454;
+	--color-gold: #fdcd2d;
+	--color-cream-deep: #ecdcbd;
+	--color-track: #ecdcbd;
+	/* CTA — deepened so white button text meets WCAG AA (>=4.5:1) */
+	--color-cta: #a84f16;
+	--color-cta-deep: #8f420e;
+	--color-cta-text: #ffffff;
+
+	/* Signal colors */
+	--color-sage: #3c7852;
+	--color-sage-deep: #2e5e40;
+	--color-sage-soft: #6fae84; /* lighter sage — gauge gradient highlight */
+	--color-coral: #c1422a;
+
+	/* Per-provider accents */
+	--color-p-claude: #d6783f;
+	--color-p-codex: #2f2f33;
+	--color-p-gemini: #3b7dd8;
+	--color-p-cursor: #4a4a52;
+	--color-p-copilot: #8957e5;
+	--color-p-grok: #111111;
+	--color-p-grok-bot: #243b55;
+	--color-p-muse-spark: #0866ff;
+	--color-p-nemotron: #76b900;
+	--color-p-mimo: #e74856;
+	--color-p-big-pickle: #0d9488;
+	--color-p-deepseek: #1a56db;
+	--color-p-aider: #8a5cc0;
+	--color-p-opencode: #d59a2e;
+	--color-p-opencodego: #3e7c8c;
+	--color-p-windsurf: #2bb3a3;
+	--color-p-openai: #10a37f;
+	--color-p-openrouter: #5f6fc5;
+	--color-p-local: #617b4f;
+	--color-p-generic: #7a7770;
+
+	/* Fonts (wired to next/font CSS variables set in layout.tsx) */
+	--font-display: var(--font-fraunces), ui-serif, Georgia, "Times New Roman", serif;
+	--font-sans: var(--font-hanken), ui-sans-serif, system-ui, -apple-system, sans-serif;
+	--font-mono: var(--font-jb), ui-monospace, "SF Mono", Menlo, monospace;
+
+	/* Motion */
+	--ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* -----------------------------------------------------------------------------
+   Base
+   ----------------------------------------------------------------------------- */
+@layer base {
+	:root {
+		--header-h: 68px;
+		--page-gutter: 24px;
+		--measure-shell: 1320px;
+		--measure-page: 1120px;
+		--measure-well: 1080px;
+		--measure-reading: 860px;
+		--measure-copy: 720px;
+		--measure-dialog-sm: 340px;
+		--measure-dialog-md: 400px;
+		--measure-dialog-lg: 430px;
+		--radius-control: 7px;
+		--radius-compact: 9px;
+		--radius-dialog: 14px;
+		--radius-card: 18px;
+		--dialog-backdrop: rgba(34, 29, 21, 0.45);
+		--shadow-card: 0 1px 2px rgba(76, 52, 16, 0.05), 0 18px 40px -22px rgba(96, 64, 22, 0.28);
+		--shadow-soft: 0 1px 2px rgba(76, 52, 16, 0.04), 0 10px 30px -18px rgba(96, 64, 22, 0.22);
+		--shadow-pop: 0 2px 4px rgba(60, 40, 12, 0.06), 0 30px 60px -28px rgba(70, 46, 14, 0.4);
+		/* JP-mascot drop-shadows (filter, not box-shadow) — the warm ginger cast under the
+		   CatAnimation mascot. Two roles: the large presiding hero mascot (hero + 404) and the
+		   smaller mascot cresting a membership/contact card. Tokenized so the five call sites
+		   can't drift the offset/blur/alpha independently. */
+		--drop-mascot-hero: 0 24px 40px rgba(120, 70, 20, 0.2);
+		--drop-mascot-card: 0 22px 34px rgba(120, 70, 20, 0.22);
+		--bar-fill-opacity: 0.55;
+	}
+
+	* {
+		border-color: var(--color-line);
+	}
+
+	html {
+		scroll-behavior: smooth;
+		scroll-padding-top: calc(var(--header-h) + 16px);
+		-webkit-font-smoothing: antialiased;
+		text-rendering: optimizeLegibility;
+	}
+
+	body {
+		background-color: var(--color-paper);
+		color: var(--color-ink);
+		font-family: var(--font-sans);
+		font-size: 17px;
+		line-height: 1.6;
+		letter-spacing: 0;
+		font-feature-settings: "ss01", "cv05";
+	}
+
+	::selection {
+		background: color-mix(in oklab, var(--color-ginger) 28%, transparent);
+		color: var(--color-ink);
+	}
+
+	h1,
+	h2,
+	h3 {
+		font-family: var(--font-display);
+		font-weight: 460;
+		letter-spacing: 0;
+		line-height: 1.04;
+		color: var(--color-ink);
+		font-optical-sizing: auto;
+	}
+
+	/* Opaque ginger-deep clears the 3:1 focus-indicator bar (WCAG 1.4.11); the
+	   3px offset keeps the ring on the page background, not on dark buttons. */
+	:focus-visible {
+		outline: 2.5px solid var(--color-ginger-deep);
+		outline-offset: 3px;
+		border-radius: 4px;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		html {
+			scroll-behavior: auto;
+		}
+	}
+}
+
+/* -----------------------------------------------------------------------------
+   Components
+   ----------------------------------------------------------------------------- */
+@layer components {
+	.wrap {
+		width: 100%;
+		max-width: var(--measure-page);
+		margin-inline: auto;
+		padding-inline: var(--page-gutter);
+	}
+
+	.home-shell {
+		width: 100%;
+		max-width: var(--measure-shell);
+		margin-inline: auto;
+		padding-inline: var(--page-gutter);
+	}
+
+	.home-well {
+		width: 100%;
+		max-width: var(--measure-well);
+		margin-inline: auto;
+		padding-inline: var(--page-gutter);
+	}
+
+	.home-copy {
+		max-width: var(--measure-copy);
+	}
+
+	.eyebrow {
+		font-family: var(--font-mono);
+		font-size: 12px;
+		letter-spacing: 0;
+		text-transform: uppercase;
+		color: var(--color-ginger-deep);
+		font-weight: 500;
+	}
+
+	/* The brand's ONE sanctioned "foil" cue: a ~1px honey→ginger hairline that fades in
+	   and out. Deployed sparingly as a premium section signature (nav base, hero base) —
+	   never a bright-gold (#fdcd2d) fill, which stays JP's mascot art only. Decorative;
+	   always paired with aria-hidden at the call site. */
+	.foil-rule {
+		height: 1px;
+		width: 100%;
+		background: linear-gradient(
+			90deg,
+			transparent,
+			var(--color-honey),
+			var(--color-ginger),
+			transparent
+		);
+	}
+
+	.tnum {
+		font-family: var(--font-mono);
+		font-feature-settings: "tnum", "zero";
+		font-variant-numeric: tabular-nums;
+		letter-spacing: 0;
+	}
+
+	/* Oversized app-ledger figure for the 404 page — the tabular-numeral display role.
+	   Pairs with .tnum (which owns the mono/tabular treatment); this owns only the
+	   responsive display size, so the not-found numeral stays token-driven instead of
+	   an inline text-[9rem] arbitrary size. */
+	.numeral-404 {
+		font-size: 6rem;
+		line-height: 1;
+	}
+	@media (min-width: 768px) {
+		.numeral-404 {
+			font-size: 9rem;
+		}
+	}
+
+	/* Buttons */
+	.btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		height: 50px;
+		padding-inline: 22px;
+		border-radius: 13px;
+		font-weight: 560;
+		font-size: 15px;
+		letter-spacing: 0;
+		transition:
+			transform 0.18s var(--ease-out-soft),
+			box-shadow 0.25s var(--ease-out-soft),
+			background-color 0.2s ease,
+			border-color 0.2s ease;
+		cursor: pointer;
+		white-space: nowrap;
+	}
+	.btn:active {
+		transform: translateY(1px) scale(0.99);
+	}
+
+	.btn-primary {
+		background: linear-gradient(180deg, var(--color-cta) 0%, var(--color-cta-deep) 100%);
+		color: #fff7ec;
+		box-shadow:
+			0 1px 0 rgba(255, 255, 255, 0.35) inset,
+			0 10px 24px -10px rgba(192, 92, 24, 0.6);
+	}
+	.btn-primary:hover {
+		box-shadow:
+			0 1px 0 rgba(255, 255, 255, 0.35) inset,
+			0 14px 30px -10px rgba(192, 92, 24, 0.72);
+		transform: translateY(-1px);
+	}
+
+	.btn-ghost {
+		background: var(--color-card);
+		color: var(--color-ink);
+		border: 1px solid var(--color-line-strong);
+		box-shadow: var(--shadow-soft);
+	}
+	.btn-ghost:hover {
+		border-color: var(--color-ginger);
+		transform: translateY(-1px);
+	}
+
+	/* Cards */
+	.card {
+		background: var(--color-card);
+		border: 1px solid var(--color-line);
+		border-radius: var(--radius-card);
+		box-shadow: var(--shadow-card);
+	}
+
+	/* Hairline-ruled card grid: cells sit on a 1px `line` background with gap-px gutters, so the
+	   gutters read as thin rules and the outer border + clipped radius fuse them into one panel.
+	   Shared by the library link/alternatives/faq grids and the homepage notes/how-it-works strips;
+	   each caller adds only its own top margin + grid-template-columns. */
+	.hairline-grid {
+		display: grid;
+		gap: 1px;
+		overflow: hidden;
+		border-radius: 16px;
+		border: 1px solid var(--color-line);
+		background: var(--color-line);
+	}
+
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		height: 32px;
+		padding-inline: 12px;
+		border-radius: 999px;
+		background: color-mix(in oklab, var(--color-card) 70%, transparent);
+		border: 1px solid var(--color-line);
+		font-size: 13px;
+		color: var(--color-ink-soft);
+		backdrop-filter: blur(8px);
+	}
+
+	.section-y {
+		padding-block: 5rem;
+	}
+	@media (min-width: 768px) {
+		.section-y {
+			padding-block: 7rem;
+		}
+	}
+
+	.hero-title {
+		font-size: 2.45rem;
+		line-height: 1.04;
+		letter-spacing: 0;
+	}
+	@media (min-width: 768px) {
+		.hero-title {
+			font-size: 4.1rem;
+		}
+	}
+
+	.section-title {
+		font-size: 2rem;
+		line-height: 1.06;
+		letter-spacing: 0;
+	}
+	@media (min-width: 768px) {
+		.section-title {
+			font-size: 3rem;
+		}
+	}
+
+	.hero-lede {
+		margin-top: 1.25rem;
+		max-width: 43ch;
+		font-size: 17px;
+		line-height: 1.65;
+		color: var(--color-ink-soft);
+	}
+	@media (min-width: 768px) {
+		.hero-lede {
+			font-size: 18px;
+		}
+	}
+
+	.section-lede {
+		font-size: 17px;
+		line-height: 1.65;
+		color: var(--color-ink-soft);
+	}
+	.body-copy {
+		font-size: 15px;
+		line-height: 1.65;
+		color: var(--color-ink-soft);
+	}
+	.small-copy {
+		font-size: 14px;
+		line-height: 1.55;
+		color: var(--color-ink-soft);
+	}
+	/* Shared body size for the /library data-table family (value-benchmark, comparison,
+	   vendor-models, pricing) — same size as .small-copy but without its ink-soft color, since
+	   table cells set their own text color per row (highlight rows, price cells, etc). */
+	.table-copy {
+		font-size: 14px;
+		line-height: 1.55;
+	}
+	.micro-copy {
+		font-size: 13px;
+		line-height: 1.5;
+		color: var(--color-ink-soft);
+	}
+	.fine-print {
+		font-size: 12px;
+		line-height: 1.5;
+		color: var(--color-ink-faint);
+	}
+
+	/* Display-money "hero figure" roles — the single largest money figure on a marketing surface.
+	   Sizes stay token-owned (like the demo's `.demo-total`) so the homepage pricing hero and the
+	   pSEO calculator estimate read as one family instead of inline `text-[Npx]` values; the
+	   `tnum font-display` treatment stays a call-site utility (and `.tnum` already zeroes tracking). */
+	.money-hero {
+		font-size: 58px;
+		line-height: 1;
+		color: var(--color-ink);
+	}
+	@media (min-width: 640px) {
+		.money-hero {
+			font-size: 72px;
+		}
+	}
+	.money-figure {
+		font-size: 34px;
+		line-height: 1;
+		color: var(--color-ink);
+	}
+
+	/* Compact-interface type roles. Marketing prose uses the copy roles above;
+	   dialogs, forms, sticky bars, and dense utility controls use these roles so
+	   their 11-15px hierarchy cannot drift independently across components. */
+	.ui-title {
+		font-size: 14px;
+		line-height: 1.25;
+		font-weight: 600;
+		color: var(--color-ink);
+	}
+	.ui-copy {
+		font-size: 12px;
+		line-height: 1.4;
+		color: var(--color-ink-soft);
+	}
+	.ui-label {
+		font-size: 11px;
+		line-height: 1.35;
+		font-weight: 600;
+		color: var(--color-ink-soft);
+	}
+	.ui-control-copy {
+		font-size: 13px;
+		line-height: 1.4;
+	}
+	.ui-action-copy {
+		font-size: 12px;
+		line-height: 1;
+		font-weight: 600;
+	}
+	.dialog-title {
+		font-family: var(--font-display);
+		font-size: 28px;
+		line-height: 1.25;
+		color: var(--color-ink);
+	}
+	.ui-item-copy {
+		font-size: 12.5px;
+		line-height: 1.25;
+		font-weight: 500;
+		color: var(--color-ink);
+	}
+
+	/* Shared website geometry. Native app/demo pixels stay owned by their parity
+	   contract; these roles normalize the surrounding marketing and utility UI. */
+	.reading-shell {
+		max-width: var(--measure-reading);
+	}
+	.copy-measure {
+		max-width: var(--measure-copy);
+	}
+	.compact-radius {
+		border-radius: var(--radius-compact);
+	}
+	.form-measure {
+		max-width: 620px;
+	}
+	.prose-measure {
+		max-width: 78ch;
+	}
+	.dialog-panel {
+		margin: auto;
+		width: min(92vw, var(--measure-dialog-md));
+		border: 1px solid var(--color-line);
+		border-radius: var(--radius-dialog);
+		background: var(--color-card);
+		padding: 0;
+		color: var(--color-ink);
+		box-shadow: var(--shadow-pop);
+	}
+	.dialog-panel::backdrop {
+		background: var(--dialog-backdrop);
+	}
+	.dialog-panel-sm {
+		width: min(92vw, var(--measure-dialog-sm));
+	}
+	.dialog-panel-lg {
+		width: min(92vw, var(--measure-dialog-lg));
+	}
+	.dialog-surface {
+		position: relative;
+		overflow: hidden;
+		border-radius: var(--radius-dialog);
+		padding: 1rem;
+	}
+	.compact-field {
+		width: 100%;
+		border: 1px solid var(--color-line);
+		border-radius: var(--radius-control);
+		background: var(--color-paper);
+		padding: 0.375rem 0.5rem;
+		font-size: 13px;
+		line-height: 1.4;
+		color: var(--color-ink);
+		outline: none;
+	}
+	.compact-field:focus {
+		border-color: var(--color-ginger);
+	}
+	.compact-action {
+		border-radius: 999px;
+		padding: 0.375rem 0.75rem;
+		font-size: 12px;
+		line-height: 1;
+		font-weight: 600;
+		transition: 150ms ease;
+	}
+	.nav-copy {
+		font-size: 14px;
+		line-height: 1;
+	}
+	.card-title {
+		font-family: var(--font-display);
+		font-size: 20px;
+		line-height: 1.18;
+		letter-spacing: 0;
+		color: var(--color-ink);
+	}
+	/* Compact display heading for dense library cards (link-grid, alternatives-list)
+	   — same display serif + ink as .card-title, one step down in size so the size
+	   stays token-owned instead of an inline text-[15px] override. */
+	.card-title-sm {
+		font-family: var(--font-display);
+		font-size: 15px;
+		line-height: 1.2;
+		letter-spacing: 0;
+		color: var(--color-ink);
+	}
+	/* Shared "membership card" wordmark size — contact cards all
+	   lock the Wordmark to the same compact scale next to a small BrandMark. */
+	.card-wordmark {
+		white-space: nowrap;
+		font-size: 17px;
+	}
+	/* Shared "membership card" masthead line — the 15px ink emphasis slot below the status
+	   dot on the contact cards (holds the
+	   tagline). Owns only size + color so the three cards can't drift; each instance keeps its
+	   own font/tracking (font-display italic, tnum, etc.). */
+	.card-masthead {
+		font-size: 15px;
+		color: var(--color-ink);
+	}
+	/* JP's closing-note signature (Fraunces italic, ginger-deep). Size + margin stay
+	   contextual (bigger inside a membership card, smaller under a plain paragraph)
+	   so this only owns the three properties that must never drift independently. */
+	.jp-signature {
+		font-family: var(--font-display);
+		font-style: italic;
+		color: var(--color-ginger-deep);
+	}
+	.demo-eyebrow {
+		font-family: var(--font-mono);
+		font-size: 10px;
+		font-weight: 500;
+		letter-spacing: 0;
+		text-transform: uppercase;
+		color: var(--color-ginger-deep);
+	}
+	/* Compact app-label geometry, mirrored from LabelBadgeMetrics. Borders stay inside. */
+	.demo-badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+		height: 17px;
+		padding: 0 5px;
+		line-height: 13px;
+		white-space: nowrap;
+		flex-shrink: 0;
+	}
+	.demo-chip {
+		font-family: var(--font-mono);
+		font-size: 9px;
+		font-weight: 500;
+		letter-spacing: 0;
+		color: var(--color-ink-faint);
+	}
+	.demo-total {
+		font-size: 40px;
+		line-height: 1;
+		letter-spacing: 0;
+		color: var(--color-ink);
+	}
+	/* Split-flap money display — the web twin of the app's `SplitFlapMoney`: each glyph rides its
+	   own paper flap tile with a mechanical center seam + top highlight. Paper/line/ink all resolve
+	   through the demo root's theme vars, so the tiles re-tint 1:1 in Midnight Ledger. */
+	.flap-money {
+		display: inline-flex;
+		align-items: stretch;
+		gap: 3px;
+	}
+	.flap-tile {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 0.62em;
+		padding: 0.08em 0.05em;
+		background: var(--color-paper);
+		border-radius: 6px;
+		box-shadow: 0 1px 1px rgba(76, 52, 16, 0.08);
+		color: var(--color-ink);
+	}
+	.flap-tile--narrow {
+		min-width: 0.34em;
+	}
+	.flap-tile::before {
+		content: "";
+		position: absolute;
+		inset-inline: 0;
+		top: 50%;
+		height: 1px;
+		background: var(--color-line-strong);
+		opacity: 0.75;
+	}
+	.flap-tile::after {
+		content: "";
+		position: absolute;
+		inset-inline: 0;
+		top: 0;
+		height: 1px;
+		border-top-left-radius: 6px;
+		border-top-right-radius: 6px;
+		background: rgba(255, 255, 255, 0.5);
+	}
+	.demo-value {
+		font-size: 13px;
+		font-weight: 500;
+		color: var(--color-ink);
+	}
+	.demo-value-lg {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--color-ink);
+	}
+	.demo-label {
+		font-size: 12px;
+		color: var(--color-ink-soft);
+	}
+	.demo-caption {
+		font-size: 11px;
+		color: var(--color-ink-faint);
+	}
+	.demo-micro {
+		font-size: 10px;
+		color: var(--color-ink-faint);
+	}
+
+	/* Accounting-paper hairlines: a faint ledger ruling behind a section */
+	.ledger {
+		background-image: repeating-linear-gradient(
+			to bottom,
+			transparent 0,
+			transparent 31px,
+			color-mix(in oklab, var(--color-line) 55%, transparent) 31px,
+			color-mix(in oklab, var(--color-line) 55%, transparent) 32px
+		);
+	}
+
+	/* Legal-page 3D diorama stage height — kept as a token (base + svh clamp) rather than an inline
+	   component clamp(), so the one responsive-height value the legal scene uses stays with the rest
+	   of the sizing roles. */
+	.scene-stage {
+		height: clamp(380px, 60svh, 680px);
+	}
+
+	.grain::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		opacity: 0.4;
+		mix-blend-mode: multiply;
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+	}
+
+}
+
+/* -----------------------------------------------------------------------------
+   Keyframes — mascot + atmosphere
+   ----------------------------------------------------------------------------- */
+@keyframes jp-blink {
+	0%,
+	92%,
+	100% {
+		transform: scaleY(1);
+	}
+	95%,
+	97% {
+		transform: scaleY(0.08);
+	}
+}
+@keyframes jp-tail {
+	0%,
+	100% {
+		transform: rotate(0deg);
+	}
+	50% {
+		transform: rotate(-9deg);
+	}
+}
+@keyframes jp-breathe {
+	0%,
+	100% {
+		transform: translateY(0) scale(1);
+	}
+	50% {
+		transform: translateY(-2px) scale(1.006);
+	}
+}
+@keyframes float-soft {
+	0%,
+	100% {
+		transform: translateY(0) rotate(-0.4deg);
+	}
+	50% {
+		transform: translateY(-10px) rotate(0.4deg);
+	}
+}
+@keyframes marquee {
+	from {
+		transform: translateX(0);
+	}
+	to {
+		transform: translateX(-50%);
+	}
+}
+@keyframes rise-in {
+	from {
+		opacity: 0;
+		transform: translateY(18px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Product-demo card: crossfade between the dashboard and settings faces (mirrors the
+   app's 0.12s opacity transition), and the header's animated basis-label ticker band
+   (mirrors the app's TickerTapeText). The ticker track duplicates its content so a
+   -50% translate loops seamlessly. */
+@keyframes demo-fade {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+.demo-face-enter {
+	animation: demo-fade 150ms ease both;
+}
+/* Upgrade-celebration confetti (mirrors the app). One shower, top→bottom, then fades. */
+@keyframes demo-confetti-fall {
+	0% {
+		transform: translateY(-24px) rotate(0deg);
+		opacity: 1;
+	}
+	100% {
+		transform: translateY(340px) rotate(var(--confetti-spin, 360deg));
+		opacity: 0;
+	}
+}
+.demo-confetti-piece {
+	position: absolute;
+	top: 0;
+	border-radius: 1.5px;
+	animation: demo-confetti-fall var(--confetti-dur, 1.4s) ease-in var(--confetti-delay, 0s) forwards;
+	will-change: transform, opacity;
+}
+.demo-ticker {
+	animation: marquee 13s linear infinite;
+	will-change: transform;
+}
+
+/* Scroll reveal (toggled by IntersectionObserver). Content stays visible by
+   default so no-JS, full-page QA screenshots, and observer failures never leave
+   homepage sections blank. */
+.reveal {
+	opacity: 1;
+	transform: none;
+	transition:
+		opacity 0.7s var(--ease-out-soft),
+		transform 0.7s var(--ease-out-soft);
+	transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal.in {
+	opacity: 1;
+	transform: none;
+}
+
+/* Staggered entrance primitive — set --rise-delay inline for the stagger.
+   Replaces repeated inline `style={{ animation: "rise-in ..." }}`. */
+.rise-in {
+	animation: rise-in 0.7s var(--ease-out-soft) var(--rise-delay, 0ms) both;
+}
+
+.animate-marquee {
+	--marquee-duration: 180s;
+	animation: marquee var(--marquee-duration) linear infinite;
+	will-change: transform;
+}
+@media (max-width: 640px) {
+	.animate-marquee {
+		--marquee-duration: 88s;
+	}
+}
+.animate-float {
+	animation: float-soft 7s ease-in-out infinite;
+}
+/* Grounding shadow for the floating demo, synced 1:1 with float-soft (same 7s ease-in-out):
+   settled (0/100%, card down) → tighter + darker; lifted (50%, card up) → larger, deeper, softer.
+   The base box-shadow is the settled state so reduced-motion (animation neutralized) keeps a strong
+   static shadow. */
+.animate-float-shadow {
+	box-shadow:
+		0 3px 8px rgba(60, 40, 12, 0.12),
+		0 18px 30px -16px rgba(70, 46, 14, 0.56),
+		0 34px 56px -30px rgba(70, 46, 14, 0.4);
+	animation: float-shadow 7s ease-in-out infinite;
+	will-change: box-shadow;
+}
+@keyframes float-shadow {
+	0%,
+	100% {
+		box-shadow:
+			0 3px 8px rgba(60, 40, 12, 0.12),
+			0 18px 30px -16px rgba(70, 46, 14, 0.56),
+			0 34px 56px -30px rgba(70, 46, 14, 0.4);
+	}
+	50% {
+		box-shadow:
+			0 6px 14px rgba(60, 40, 12, 0.08),
+			0 38px 64px -24px rgba(70, 46, 14, 0.46),
+			0 84px 130px -38px rgba(70, 46, 14, 0.62);
+	}
+}
+
+/* Honor prefers-reduced-motion (AGENTS.md: "no autoplaying looping motion for
+   reduced-motion users"). A universal reset neutralizes every looping/entrance
+   animation — marquee, float, float-shadow, rise-in, reveal, and any future
+   motion — in one place. The float-shadow base box-shadow is already the settled
+   state, so stopping the animation leaves a correct static shadow, and reveal
+   content is forced visible in case its observer never fires. */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation: none !important;
+		transition-duration: 0.01ms !important;
+	}
+	.reveal {
+		opacity: 1;
+		transform: none;
+	}
+	/* Confetti is pure motion — hide it entirely rather than leaving static dots parked at the top. */
+	.demo-confetti-piece {
+		display: none;
+	}
+}

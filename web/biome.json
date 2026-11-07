@@ -1,0 +1,67 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
+	"vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+	"files": {
+		"ignoreUnknown": true,
+		"includes": [
+			"app/**",
+			"components/**",
+			"emails/**",
+			"lib/**",
+			"tests/**",
+			"scripts/**",
+			"proxy.ts",
+			"*.ts",
+			"*.tsx",
+			"*.mjs",
+			"*.json",
+			"!**/*.svg",
+			"!**/*.css"
+		]
+	},
+	"formatter": { "enabled": true, "indentStyle": "tab", "lineWidth": 100 },
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "recommended",
+			"correctness": {
+				"noUnusedVariables": "error",
+				"noUnusedImports": "error"
+			},
+			"suspicious": {
+				"noExplicitAny": "error",
+				"noArrayIndexKey": "off",
+				"noConsole": "warn"
+			},
+			"complexity": {
+				"noImportantStyles": "off",
+				"noExcessiveCognitiveComplexity": {
+					"level": "error",
+					"options": { "maxAllowedComplexity": 15 }
+				}
+			},
+			"style": {
+				"useConst": "error",
+				"useImportType": "error",
+				"useTemplate": "error",
+				"noNonNullAssertion": "off"
+			},
+			"a11y": {
+				"useKeyWithClickEvents": "off"
+			}
+		}
+	},
+	"javascript": {
+		"formatter": { "quoteStyle": "double", "jsxQuoteStyle": "double" }
+	},
+	"overrides": [
+		{
+			"includes": ["scripts/**"],
+			"linter": {
+				"rules": {
+					"suspicious": { "noConsole": "off" }
+				}
+			}
+		}
+	]
+}

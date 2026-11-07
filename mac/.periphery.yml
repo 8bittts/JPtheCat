@@ -1,0 +1,12 @@
+# Periphery config for JP the Cat's SwiftPM macOS package.
+# Run from this directory with:
+#   periphery scan
+#
+# There is no Xcode project in this package. Leave project/schemes unset so
+# Periphery uses SwiftPM (`swift build`) rather than xcodebuild.
+retain_public: true
+retain_objc_accessible: true
+retain_unused_protocol_func_params: true
+retain_assign_only_properties: true
+report_exclude:
+  - Sources/**/Resources/**

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <!-- White N glyph for NVIDIA Nemotron (sits on green brand chip). -->
+  <path fill="currentColor" d="M5 19V5h2.6l6.8 10.2V5H19v14h-2.6L9.6 8.8V19H5z"/>
+</svg>

@@ -1,0 +1,82 @@
+name: CI
+
+# This repo is PRIVATE, so macOS minutes bill at 10x (the SwiftPM job is ~30 billable min/push while
+# the Linux jobs are ~1 each). Running on every push to every branch is what exhausted the Actions
+# spending limit and got this workflow disabled for a month. Gating on `main` plus pull requests
+# keeps a gate at every merge without paying for each intermediate branch push.
+# Do NOT instead add per-job `paths` filters: a web-only edit to menubar-demo.tsx breaks a MAC test
+# (AppDemoParityGuardTests runs verify-app-demo-parity.sh) and a mac-only edit to Theme.swift breaks
+# a WEB test (demo-theme-catalog.test.ts), so filtering by surface silently drops parity coverage.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mac:
+    name: SwiftPM
+    # Must match the local toolchain: Swift 6.3.3, target arm64-apple-macosx26.0. macos-15's default
+    # toolchain is older and rejects the `isolated deinit` in DashboardViewModel outright, which is
+    # why every run failed before. Do NOT "fix" a runner mismatch by adding
+    # -enable-experimental-feature to Package.swift — that weakens the shipped build settings to suit
+    # the CI image. The `swift --version` step below is the check: it must report 6.3.x.
+    runs-on: macos-26
+    defaults:
+      run:
+        working-directory: mac
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Show toolchain
+        run: swift --version
+
+      - name: Cache SwiftPM
+        uses: actions/cache@v5
+        with:
+          path: |
+            mac/.build
+            ~/Library/Caches/org.swift.swiftpm
+          key: ${{ runner.os }}-swiftpm-${{ hashFiles('mac/Package.swift', 'mac/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-swiftpm-
+
+      - name: Build
+        run: swift build
+
+      - name: Test
+        run: swift test --parallel
+
+  # Vercel's build runs only `next build` — not bun test, knip, or react-doctor — so without this job
+  # a failing test or a doctor regression ships to production while Vercel still reports READY.
+  # web/AGENTS.md marks that trap [CRITICAL]; it already shipped a WCAG failure once.
+  web:
+    name: Web quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          # Reads the pinned `packageManager` field rather than floating to latest.
+          bun-version-file: web/package.json
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # check -> test -> knip -> doctor (must be 100/100) -> build, in that order.
+      # Runs without any secrets on purpose: the suite must stay green from a clean checkout, so a
+      # test that silently needs a developer's .env.local fails here instead of passing only locally.
+      - name: Quality gate
+        run: bun run quality
