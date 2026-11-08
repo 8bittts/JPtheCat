@@ -590,7 +590,9 @@ function LiveDataSection({
 				providerMark={{ icon: PROVIDERS.claude.icon, color: PROVIDERS.claude.color }}
 				title="Claude Code"
 				subtitle={
-					claudeEnabled ? "In totals, widgets & alerts" : "Hidden from dashboard, widget & alerts"
+					claudeEnabled
+						? "Real spend · in totals, widgets & alerts"
+						: "Hidden from dashboard, widgets & alerts"
 				}
 				on={claudeEnabled}
 				onToggle={() => setClaudeEnabled((v) => !v)}
@@ -601,8 +603,8 @@ function LiveDataSection({
 				title={claudeLimits ? "Claude live limits · on" : "Enable Claude live limits"}
 				subtitle={
 					claudeLimits
-						? "Show official 5h + weekly stats"
-						: "Show your real session/weekly % (edits your statusline)"
+						? "Official 5-hour & weekly % · statusline feed"
+						: "Shows official 5-hour & weekly % · edits your statusline"
 				}
 				on={claudeLimits}
 				onToggle={() => setClaudeLimits((v) => !v)}
@@ -612,7 +614,9 @@ function LiveDataSection({
 				providerMark={{ icon: PROVIDERS.codex.icon, color: PROVIDERS.codex.color }}
 				title="Codex"
 				subtitle={
-					codexEnabled ? "In totals, widgets & alerts" : "Hidden from dashboard, widget & alerts"
+					codexEnabled
+						? "Notional list price · in totals, widgets & alerts"
+						: "Hidden from dashboard, widgets & alerts"
 				}
 				on={codexEnabled}
 				onToggle={() => setCodexEnabled((v) => !v)}
@@ -625,8 +629,8 @@ function LiveDataSection({
 				title="Grok"
 				subtitle={
 					grokEnabled
-						? "In totals & widgets · notional list price"
-						: "Hidden from dashboard, widget & alerts"
+						? "Build, Cursor & Grok Bot · notional list price · in totals, widgets & alerts"
+						: "Hidden from dashboard, widgets & alerts"
 				}
 				on={grokEnabled}
 				onToggle={() => setGrokEnabled((v) => !v)}
@@ -638,8 +642,8 @@ function LiveDataSection({
 				title={grokLimits ? "Grok live limits · on" : "Enable Grok live limits"}
 				subtitle={
 					grokLimits
-						? "Show official SuperGrok weekly %"
-						: "Show your real SuperGrok weekly % (adds a Grok hook)"
+						? "Official SuperGrok weekly % · Grok Build log"
+						: "Shows official SuperGrok weekly % · adds a Grok hook"
 				}
 				on={grokLimits}
 				onToggle={() => setGrokLimits((v) => !v)}
@@ -652,8 +656,8 @@ function LiveDataSection({
 				title="Muse Spark"
 				subtitle={
 					museSparkEnabled
-						? "OpenCode on this Mac · notional list price"
-						: "Hidden from dashboard, widget & alerts"
+						? "OpenCode on this Mac · notional list price · in totals & widgets"
+						: "Hidden from dashboard & widgets"
 				}
 				on={museSparkEnabled}
 				onToggle={() => setMuseSparkEnabled((v) => !v)}
@@ -662,7 +666,11 @@ function LiveDataSection({
 				icon="code"
 				providerMark={{ icon: PROVIDERS.cursor.icon, color: PROVIDERS.cursor.color }}
 				title={cursorHook ? "Cursor CLI live data · on" : "Enable Cursor CLI live data"}
-				subtitle={cursorHook ? "On dashboard, not in totals" : "Adds a token-only dashboard row"}
+				subtitle={
+					cursorHook
+						? "Feeds the Grok row at notional list price"
+						: "Adds a Cursor stop hook · agent turns feed the Grok row"
+				}
 				on={cursorHook}
 				onToggle={() => setCursorHook((v) => !v)}
 			/>
@@ -672,8 +680,8 @@ function LiveDataSection({
 				title="OpenCode Go"
 				subtitle={
 					openCodeGoEnabled
-						? "Gateway view, not in totals · 5-hour & weekly usage vs cap"
-						: "Hidden from dashboard & alerts"
+						? "Gateway view · not in totals or alerts · measured 5-hour & weekly usage vs Go's caps"
+						: "Go section hidden from the OpenCode row & widget"
 				}
 				on={openCodeGoEnabled}
 				onToggle={() => setOpenCodeGoEnabled((v) => !v)}

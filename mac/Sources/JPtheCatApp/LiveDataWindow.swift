@@ -14,12 +14,18 @@ import SwiftUI
 @MainActor
 final class LiveDataWindowController: TrayChildWindowController {
   private let model: DashboardViewModel
+  /// Test-only fixture: pins which detection-gated rows render so `LiveDataWindowLayoutTests` can
+  /// measure the maximum and minimum row sets. Production passes `nil` and the content probes real
+  /// local presence (`LiveDataWindowContent.Detection.probe()`).
+  private let detection: LiveDataWindowContent.Detection?
 
   init(
     model: DashboardViewModel, dashboardChrome: DashboardChromeState,
-    notificationCenter: NotificationCenter = .default
+    notificationCenter: NotificationCenter = .default,
+    detection: LiveDataWindowContent.Detection? = nil
   ) {
     self.model = model
+    self.detection = detection
     super.init(
       dashboardChrome: dashboardChrome,
       notificationCenter: notificationCenter,
@@ -36,6 +42,6 @@ final class LiveDataWindowController: TrayChildWindowController {
   }
 
   override func makeRootView() -> AnyView {
-    AnyView(LiveDataWindowContent(model: model))
+    AnyView(LiveDataWindowContent(model: model, detection: detection))
   }
 }

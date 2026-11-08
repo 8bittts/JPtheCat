@@ -124,6 +124,9 @@ enum JPAppSpacing {
   // intrinsic (the hosting controller uses `.preferredContentSize`), so the window fits its content
   // exactly with no dead space and grows a row taller as providers are added.
   static let liveDataWindowW: CGFloat = 420
+  static let liveDataChildIndent: CGFloat = 14  // extra leading inset on a provider's dependent opt-in rows
+  static let liveDataSwitchSlotWidth: CGFloat = 44  // switch-only rows: the switch (38) + breathing room, no chevron slot
+  static let liveDataRowY: CGFloat = 6  // fifteen-row list: tighter than settingsRowY so every row still fits on a 13" display
 
   // The dedicated "Themes" window (`ThemesWindowController`). Fixed width for a 2-column, larger,
   // readable theme grid; height is intrinsic (`fittingSize`) over the deterministic `JPTheme.all`

@@ -75,6 +75,7 @@ final class ProviderOptInRowTests: XCTestCase {
 			("grok", SettingsBackView.grokLiveLimits),
 			("copilot", SettingsBackView.copilotLiveData),
 			("cursor", SettingsBackView.cursorLiveData),
+			("grokPlan", SettingsBackView.grokPlanUsage),
 		]
 		for (name, descriptor) in descriptors {
 			let titles = [
@@ -180,25 +181,38 @@ final class ProviderOptInRowTests: XCTestCase {
 	func testLiveDataWindowGatesEveryProviderRowOnLocalDetection() throws {
 		let content = try AppSourceScanner.body(of: "struct LiveDataWindowContent")
 
-		for gate in ["if grokBuildDetected {", "if museSparkDetected {", "if copilotCLIDetected {", "if cursorCLIDetected {", "if cursorSignInSourceDetected || grokBotDetected {", "if grokBuildDetected || grokBotDetected || cursorSignInSourceDetected || cursorCLIDetected {"] {
+		for gate in [
+			"if detection.grok {", "if detection.grokBuild {", "if detection.cursorCLI {",
+			"if detection.cursorSignInSource || detection.grokBot {", "if detection.museSpark {",
+			"if detection.openCode.zen {", "if detection.openCode.go {", "if detection.copilotCLI {",
+		] {
 			XCTAssertTrue(content.contains(gate), "missing detection gate: \(gate)")
 		}
+		// `Detection.probe()` is the ONLY production constructor, and every field reads a real detector.
 		for probe in [
-			"copilotCLIDetected = CopilotOtelSetup.isCopilotCLIDetected()",
-			"cursorCLIDetected = CursorHookSetup.isCursorCLIDetected()",
-			"cursorSignInSourceDetected = CursorAuthToken.isSourcePresent()",
-			"grokBuildDetected = GrokProvider.isGrokBuildDetected()",
-			"grokBotDetected = GrokBotProvider.isGrokBotDetected()",
+			"detection.copilotCLI = CopilotOtelSetup.isCopilotCLIDetected()",
+			"detection.cursorCLI = CursorHookSetup.isCursorCLIDetected()",
+			"detection.cursorSignInSource = CursorAuthToken.isSourcePresent()",
+			"detection.grokBuild = GrokProvider.isGrokBuildDetected()",
+			"detection.grokBot = GrokBotProvider.isGrokBotDetected()",
+			"detection.openCode = OpenCodeDetection.current(root: OpenCodeStorePaths.defaultRoot())",
+			"detection.museSpark = MuseSparkProvider().isAvailable()",
 		] {
-			XCTAssertTrue(content.contains(probe), "detection must be re-probed on appear: \(probe)")
+			XCTAssertTrue(content.contains(probe), "detection must read a real local probe: \(probe)")
 		}
+		// Re-probed on appear in production; a fixture (tests only) pins it and skips the re-probe.
+		XCTAssertTrue(content.contains("guard fixedDetection == nil else { return }"))
+		XCTAssertTrue(content.contains("detection = Detection.probe()"))
+		// The all-rows fixture exists for layout tests and is never referenced by app code.
+		XCTAssertEqual(try AppSourceScanner.occurrences(of: "Detection.everything"), 0)
+		XCTAssertEqual(try AppSourceScanner.occurrences(of: ".everything)"), 0)
 
 		// Each gated provider's row must sit AFTER its gate opens.
 		for (gate, descriptor) in [
-			("if grokBuildDetected {", "SettingsBackView.grokLiveLimits"),
-			("if copilotCLIDetected {", "SettingsBackView.copilotLiveData"),
-			("if cursorCLIDetected {", "SettingsBackView.cursorLiveData"),
-			("if cursorSignInSourceDetected || grokBotDetected {", "SettingsBackView.grokPlanUsage"),
+			("if detection.grokBuild {", "SettingsBackView.grokLiveLimits"),
+			("if detection.copilotCLI {", "SettingsBackView.copilotLiveData"),
+			("if detection.cursorCLI {", "SettingsBackView.cursorLiveData"),
+			("if detection.cursorSignInSource || detection.grokBot {", "SettingsBackView.grokPlanUsage"),
 		] {
 			let gateIndex = try XCTUnwrap(content.range(of: gate)?.lowerBound)
 			let rowIndex = try XCTUnwrap(content.range(of: descriptor)?.lowerBound)
@@ -207,5 +221,94 @@ final class ProviderOptInRowTests: XCTestCase {
 
 		// Exactly five opt-in rows, all rendered by the one shared view.
 		XCTAssertEqual(try AppSourceScanner.occurrences(of: "ProviderOptInRow(model: model"), 5)
+	}
+
+	// MARK: - Copy honesty (audited against the accounting code, not marketing text)
+
+	/// Cursor is consolidated into the ONE public Grok row (`ProviderID.consolidated`;
+	/// `DashboardViewModel` merges `cursor.loadEvents()` into Grok's rollup) and Grok is
+	/// `ProviderBasis.notional`, so priced Cursor turns DO reach the dollar aggregate. The row shipped
+	/// "On dashboard, not in totals" / "Adds a token-only dashboard row" — both false since the
+	/// consolidation — and this pins the corrected claim on the subtitle AND the install alert.
+	func testCursorCopyNamesTheGrokRowAndNeverClaimsExclusionFromTotals() {
+		XCTAssertEqual(ProviderID.cursor.consolidated, .grok)
+		XCTAssertTrue(ProviderBasis.of(.grok).isAggregable)
+		for state in [ProviderOptInState.active, .installable] {
+			let subtitle = SettingsBackView.cursorLiveData.subtitle(state, false)
+			XCTAssertTrue(subtitle.contains("Grok row"), "Cursor copy must say where its turns land: \(subtitle)")
+			XCTAssertFalse(subtitle.lowercased().contains("not in totals"), subtitle)
+			XCTAssertFalse(subtitle.lowercased().contains("token-only"), subtitle)
+			XCTAssertFalse(subtitle.lowercased().contains("own "), subtitle)
+		}
+		XCTAssertTrue(SettingsBackView.cursorLiveData.subtitle(.active, false).contains("notional list price"))
+		let alert = SettingsBackView.cursorLiveData.installAlert.message
+		XCTAssertTrue(alert.contains("inside the Grok row"))
+		XCTAssertFalse(alert.contains("never added to dollar totals"))
+	}
+
+	/// Copilot is `ProviderBasis.estimate`: its own dashboard row and widget entry, never a dollar total
+	/// or an alert. The copy must carry the basis AND the exclusion in both switch states.
+	func testCopilotCopyCarriesTokenEstimateBasisAndTotalsExclusion() {
+		XCTAssertEqual(ProviderBasis.of(.copilot), .estimate)
+		XCTAssertFalse(ProviderBasis.of(.copilot).isAggregable)
+		for state in [ProviderOptInState.active, .installable] {
+			let subtitle = SettingsBackView.copilotLiveData.subtitle(state, false).lowercased()
+			XCTAssertTrue(subtitle.contains("token estimate"), subtitle)
+			XCTAssertTrue(subtitle.contains("not in totals"), subtitle)
+			XCTAssertTrue(subtitle.contains("totals"), subtitle)
+		}
+	}
+
+	/// Grok plan usage: the official weekly pool drives the gauge; with no weekly pool a billing-cycle
+	/// meter is shown and named as such (never a fabricated 5-hour/weekly window). Three distinct
+	/// subtitles, like every other descriptor, and the off state says what enabling fetches and with what.
+	func testGrokPlanUsageNamesItsWindowsAndSignInSource() {
+		let descriptor = SettingsBackView.grokPlanUsage
+		let active = descriptor.subtitle(.active, false)
+		XCTAssertTrue(active.contains("weekly pool"), active)
+		XCTAssertTrue(active.contains("billing-cycle"), active)
+		XCTAssertFalse(active.contains("5-hour"), "plan usage never exposes a 5-hour window: \(active)")
+		let installable = descriptor.subtitle(.installable, false)
+		XCTAssertTrue(installable.contains("sign-in"), installable)
+		XCTAssertEqual(
+			Set([active, installable, descriptor.subtitle(.unavailable, false)]).count, 3,
+			"grok plan usage must subtitle all three states distinctly")
+		XCTAssertTrue(descriptor.title(.installable, false).hasPrefix("Enable "))
+	}
+
+	/// The two capture opt-ins name the official window they unlock and what they install.
+	func testLiveLimitCopyNamesTheOfficialWindowAndTheInstalledArtifact() {
+		let claude = SettingsBackView.claudeLiveLimits
+		XCTAssertTrue(claude.subtitle(.active, true).contains("5-hour & weekly"))
+		XCTAssertTrue(claude.subtitle(.installable, false).contains("statusline"))
+		let grok = SettingsBackView.grokLiveLimits
+		XCTAssertTrue(grok.subtitle(.active, true).contains("weekly"))
+		XCTAssertFalse(grok.subtitle(.active, true).contains("5-hour"), "Grok Build publishes no 5-hour window")
+		XCTAssertTrue(grok.subtitle(.installable, false).contains("hook"))
+	}
+
+	/// Enable-row copy in `LiveDataWindowContent`, checked against the basis table: Claude is the only
+	/// `.real` row; gateways are shown but never summed; brand rows carry no official window, so they
+	/// must not promise alerts. Source-scoped because the strings are literals inside the view body.
+	func testEnableRowCopyMatchesEachProviderBasis() throws {
+		let content = try AppSourceScanner.body(of: "struct LiveDataWindowContent")
+		XCTAssertEqual(ProviderBasis.of(.claude), .real)
+		XCTAssertTrue(content.contains(#""Real spend · in totals, widgets & alerts""#))
+		XCTAssertEqual(ProviderBasis.of(.codex), .notional)
+		XCTAssertTrue(content.contains(#"enabled: "Notional list price · in totals, widgets & alerts""#))
+		XCTAssertEqual(ProviderBasis.of(.opencode), .gateway)
+		XCTAssertEqual(ProviderBasis.of(.opencodego), .gateway)
+		XCTAssertEqual(try AppSourceScanner.occurrences(of: #"enabled: "Gateway view · not in totals or alerts · "#), 2)
+		XCTAssertFalse(content.contains("excluded from combined totals"), "redundant gateway wording was removed")
+		XCTAssertFalse(content.contains("Gateway view, not in totals"), "redundant gateway wording was removed")
+		// Brand rows: summed and in the widget, but no official window → no alert ever fires.
+		for row in SettingsBackView.brandRows {
+			XCTAssertTrue(ProviderCatalog.localAccountingIDs.contains(row.brand.id))
+			XCTAssertFalse(row.subtitle.contains("alerts"), row.subtitle)
+			XCTAssertTrue(row.subtitle.contains("widgets"), row.subtitle)
+			XCTAssertTrue(row.subtitle.hasPrefix("OpenCode on this Mac · "), row.subtitle)
+		}
+		// Every enable row has a disabled line; the aggregable default names all three surfaces.
+		XCTAssertTrue(content.contains(#"disabled: String = "Hidden from dashboard, widgets & alerts""#))
 	}
 }

@@ -126,7 +126,13 @@ Four deliberate divergences from the analytics window — do not "fix" them back
 - **It must become key** (`makeKeyAndOrderFront`), because AppKit renders switches desaturated gray in a non-key window.
 - **Height is intrinsic, width fixed** (`liveDataWindowW`): measure `fittingSize` after `layoutSubtreeIfNeeded()` and `setContentSize` BEFORE anchoring; never `.preferredContentSize`, a fixed height, or a `ScrollView`.
 - **No section eyebrow inside**; the chrome title already says "Live data".
-- **Rows are grouped by provider**, each enable row followed by its live-limit row, each with the real brand-mark chip through `SettingsToggleRow`/`AnalyticsProviderMark`; detection-gated rows stay hidden until the tool is present.
+- **Rows are grouped by provider in ONE well**: each enable row is followed by its dependent opt-in rows, inset by `JPAppSpacing.liveDataChildIndent`, with a `LiveDataGroupDivider` hairline between providers and none inside a group; every row carries the real brand-mark chip through `SettingsToggleRow`/`AnalyticsProviderMark`, and detection-gated rows stay hidden until the tool is present.
+
+**Subtitles wrap, never ellipsize** (`SettingsToggleRow(layout: .liveData)` plus `fixedSize(horizontal: false, vertical: true)`), because the wrapped height is what `fittingSize` measures; that layout also uses the switch-width slot (`liveDataSwitchSlotWidth`) and tighter `liveDataRowY` so fifteen rows fit a 13" display, while the one-line, shrink-to-80% default stays on the Settings face, whose intrinsic height `DashboardSizingTests` pins.
+Each subtitle states the row's accounting in order: basis (real spend, notional list price, token estimate, or gateway view), the surfaces it reaches (totals, widgets, alerts), and for an opt-in what the switch installs and which official window (5-hour, weekly, billing-cycle, or measured-against-cap) it unlocks; the disabled line names every surface the provider leaves.
+Cursor CLI live data feeds the one Grok row at notional list price (`ProviderID.consolidated`), so its copy never says "its own row" or "not in totals"; the OpenCode gateways share one `OpenCode` dashboard row and a `gateway`-badged widget entry and are never summed.
+Detection is one `LiveDataWindowContent.Detection` value: production builds it only through `probe()` and re-probes on appear; `init(model:detection:)` lets a test pin `.everything` or an empty value without weakening a gate.
+Guards: `LiveDataWindowLayoutTests` (wrap, last-row fit, gating under fixtures), `ProviderOptInRowTests`, `SettingsCopyTests`.
 
 `LiveDataWindowContent` lives in `SettingsBackView.swift` so it can reuse the private rows, and observes `ThemeManager`.
 Turning a provider off removes it from the dashboard entirely, not a zeroed row.

@@ -143,7 +143,7 @@ export function ToggleRow({
 			)}
 			<span className="min-w-0 flex-1">
 				<span className="block font-semibold text-[13px] text-ink">{title}</span>
-				{subtitle ? <span className="demo-caption block truncate">{subtitle}</span> : null}
+				{subtitle ? <span className="demo-caption block">{subtitle}</span> : null}
 			</span>
 			<Switch on={on} label={title} onToggle={onToggle} />
 		</div>
@@ -176,7 +176,7 @@ export function CycleRow({
 			</span>
 			<span className="min-w-0 flex-1">
 				<span className="block font-semibold text-[13px] text-ink">{title}</span>
-				<span className="demo-caption block truncate">{subtitle}</span>
+				<span className="demo-caption block">{subtitle}</span>
 			</span>
 			<Icon name="chevron" className="h-[13px] w-[13px] shrink-0 text-ink-faint" />
 		</button>

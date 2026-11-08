@@ -608,6 +608,9 @@ extension ProviderOptInDescriptor: Sendable {}
 private struct ProviderOptInRow: View {
   var model: DashboardViewModel
   let descriptor: ProviderOptInDescriptor
+  /// A dependent row under its provider's enable row (Claude/Grok live limits, Cursor live data,
+  /// Grok plan usage) is inset; Copilot's row is the only Copilot row, so it stays flush.
+  var indented: Bool = true
   @State private var state: ProviderOptInState = .unavailable
   @State private var captureIsFresh = false
 
@@ -617,6 +620,8 @@ private struct ProviderOptInRow: View {
       title: descriptor.title(state, captureIsFresh),
       subtitle: descriptor.subtitle(state, captureIsFresh),
       providerMark: descriptor.providerMark,
+      layout: .liveData,
+      indented: indented,
       isOn: Binding(
         get: { isInstalled },
         set: { requested in toggled(to: requested) }
@@ -700,14 +705,15 @@ extension SettingsBackView {
       case .unavailable: return "Claude live limits · manual setup"
       }
     },
+    // Capture age never gates the gauge (`ClaudeRateLimitStore`); it only picks the "finishing setup" line.
     subtitle: { state, captureIsFresh in
       switch state {
       case .active:
         return captureIsFresh
-          ? "Show official 5h + weekly stats"
-          : "Installed — run Claude Code once to start the feed"
-      case .installable: return "Show your real session/weekly % (edits your statusline)"
-      case .unavailable: return "No statusline to hook — see setup docs"
+          ? "Official 5-hour & weekly % · statusline feed"
+          : "Installed · run Claude Code once to start"
+      case .installable: return "Shows official 5-hour & weekly % · edits your statusline"
+      case .unavailable: return "No statusline script to hook · see setup docs"
       }
     },
     installAlert: ProviderOptInAlert(
@@ -758,11 +764,16 @@ extension SettingsBackView {
     let subtitle: String
   }
 
+  /// Local accounting rows (`ProviderCatalog.localAccountingIDs`): summed into the dollar aggregate and
+  /// listed in the widget, never marketed. They carry no official window, so alerts never fire for them
+  /// (`UsageAlertCenter.alertableWindows` needs a 5-hour/weekly %), which is why the copy says
+  /// "totals & widgets" and not "alerts". Big Pickle is OpenCode's free house model (0/0 in
+  /// `pricing-default.json`), so it is always fully unpriced and shows tokens.
   static let brandRows: [BrandRow] = [
-    BrandRow(brand: .nemotron, icon: "cpu", subtitle: "OpenCode on this Mac · list price when priced, tokens when free"),
-    BrandRow(brand: .mimo, icon: "brain", subtitle: "OpenCode on this Mac · list price when priced, tokens when free"),
-    BrandRow(brand: .bigPickle, icon: "leaf", subtitle: "OpenCode on this Mac · free smoke-test model"),
-    BrandRow(brand: .deepseek, icon: "sparkle", subtitle: "OpenCode on this Mac · list price when priced, tokens when free"),
+    BrandRow(brand: .nemotron, icon: "cpu", subtitle: "OpenCode on this Mac · list price when priced, else tokens · in totals & widgets"),
+    BrandRow(brand: .mimo, icon: "brain", subtitle: "OpenCode on this Mac · list price when priced, else tokens · in totals & widgets"),
+    BrandRow(brand: .bigPickle, icon: "leaf", subtitle: "OpenCode on this Mac · free house model, tokens only · in widgets"),
+    BrandRow(brand: .deepseek, icon: "sparkle", subtitle: "OpenCode on this Mac · list price when priced, else tokens · in totals & widgets"),
   ]
 
   static let grokLiveLimits = ProviderOptInDescriptor(
@@ -776,13 +787,14 @@ extension SettingsBackView {
       case .unavailable: return "Grok live limits · unavailable"
       }
     },
+    // The API weekly pool from Grok plan usage wins over this hook capture (`_docs/03-data.md`).
     subtitle: { state, captureIsFresh in
       switch state {
       case .active:
         return captureIsFresh
-          ? "Show official SuperGrok weekly %"
-          : "Installed — use Grok Build once to start the feed"
-      case .installable: return "Show your real SuperGrok weekly % (adds a Grok hook)"
+          ? "Official SuperGrok weekly % · Grok Build log"
+          : "Installed · use Grok Build once to start"
+      case .installable: return "Shows official SuperGrok weekly % · adds a Grok hook"
       case .unavailable: return "Install Grok Build to enable"
       }
     },
@@ -838,10 +850,12 @@ extension SettingsBackView {
     // Copilot IS on the dashboard (its own row + sparkline) once this is on, unlike the earlier
     // terminal-only state — just excluded from aggregate dollar totals/alerts, which the
     // dashboard's own "estimate" badge + explainer already disclose. Keep this in sync with that.
+    // Copilot is `ProviderBasis.estimate`: its own dashboard row and widget entry (`.copilot` in
+    // `JPWidgetProviderChoice`), never a dollar total or an alert.
     subtitle: { state, _ in
       switch state {
-      case .active: return "On dashboard, not in totals"
-      case .installable: return "Adds a dashboard row, not in totals"
+      case .active: return "Token estimate · own row & widget · not in totals or alerts"
+      case .installable: return "Adds an OpenTelemetry export line to your shell config · token estimate, not in totals"
       case .unavailable: return "No shell config detected"
       }
     },
@@ -870,10 +884,13 @@ extension SettingsBackView {
     install: { try? CopilotOtelSetup.install() },
     uninstall: { try? CopilotOtelSetup.uninstall() })
 
-  /// Cursor's designed `stop` hook exposes usage counts after an agent turn. Deliberately the same
-  /// Live Data toggle/control contract as Copilot: explicit consent, reversible setup, an immediate
-  /// dashboard refresh, token-only display, and no aggregate/alert contribution. Writes no capture
-  /// file JP owns the freshness of, so it gets NO `reconcileStaleCapture` either.
+  /// Cursor's designed `stop` hook exposes usage counts after an agent turn. Same consent contract as
+  /// Copilot — explicit opt-in, reversible setup, an immediate dashboard refresh — but NOT the same
+  /// accounting: Cursor is consolidated into the one public Grok row (`ProviderID.consolidated`,
+  /// `DashboardViewModel` merges `cursor.loadEvents()` into Grok's rollup), and Grok is
+  /// `ProviderBasis.notional`, so priced Cursor turns DO enter the dollar aggregate at list price and
+  /// unpriced ones show as tokens. The copy must say "Grok row", never "its own row" or "not in
+  /// totals". Writes no capture file JP owns the freshness of, so it gets NO `reconcileStaleCapture`.
   static let cursorLiveData = ProviderOptInDescriptor(
     icon: "cursorarrow.rays",
     providerMark: ("provider-cursor", JPAppColor.cursorTintHex),
@@ -886,8 +903,8 @@ extension SettingsBackView {
     },
     subtitle: { state, _ in
       switch state {
-      case .active: return "On dashboard, not in totals"
-      case .installable: return "Adds a token-only dashboard row"
+      case .active: return "Feeds the Grok row at notional list price"
+      case .installable: return "Adds a Cursor stop hook · agent turns feed the Grok row"
       case .unavailable: return "Cursor CLI not detected"
       }
     },
@@ -898,7 +915,8 @@ extension SettingsBackView {
         + "Prompts, responses, code, transcripts, and project paths are never stored.\n\n"
         + "Existing Cursor hooks are preserved, the hook always fails open, and you can remove it "
         + "here anytime.\n\n"
-        + "Cursor appears as its own token estimate and is never added to dollar totals or alerts.",
+        + "Cursor turns appear inside the Grok row: priced models count at notional list price, "
+        + "unpriced ones show as tokens.",
       confirmButton: "Enable"),
     uninstallAlert: ProviderOptInAlert(
       title: "Turn off Cursor CLI live data?",
@@ -926,7 +944,16 @@ extension SettingsBackView {
       case .unavailable: return "Grok plan usage · unavailable"
       }
     },
-    subtitle: { state, _ in state == .active ? "Weekly & billing-cycle pools · official" : "Use Cursor or Grok Bot's saved sign-in" },
+    // Pool priority is pinned in `_docs/03-data.md`: the official weekly pool drives `weeklyUsedPct`,
+    // the gauge, menu bar and widget capsule; with no weekly pool the billing-cycle meter is shown and
+    // labelled as such, never as a 5-hour or weekly window.
+    subtitle: { state, _ in
+      switch state {
+      case .active: return "Official weekly pool drives the gauge · billing-cycle meter if no weekly pool"
+      case .installable: return "Official weekly & billing-cycle usage via your saved Cursor or Grok Bot sign-in"
+      case .unavailable: return "No saved Cursor or Grok Bot sign-in found"
+      }
+    },
     installAlert: ProviderOptInAlert(
       title: "Enable Grok plan usage?",
       message: "JP the Cat reads the sign-in Cursor or Grok Bot already saved on this Mac, using /usr/bin/security where required. It sends only that bearer token to api2.cursor.sh about every five minutes. No refresh tokens, prompts, code, transcripts, paths, or local usage are sent.\n\nOfficial percentages are separate from notional dollar totals. Turn this off here anytime.",
@@ -953,115 +980,153 @@ extension SettingsBackView {
 /// `ProviderOptInDescriptor`s on `SettingsBackView`). Observes `ThemeManager` so it re-themes live while open (a static leaf reading
 /// `JP.*` would otherwise freeze at first-render theme — see the theme-freeze lesson in AGENTS.md).
 struct LiveDataWindowContent: View {
+  /// Which detection-gated rows may render. Production builds this ONLY through `probe()`, which reads
+  /// real local presence; tests inject a fixed value through `init(model:detection:)` to render the
+  /// maximum or minimum row set deterministically. The gates themselves never weaken: a fixture can
+  /// only pick which detectors are "true", it cannot bypass `ProviderOptInRow`'s own state probe.
+  struct Detection: Equatable, Sendable {
+    var copilotCLI = false
+    var cursorCLI = false
+    var cursorSignInSource = false
+    var grokBuild = false
+    var grokBot = false
+    var museSpark = false
+    var openCode = OpenCodeDetection.none
+
+    /// Rows that opt a provider into the one public Grok row; the Grok enable row shows if any does.
+    var grok: Bool { grokBuild || grokBot || cursorSignInSource || cursorCLI }
+
+    /// Every row is hidden until its tool is present ([HARD REQUIREMENT] in AGENTS.md). ONE cached
+    /// `OpenCodeDetection` probe answers all seven OpenCode-derived rows; the rows used to open seven
+    /// read-only SQLite connections and run fourteen unindexed scans on every appearance.
+    static func probe() -> Detection {
+      var detection = Detection()
+      detection.copilotCLI = CopilotOtelSetup.isCopilotCLIDetected()
+      detection.cursorCLI = CursorHookSetup.isCursorCLIDetected()
+      detection.cursorSignInSource = CursorAuthToken.isSourcePresent()
+      detection.grokBuild = GrokProvider.isGrokBuildDetected()
+      detection.grokBot = GrokBotProvider.isGrokBotDetected()
+      detection.openCode = OpenCodeDetection.current(root: OpenCodeStorePaths.defaultRoot())
+      detection.museSpark = MuseSparkProvider().isAvailable()
+      return detection
+    }
+
+    /// Every gated row visible — the layout fixture for "the maximum locally detectable provider set".
+    static let everything = Detection(
+      copilotCLI: true, cursorCLI: true, cursorSignInSource: true, grokBuild: true, grokBot: true,
+      museSpark: true,
+      openCode: OpenCodeDetection(brands: Set(OpenCodeBrand.allCases), museSpark: true, zen: true, go: true))
+  }
+
   var model: DashboardViewModel
   @ObservedObject private var settings = SettingsStore.shared
   @ObservedObject private var themeManager = ThemeManager.shared
-  @State private var copilotCLIDetected = CopilotOtelSetup.isCopilotCLIDetected()
-  @State private var cursorCLIDetected = CursorHookSetup.isCursorCLIDetected()
-  @State private var cursorSignInSourceDetected = CursorAuthToken.isSourcePresent()
-  @State private var grokBuildDetected = GrokProvider.isGrokBuildDetected()
-  @State private var grokBotDetected = GrokBotProvider.isGrokBotDetected()
-  // ONE cached probe answers all seven OpenCode-derived rows (`OpenCodeDetection`); the rows used to
-  // open seven read-only SQLite connections and run fourteen unindexed scans on every appearance.
-  @State private var openCodeDetection = OpenCodeDetection.current(root: OpenCodeStorePaths.defaultRoot())
-  @State private var museSparkDetected = MuseSparkProvider().isAvailable()
+  @State private var detection: Detection
+  /// `nil` in production: `.onAppear` re-probes so an install or uninstall performed outside the app is
+  /// picked up the next time the window opens. A test fixture pins it and skips the re-probe.
+  private let fixedDetection: Detection?
+
+  init(model: DashboardViewModel, detection: Detection? = nil) {
+    self.model = model
+    self.fixedDetection = detection
+    _detection = State(initialValue: detection ?? Detection.probe())
+  }
 
   var body: some View {
-    // Fixed width, INTRINSIC height: the hosting controller uses `.preferredContentSize`, so the window
-    // sizes exactly to this content (no dead space) and grows a row's worth taller as providers are
-    // added — no `ScrollView` needed for today's list.
+    // Fixed width, INTRINSIC height: `TrayChildWindowController` measures `fittingSize` after a layout
+    // pass and sizes the window exactly to this content (no dead space), so it grows a row taller as
+    // providers are detected. Subtitles WRAP (`layout: .liveData`) and that wrapped height is what the
+    // measurement sees — no `ScrollView`, no fixed height, no ellipsis on accounting copy.
     VStack(alignment: .leading, spacing: 0) {
       chromeBar
       Rectangle().fill(JP.line).frame(height: 1)
       VStack(alignment: .leading, spacing: JPAppSpacing.settingsBodyY) {
-        // No section eyebrow — the window's chrome title already reads "— Live data". Grouped by
-        // provider so each provider's enable + its live-limit opt-in sit together: Claude, then Codex,
-        // then Grok, then Muse Spark, then Copilot.
+        // No section eyebrow — the window's chrome title already reads "— Live data". ONE well, grouped
+        // by provider: each provider's enable row, then its indented dependent opt-in rows, with a
+        // `LiveDataGroupDivider` between providers and none inside a group. Catalog order: Claude,
+        // Codex, Grok, Muse Spark, the OpenCode model brands, the two OpenCode gateways, Copilot.
         sectionWell {
-          SettingsToggleRow(
-            icon: "terminal",
-            title: "Claude Code",
-            subtitle: settings.claudeProviderEnabled
-              ? "In totals, widgets & alerts"
-              : "Hidden from dashboard, widget & alerts",
+          providerToggle(
+            icon: "terminal", title: "Claude Code",
+            // `ProviderBasis.of(.claude)` is `.real`: the only billed-dollar row.
+            enabled: "Real spend · in totals, widgets & alerts",
             providerMark: ("provider-claude", JPAppColor.claudeTintHex),
             isOn: $settings.claudeProviderEnabled)
           ProviderOptInRow(model: model, descriptor: SettingsBackView.claudeLiveLimits)
-          SettingsToggleRow(
-            icon: "curlybraces",
-            title: "Codex",
-            subtitle: settings.codexProviderEnabled
-              ? "In totals, widgets & alerts"
-              : "Hidden from dashboard, widget & alerts",
+          LiveDataGroupDivider()
+          providerToggle(
+            icon: "curlybraces", title: "Codex",
+            // Codex's official 5-hour/weekly windows come from its own rollout logs — no opt-in row.
+            enabled: "Notional list price · in totals, widgets & alerts",
             providerMark: ("provider-codex", JPAppColor.codexTintHex),
             isOn: $settings.codexProviderEnabled)
-          if grokBuildDetected || grokBotDetected || cursorSignInSourceDetected || cursorCLIDetected {
-            SettingsToggleRow(
-              icon: "sparkles",
-              title: "Grok",
-              subtitle: settings.grokProviderEnabled
-                ? "Build · Cursor · Grok Bot"
-                : "Hidden from dashboard, widget & alerts",
+          if detection.grok {
+            LiveDataGroupDivider()
+            providerToggle(
+              icon: "sparkles", title: "Grok",
+              // One public row for three sources (`ProviderID.consolidated`); `.notional` basis.
+              enabled: "Build, Cursor & Grok Bot · notional list price · in totals, widgets & alerts",
               providerMark: ("provider-grok", JPAppColor.grokTintHex),
               isOn: $settings.grokProviderEnabled)
-            if grokBuildDetected {
+            if detection.grokBuild {
               ProviderOptInRow(model: model, descriptor: SettingsBackView.grokLiveLimits)
             }
-            if cursorCLIDetected {
+            if detection.cursorCLI {
               ProviderOptInRow(model: model, descriptor: SettingsBackView.cursorLiveData)
             }
-            if cursorSignInSourceDetected || grokBotDetected {
+            if detection.cursorSignInSource || detection.grokBot {
               ProviderOptInRow(model: model, descriptor: SettingsBackView.grokPlanUsage)
             }
           }
-          if museSparkDetected {
-            SettingsToggleRow(
-              icon: "flame",
-              title: "Muse Spark",
-              subtitle: settings.museSparkProviderEnabled
-                ? "OpenCode on this Mac · notional list price"
-                : "Hidden from dashboard, widget & alerts",
+          if detection.museSpark {
+            LiveDataGroupDivider()
+            providerToggle(
+              icon: "flame", title: "Muse Spark",
+              // `.notional`, aggregable, `.museSpark` widget choice; no official window, so no alerts.
+              enabled: "OpenCode on this Mac · notional list price · in totals & widgets",
+              disabled: "Hidden from dashboard & widgets",
               providerMark: ("provider-muse_spark", JPAppColor.museSparkTintHex),
               isOn: $settings.museSparkProviderEnabled)
           }
           ForEach(SettingsBackView.brandRows, id: \.brand) { row in
-            if openCodeDetection.brands.contains(row.brand) {
-              SettingsToggleRow(
-                icon: row.icon,
-                title: row.brand.displayName,
-                subtitle: settings.isBrandEnabled(row.brand)
-                  ? row.subtitle
-                  : "Hidden from dashboard, widget & alerts",
+            if detection.openCode.brands.contains(row.brand) {
+              LiveDataGroupDivider()
+              providerToggle(
+                icon: row.icon, title: row.brand.displayName,
+                enabled: row.subtitle,
+                disabled: "Hidden from dashboard & widgets",
                 providerMark: ("provider-\(row.brand.id.rawValue)", JPAppColor.tintHex(for: row.brand.id)),
                 isOn: Binding(
                   get: { settings.isBrandEnabled(row.brand) },
                   set: { settings.setBrandEnabled(row.brand, $0) }))
             }
           }
-          if openCodeDetection.zen {
-            SettingsToggleRow(
-              icon: "wand.and.stars",
-              title: "OpenCode Zen",
-              subtitle: settings.openCodeZenProviderEnabled
-                ? "Gateway view, not in totals · excluded from combined totals"
-                : "Hidden from dashboard & alerts",
+          // Zen and Go are `ProviderBasis.gateway`: real dollars already counted under the brand rows,
+          // so they are SHOWN (one shared "OpenCode" dashboard row with a section each, plus a
+          // `gateway`-badged widget entry) and never enter totals or alerts.
+          if detection.openCode.zen {
+            LiveDataGroupDivider()
+            providerToggle(
+              icon: "wand.and.stars", title: "OpenCode Zen",
+              enabled: "Gateway view · not in totals or alerts · on the OpenCode row & widget",
+              disabled: "Zen section hidden from the OpenCode row & widget",
               providerMark: ("provider-opencode", JPAppColor.openCodeZenTintHex),
               isOn: $settings.openCodeZenProviderEnabled)
           }
-          if openCodeDetection.go {
-            SettingsToggleRow(
-              icon: "gauge.with.dots.needle.33percent",
-              title: "OpenCode Go",
-              subtitle: settings.openCodeGoProviderEnabled
-                ? "Gateway view, not in totals · 5-hour & weekly usage vs cap"
-                : "Hidden from dashboard & alerts",
+          if detection.openCode.go {
+            LiveDataGroupDivider()
+            providerToggle(
+              icon: "gauge.with.dots.needle.33percent", title: "OpenCode Go",
+              // `quotaIsMeasured`, never `usageOfficial`: local cost against Go's PUBLISHED caps.
+              enabled: "Gateway view · not in totals or alerts · measured 5-hour & weekly usage vs Go's caps",
+              disabled: "Go section hidden from the OpenCode row & widget",
               providerMark: ("provider-opencodego", JPAppColor.openCodeGoTintHex),
               isOn: $settings.openCodeGoProviderEnabled)
           }
-          if copilotCLIDetected {
-            ProviderOptInRow(model: model, descriptor: SettingsBackView.copilotLiveData)
+          if detection.copilotCLI {
+            LiveDataGroupDivider()
+            ProviderOptInRow(model: model, descriptor: SettingsBackView.copilotLiveData, indented: false)
           }
-
         }
       }
       .padding(.horizontal, JPAppSpacing.panelX)
@@ -1070,14 +1135,23 @@ struct LiveDataWindowContent: View {
     .frame(width: JPAppSpacing.liveDataWindowW, alignment: .top)
     .background(JP.card)
     .onAppear {
-      copilotCLIDetected = CopilotOtelSetup.isCopilotCLIDetected()
-      cursorCLIDetected = CursorHookSetup.isCursorCLIDetected()
-      cursorSignInSourceDetected = CursorAuthToken.isSourcePresent()
-      grokBuildDetected = GrokProvider.isGrokBuildDetected()
-      grokBotDetected = GrokBotProvider.isGrokBotDetected()
-      openCodeDetection = OpenCodeDetection.current(root: OpenCodeStorePaths.defaultRoot())
-      museSparkDetected = MuseSparkProvider().isAvailable()
+      guard fixedDetection == nil else { return }
+      detection = Detection.probe()
     }
+  }
+
+  /// A provider's enable row. Off removes the provider from the dashboard entirely (never a zeroed
+  /// row), so the disabled copy names every surface it leaves; the default covers the aggregable
+  /// providers that carry an official window (dashboard, widgets AND alerts).
+  private func providerToggle(
+    icon: String, title: String, enabled: String,
+    disabled: String = "Hidden from dashboard, widgets & alerts",
+    providerMark: (resource: String, tintHex: String), isOn: Binding<Bool>
+  ) -> some View {
+    SettingsToggleRow(
+      icon: icon, title: title,
+      subtitle: isOn.wrappedValue ? enabled : disabled,
+      providerMark: providerMark, layout: .liveData, isOn: isOn)
   }
 
   /// `JP the Cat 🐾 — Live data` drawn inline with the traffic lights (the window sets
@@ -1318,7 +1392,10 @@ private struct SettingsJPActionRow: View {
 
 /// A settings row with a trailing switch (mirrors `SettingsRow` layout). `onChange` fires after the
 /// bound value flips so callers can act (e.g. request notification authorization).
-private struct SettingsToggleRow: View {
+///
+/// Internal (not `private`) so `LiveDataWindowLayoutTests` can host one row and measure that a long
+/// subtitle WRAPS; every call site still lives in this file.
+struct SettingsToggleRow: View {
   let icon: String
   let title: String
   var subtitle: String?
@@ -1327,6 +1404,27 @@ private struct SettingsToggleRow: View {
   // dashboard selector's provider chips. `nil` (the default) keeps the plain SF Symbol for every other
   // Settings toggle.
   var providerMark: (resource: String, tintHex: String)? = nil
+  /// Where the row lives. The Settings face keeps the one-line, shrink-to-80% subtitle and the wide
+  /// switch slot because it is intrinsic-height with no scroll and `DashboardSizingTests` pins that
+  /// face's budget. Live Data rows carry accounting copy that must never be ellipsized, so they WRAP
+  /// the subtitle; since every row there ends in a switch (no chevron rows to align with) the slot
+  /// is the switch's own width, giving the caption ~32pt more line length, and the vertical padding
+  /// is tighter so fifteen rows still fit a 13" display without a `ScrollView`.
+  enum Layout {
+    case settingsFace
+    case liveData
+
+    var subtitleWraps: Bool { self == .liveData }
+    var switchSlotWidth: CGFloat {
+      self == .liveData ? JPAppSpacing.liveDataSwitchSlotWidth : JPAppSpacing.settingsSwitchSlotWidth
+    }
+    var rowY: CGFloat { self == .liveData ? JPAppSpacing.liveDataRowY : JPAppSpacing.settingsRowY }
+  }
+
+  var layout: Layout = .settingsFace
+  /// A provider's dependent opt-in row (live limits, live data, plan usage) is inset by
+  /// `JPAppSpacing.liveDataChildIndent` so the hierarchy reads without a second well or eyebrow.
+  var indented: Bool = false
   @Binding var isOn: Bool
   var onChange: (Bool) -> Void = { _ in }
   // Re-render on theme change so global JP.* reads re-resolve.
@@ -1346,8 +1444,7 @@ private struct SettingsToggleRow: View {
       VStack(alignment: .leading, spacing: 1) {
         Text(title).font(JPAppFont.bodyStrong).foregroundStyle(JP.ink)
         if let subtitle {
-          Text(subtitle).font(JPAppFont.caption).foregroundStyle(JP.inkFaint)
-            .lineLimit(1).minimumScaleFactor(0.8)
+          subtitleText(subtitle)
         }
       }
       // Icon + title/subtitle are decorative here: the Toggle below carries the title (label),
@@ -1361,7 +1458,7 @@ private struct SettingsToggleRow: View {
       .toggleStyle(.switch)
       .controlSize(.regular)
       .tint(JP.ginger)
-      .frame(width: JPAppSpacing.settingsSwitchSlotWidth, alignment: .trailing)
+      .frame(width: layout.switchSlotWidth, alignment: .trailing)
       .accessibilityLabel(title)
       .accessibilityValue(isOn ? "On" : "Off")
       .accessibilityHint(subtitle ?? "")
@@ -1370,7 +1467,39 @@ private struct SettingsToggleRow: View {
         onChange(newValue)
       }
     }
-    .padding(.horizontal, JPAppSpacing.settingsRowX).padding(.vertical, JPAppSpacing.settingsRowY)
+    .padding(.leading, JPAppSpacing.settingsRowX + (indented ? JPAppSpacing.liveDataChildIndent : 0))
+    .padding(.trailing, JPAppSpacing.settingsRowX)
+    .padding(.vertical, layout.rowY)
     .contentShape(Rectangle())
+  }
+
+  /// One line that shrinks to 80% before ellipsizing (the Settings face), or a wrapped caption that
+  /// takes as many lines as the fixed window width needs (Live Data). `fixedSize(vertical:)` is what
+  /// makes the wrapped height reach `NSHostingView.fittingSize`, which the intrinsic-height window
+  /// is measured from — without it the row reports one line and the window clips the rest.
+  @ViewBuilder
+  private func subtitleText(_ subtitle: String) -> some View {
+    let text = Text(subtitle).font(JPAppFont.caption).foregroundStyle(JP.inkFaint)
+    if layout.subtitleWraps {
+      text.fixedSize(horizontal: false, vertical: true)
+    } else {
+      text.lineLimit(1).minimumScaleFactor(0.8)
+    }
+  }
+}
+
+/// The hairline between two provider groups inside the Live Data well: a provider's enable row and
+/// its dependent opt-in rows sit between two of these with no line between them, so the group reads
+/// as one unit while adjacent providers stay separated. Inset to the row's own horizontal padding.
+struct LiveDataGroupDivider: View {
+  // periphery:ignore - intentional theme dependency for the static JP.line read.
+  @ObservedObject private var themeManager = ThemeManager.shared
+
+  var body: some View {
+    Rectangle()
+      .fill(JP.line)
+      .frame(height: 1)
+      .padding(.horizontal, JPAppSpacing.settingsRowX)
+      .accessibilityHidden(true)
   }
 }

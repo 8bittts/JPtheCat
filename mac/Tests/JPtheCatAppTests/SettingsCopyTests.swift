@@ -118,7 +118,13 @@ final class SettingsCopyTests: XCTestCase {
 		let source = try AppSourceScanner.body(of: "struct SettingsToggleRow")
 
 		XCTAssertTrue(source.contains(".controlSize(.regular)"))
-		XCTAssertTrue(source.contains(".frame(width: JPAppSpacing.settingsSwitchSlotWidth, alignment: .trailing)"))
+		// The slot is normalized per surface: the Settings-face default is the shared token, and the
+		// Live Data layout narrows it to the switch itself (every row there ends in a switch).
+		XCTAssertTrue(source.contains(".frame(width: layout.switchSlotWidth, alignment: .trailing)"))
+		XCTAssertEqual(SettingsToggleRow.Layout.settingsFace.switchSlotWidth, JPAppSpacing.settingsSwitchSlotWidth)
+		XCTAssertEqual(SettingsToggleRow.Layout.liveData.switchSlotWidth, JPAppSpacing.liveDataSwitchSlotWidth)
+		XCTAssertFalse(SettingsToggleRow.Layout.settingsFace.subtitleWraps)
+		XCTAssertTrue(SettingsToggleRow.Layout.liveData.subtitleWraps)
 		XCTAssertFalse(source.contains(".accessibilityElement(children: .combine)"))
 		XCTAssertTrue(source.contains(".accessibilityLabel(title)"))
 		XCTAssertTrue(source.contains(#".accessibilityValue(isOn ? "On" : "Off")"#))
@@ -168,36 +174,40 @@ final class SettingsCopyTests: XCTestCase {
 	@MainActor
 	func testEverySettingsSwitchUsesSharedToggleRow() throws {
 		let source = try AppSourceScanner.joined()
-		let switches = [
+		// The Settings face calls `SettingsToggleRow` directly, one call site per switch.
+		let settingsFaceSwitches = [
 			"Show Dock icon",
 			"Launch at login",
 			"Automatic updates",
-			"Claude Code",
-			"Codex",
-			"Grok",
-			"Muse Spark",
-			"OpenCode Zen",
-			"OpenCode Go",
 			"Usage alerts at 80%",
 			"Show notification banner",
 			"Meow on alerts",
 			"Interactive sounds",
 		]
+		// The Live Data window funnels EVERY provider enable row through ONE `providerToggle(...)`
+		// helper (wrapping subtitle + enabled/disabled copy), so these titles are asserted inside that
+		// declaration rather than as extra `SettingsToggleRow(` call sites.
+		let liveDataSwitches = ["Claude Code", "Codex", "Grok", "Muse Spark", "OpenCode Zen", "OpenCode Go"]
 
-		// +1 for the ONE dynamic-title `SettingsToggleRow` inside `ProviderOptInRow`, which now renders
-		// all four provider opt-ins (Claude/Grok live limits, Copilot/Cursor live data) from their
-		// descriptors — it used to be +4, one per hand-copied row, and the four had already drifted.
-		// Their titles change with install state, so they are not in the static `switches` list.
+		// +1 for the ONE dynamic-title `SettingsToggleRow` inside `ProviderOptInRow`, which renders all
+		// five provider opt-ins (Claude/Grok live limits, Copilot/Cursor live data, Grok plan usage)
+		// from their descriptors — it used to be +4, one per hand-copied row, and the four had drifted.
+		// +1 for the ONE `SettingsToggleRow` inside `LiveDataWindowContent.providerToggle`, which renders
+		// every enable row (the six static titles above AND the `SettingsBackView.brandRows` `ForEach`);
+		// nine hand-copied rows used to sit there and their disabled copy had already drifted apart.
 		// Counted across the WHOLE scanned set: a split that moved half the rows into a new file would
 		// otherwise silently halve the count this pins.
-		// +1 more for the ONE `SettingsToggleRow` inside the `SettingsBackView.brandRows` `ForEach`,
-		// which renders every OpenCode model-brand row (Nemotron/MiMo/Big Pickle/DeepSeek) from the
-		// `OpenCodeBrand` table — four hand-copied rows used to sit here and had already drifted.
 		let toggleRowCallSites = try AppSourceScanner.occurrences(of: "SettingsToggleRow(")
-		XCTAssertEqual(toggleRowCallSites, switches.count + 2)
-		for title in switches {
+		XCTAssertEqual(toggleRowCallSites, settingsFaceSwitches.count + 2)
+		for title in settingsFaceSwitches {
 			XCTAssertTrue(source.contains(#"title: "\#(title)""#), "\(title) must stay in SettingsToggleRow")
 		}
+		let liveData = try AppSourceScanner.body(of: "struct LiveDataWindowContent")
+		for title in liveDataSwitches {
+			XCTAssertTrue(liveData.contains(#"title: "\#(title)""#), "\(title) must stay a Live Data providerToggle")
+		}
+		// Six static enable rows + the brand `ForEach` + the helper's own declaration.
+		XCTAssertEqual(try AppSourceScanner.occurrences(of: "providerToggle("), liveDataSwitches.count + 2)
 		XCTAssertEqual(
 			SettingsBackView.brandRows.map(\.brand.displayName),
 			["Nemotron", "MiMo", "Big Pickle", "DeepSeek"])
