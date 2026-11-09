@@ -42,6 +42,7 @@ WIDGET_SOURCE_PLIST="JPtheCatWidgetExtension-Info.plist"
 WIDGET_ENTITLEMENTS="JPtheCatWidgetExtension.entitlements"
 ICNS_SOURCE="AppIcon.icns"
 SPARKLE_SOURCE="tools/sparkle/Sparkle.framework"
+SPARKLE_LICENSE_SOURCE="tools/sparkle/LICENSE"
 DMG_DEVICE_NODE=""
 
 BUILD_ONLY=false
@@ -501,6 +502,10 @@ step "Copied localized app name"
 if [ -d "$SPARKLE_SOURCE" ]; then
 	ditto "$SPARKLE_SOURCE" "$FRAMEWORKS_DIR/Sparkle.framework"
 	step "Copied Sparkle.framework"
+	# Sparkle's MIT license requires its notice in every copy we ship, so the bundle carries it.
+	[ -f "$SPARKLE_LICENSE_SOURCE" ] || fail "Missing ${SPARKLE_LICENSE_SOURCE}; the shipped app must carry Sparkle's MIT notice"
+	cp "$SPARKLE_LICENSE_SOURCE" "$RESOURCES_DIR/Sparkle-LICENSE.txt"
+	step "Copied Sparkle license notice"
 else
 	warn "Sparkle.framework not found — auto-update disabled"
 fi

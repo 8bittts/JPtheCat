@@ -35,7 +35,6 @@ Any promoted phase ends with owner-doc alignment and the affected declared gates
 
 ### Open-source upkeep
 
-- Ship Sparkle's MIT notice inside the app bundle (an About acknowledgement or a bundled license file); the repository copy is `mac/tools/sparkle/LICENSE`.
 - Add issue and pull-request templates when the first outside contribution arrives.
 
 ### Pricing re-checks with a known date

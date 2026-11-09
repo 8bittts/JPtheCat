@@ -40,6 +40,7 @@ Post-release proofs:
 
 - Sparkle is vendored at `mac/tools/sparkle/` and SHA-pinned in its `VERSION` file; `build-dmg.sh`'s `verify_sparkle_vendor` preflight aborts on drift.
 - Keep the framework's top-level `Updater.app` symlink and `Versions/B/{Updater.app,XPCServices,Autoupdate}`; a missing piece produces "An error occurred while launching the installer" and broke releases 0.014–0.021.
+- Sparkle's MIT notice ships in every bundle as `Contents/Resources/Sparkle-LICENSE.txt`, copied from `mac/tools/sparkle/LICENSE` by `build-dmg.sh` (which fails closed without it) and `build_and_run.sh` (guard: `SparkleLicenseNoticeTests`).
 - Re-vendor only from the official `Sparkle-<ver>.tar.xz` archive, never SwiftPM artifacts, which ship no helper apps; `.gitignore` keeps explicit `!tools/sparkle/…` lines so the global `*.app` rule cannot drop the helper.
 - `Package.swift` links Sparkle with `-F tools/sparkle` unsafe flags, so this leaf package cannot be another package's dependency, and the flag resolves through the tracked root `tools -> mac/tools` symlink (`mac/AGENTS.md`).
 - Back up the EdDSA private key (keychain account `jpthecat`, exported to `~/.config/jpthecat/sparkle_ed25519_priv.key`); losing it strands every installed user on their current build.

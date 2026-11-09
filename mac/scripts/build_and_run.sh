@@ -38,6 +38,9 @@ cp -R en.lproj "$APP/Contents/Resources/"
 if [ -d tools/sparkle/Sparkle.framework ]; then
 	mkdir -p "$APP/Contents/Frameworks"
 	ditto tools/sparkle/Sparkle.framework "$APP/Contents/Frameworks/Sparkle.framework"
+	# Sparkle's MIT notice ships beside the framework, matching build-dmg.sh.
+	[ -f tools/sparkle/LICENSE ] || { echo "ERROR: tools/sparkle/LICENSE missing" >&2; exit 1; }
+	cp tools/sparkle/LICENSE "$APP/Contents/Resources/Sparkle-LICENSE.txt"
 fi
 
 # SwiftPM resource bundles belong under Contents/Resources in a staged .app. Keep local staging

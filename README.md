@@ -95,7 +95,7 @@ The source code is licensed under the [MIT License](LICENSE).
 The JP the Cat name, logo, app icon, and JP's mascot images and sounds are not covered by the MIT License and stay reserved.
 Forks must use their own name, icon, and mascot.
 Provider names and logos belong to their owners.
-Sparkle is bundled under its own MIT license in [`mac/tools/sparkle/LICENSE`](mac/tools/sparkle/LICENSE).
+Sparkle is bundled under its own MIT license in [`mac/tools/sparkle/LICENSE`](mac/tools/sparkle/LICENSE), and the app carries that notice as `Contents/Resources/Sparkle-LICENSE.txt`.
 
 ---
 
