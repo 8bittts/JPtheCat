@@ -55,7 +55,7 @@ export function pricingLead(id: ModelId): string {
 		const tokenizer = enrichments.includes("new-tokenizer")
 			? " It uses the newer tokenizer, which emits ~30% more tokens for the same text."
 			: "";
-		return `${base} This is the fast-mode rate, Anthropic's research-preview option for faster output. It applies across the full context window, prompt-caching multipliers stack on top, and JP the Cat applies it only to turns Claude Code logs as fast.${tokenizer}`;
+		return `${base} This is the fast-mode rate for faster output. It applies across the full context window, prompt-caching multipliers stack on top, and JP the Cat applies it only to turns Claude Code logs as fast.${tokenizer}`;
 	}
 	if (enrichments.includes("limited-availability")) {
 		return `${base} Anthropic offers it only to approved Project Glasswing customers. It also uses the newer tokenizer, which emits ~30% more tokens for the same text.`;

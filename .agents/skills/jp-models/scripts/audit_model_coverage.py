@@ -18,6 +18,7 @@ routed id `OpenCodeGateway.normalizedModelID` can return; this script does not r
 from __future__ import annotations
 
 import argparse
+import base64
 import glob
 import json
 import os
@@ -126,6 +127,36 @@ def claude_models(root: str) -> set[str]:
     return models
 
 
+def cursor_models(path: str) -> set[str]:
+    """Model ids from JP's opt-in Cursor capture. Decodes `model` or `model_b64` only."""
+    models: set[str] = set()
+    file = Path(os.path.expanduser(path))
+    if not file.is_file():
+        return models
+    SCANNED_FILES[str(file)] = 1
+    try:
+        handle = open(file, encoding="utf-8", errors="ignore")
+    except OSError as error:
+        raise RuntimeError("A local model source could not be read") from error
+    with handle:
+        for line in handle:
+            try:
+                obj = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            model = obj.get("model")
+            if not isinstance(model, str) or not model:
+                encoded = obj.get("model_b64")
+                if isinstance(encoded, str):
+                    try:
+                        model = base64.b64decode(encoded).decode("utf-8")
+                    except (ValueError, UnicodeDecodeError):
+                        model = None
+            if isinstance(model, str) and model:
+                models.add(model)
+    return models
+
+
 def grok_models(root: str) -> set[str]:
     models: set[str] = set()
     pattern = str(Path(os.path.expanduser(root)) / "**" / "updates.jsonl")
@@ -202,6 +233,10 @@ def main() -> int:
     parser.add_argument("--codex-root", default="~/.codex/sessions")
     parser.add_argument("--grok-root", default="~/.grok/sessions")
     parser.add_argument("--opencode-root", default="~/.local/share/opencode")
+    parser.add_argument(
+        "--cursor-capture",
+        default="~/Library/Application Support/JPtheCat/cursor-usage.jsonl",
+    )
     args = parser.parse_args()
 
     price_path = Path(args.repo).resolve() / "mac/Sources/JPtheCatCore/Resources/pricing-default.json"
@@ -213,6 +248,7 @@ def main() -> int:
     codex, early_resolved, permanently_unknown = codex_models(args.codex_root)
     claude = claude_models(args.claude_root)
     grok = grok_models(args.grok_root)
+    cursor = cursor_models(args.cursor_capture)
     opencode_by_gateway, opencode_sessions = opencode_models(args.opencode_root)
     opencode = set().union(*opencode_by_gateway.values(), opencode_sessions)
     opencode_ingested = {
@@ -238,6 +274,7 @@ def main() -> int:
             "token_events_without_any_same_file_model": permanently_unknown,
         },
         "grok": {"emitted_models": sorted(grok), "missing_prices": missing(grok)},
+        "cursor": {"emitted_models": sorted(cursor), "missing_prices": missing(cursor)},
         "opencode": {
             "emitted_models": sorted(opencode),
             "emitted_models_by_gateway": {
@@ -255,14 +292,21 @@ def main() -> int:
             "jsonl_files_read": sum(SCANNED_FILES.values()),
             "opencode_database_read": (Path(os.path.expanduser(args.opencode_root)) / "opencode.db").is_file(),
             "opencode_message_tables_read": OPENCODE_TABLES_READ,
-            "emitted_model_counts": {"claude": len(claude), "codex": len(codex), "grok": len(grok), "opencode": len(opencode)},
+            "emitted_model_counts": {
+                "claude": len(claude),
+                "codex": len(codex),
+                "grok": len(grok),
+                "opencode": len(opencode),
+                "cursor": len(cursor),
+            },
         },
     }
     print(json.dumps(result, indent=2))
     has_missing = any(
-        result[provider]["missing_prices"] for provider in ("claude", "codex", "grok", "opencode")
+        result[provider]["missing_prices"]
+        for provider in ("claude", "codex", "grok", "opencode", "cursor")
     )
-    if not any((claude, codex, grok, opencode)):
+    if not any((claude, codex, grok, opencode, cursor)):
         return 2  # An empty audit is not a coverage pass.
     return 1 if has_missing else 0
 

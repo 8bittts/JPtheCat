@@ -25,7 +25,7 @@ describe("library pricing parity", () => {
 		expect(RATE_MULTIPLIERS as Record<string, number>).toEqual(macJson.rate_multipliers);
 	});
 
-	it("mirrors exactly 112 models", () => {
-		expect(MODEL_IDS.length).toBe(112);
+	it("mirrors exactly 114 models", () => {
+		expect(MODEL_IDS.length).toBe(114);
 	});
 });

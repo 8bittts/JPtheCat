@@ -143,6 +143,7 @@ final class MultiWindowSummariesParityTests: XCTestCase {
 		let models = ["qwen3.6-plus", "qwen3.7-plus", "gpt-6-luna", "gpt-6-sol", "gpt-6.1-sol", "claude-sonnet-5-5", "claude-sonnet-5-5-zen", "claude-haiku-5-5", "claude-haiku-5-5-us-inference", "claude-opus-5-5-fast-mode", "space-bunny", "gpt-reserve",
 			"claude-sonnet-4-5",  // has a real >200K tier — exercises the cliff
 			"grok-4.7",  // current Grok Build emit + xAI >200K cliff, no cache-creation fields
+			"grok-4.7-fast",  // exclusive 200K cliff (prompt must exceed 200K) at the Fast rates
 			"grok-4.6",  // prior Grok Build emit; same cliff shape
 			"grok-4.5",  // older Grok Build emit; same cliff shape, cheaper cached-input rate
 			"claude-opus-4-8",  // priced, no tier

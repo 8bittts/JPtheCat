@@ -36,8 +36,8 @@ import { PROVIDERS } from "@/lib/site";
 
 describe("library structure & registries", () => {
 	it("freezes registry counts (computed by the gate, never a hand-picked target)", () => {
-		expect(MODEL_IDS.length).toBe(112);
-		expect(eligibleModelSlugs()).toHaveLength(49);
+		expect(MODEL_IDS.length).toBe(114);
+		expect(eligibleModelSlugs()).toHaveLength(51);
 		expect(VENDORS).toHaveLength(7);
 		expect(VENDOR_FAMILY_SLUGS).toHaveLength(7);
 		expect(LIBRARY_SECTIONS).toHaveLength(9);

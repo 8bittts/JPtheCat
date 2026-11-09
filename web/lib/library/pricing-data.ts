@@ -93,6 +93,13 @@ export const PRICING_MODELS = {
 		cache_creation_input_token_cost_above_1hr: 1e-5,
 		cache_read_input_token_cost: 5e-7,
 	},
+	"claude-fable-5-2": {
+		input_cost_per_token: 8e-6,
+		output_cost_per_token: 4e-5,
+		cache_creation_input_token_cost: 1e-5,
+		cache_creation_input_token_cost_above_1hr: 1.6e-5,
+		cache_read_input_token_cost: 2e-7,
+	},
 	"claude-fable-5-1": {
 		input_cost_per_token: 1e-5,
 		output_cost_per_token: 5e-5,
@@ -360,6 +367,14 @@ export const PRICING_MODELS = {
 		output_cost_per_token_above_200k_tokens: 1.2e-5,
 		cache_read_input_token_cost_above_200k_tokens: 1e-6,
 		context_tier_inclusive: true,
+	},
+	"grok-4.7-fast": {
+		input_cost_per_token: 4e-6,
+		output_cost_per_token: 1.2e-5,
+		cache_read_input_token_cost: 1e-6,
+		input_cost_per_token_above_200k_tokens: 6e-6,
+		output_cost_per_token_above_200k_tokens: 1.8e-5,
+		cache_read_input_token_cost_above_200k_tokens: 1.5e-6,
 	},
 	"grok-4.6": {
 		input_cost_per_token: 2e-6,
@@ -797,6 +812,8 @@ export const MODEL_ID_ALIASES: Readonly<Record<string, ModelId>> = {
 	"gpt-5.6": "gpt-5.6-sol",
 	"gpt-reserve": "gpt-5.6-luna",
 	"grok-4.7-build": "grok-4.7",
+	"grok-4.7-high-fast": "grok-4.7-fast",
+	"claude-opus-5-5-medium": "claude-opus-5-5",
 	"grok-4.6-build": "grok-4.6",
 	"grok-4.6-latest": "grok-4.6",
 	"grok-4.5-build": "grok-4.5",

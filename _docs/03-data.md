@@ -100,10 +100,11 @@ Sources: [A] [Anthropic pricing](https://platform.claude.com/docs/en/about-claud
 
 | Rows | Source | Disposition and qualification |
 |---|---|---|
-| `claude-opus-5-5`, `claude-opus-5`, `claude-opus-4-8`, `claude-opus-4-7`, `claude-opus-4-6`, `claude-opus-4-5`, `claude-fable-5-1`, `claude-mythos-5-1`, `claude-fable-5`, `claude-mythos-5`, `claude-sonnet-5`, `claude-sonnet-4-6`, `claude-sonnet-4-5`, `claude-haiku-4-5` | A | Verified; Sonnet 4.5's legacy context tier is corroborated by Zen. |
+| `claude-fable-5-2`, `claude-opus-5-5`, `claude-opus-5`, `claude-opus-4-8`, `claude-opus-4-7`, `claude-opus-4-6`, `claude-opus-4-5`, `claude-fable-5-1`, `claude-mythos-5-1`, `claude-fable-5`, `claude-mythos-5`, `claude-sonnet-5`, `claude-sonnet-4-6`, `claude-sonnet-4-5`, `claude-haiku-4-5` | A | Verified; Sonnet 4.5's legacy context tier is corroborated by Zen. Fable 5.2 is its own row ($8/$40, cache read $0.20). Fast mode for Fable 5.2 is published at $16/$80, and no local turn has logged `usage.speed` fast, so there is no fast-mode row yet. |
 | `claude-sonnet-5-5` | A | Corrected to the exact emitted id; flat through 1M context. |
 | `claude-haiku-5-5` | A | Verified; exclusive 100K prompt boundary counting input, cache reads, and both cache writes, not output. |
-| `claude-opus-5-5-fast-mode`, `claude-opus-5-fast-mode`, `claude-opus-4-8-fast-mode` | A | Verified fast mode (research preview); cache multipliers stack, no 200K premium. Opus 4.6 serves fast requests at standard speed and Opus 4.7 rejects them, so neither has a row. |
+| `claude-opus-5-5-fast-mode`, `claude-opus-5-fast-mode`, `claude-opus-4-8-fast-mode` | A | Verified fast mode; cache multipliers stack, no 200K premium. Opus 5.5 fast mode is generally available. Opus 5 and Opus 4.8 remain research preview. Opus 4.6 serves fast requests at standard speed and Opus 4.7 rejects them, so neither has a row. |
+| `claude-opus-5-5-medium` | A | Alias of `claude-opus-5-5`. Cursor appends the effort, and Anthropic's effort parameter does not change the per-token rate. |
 | `-us-inference` multiplier (1.1x) | A ([data residency](https://platform.claude.com/docs/en/build-with-claude/data-residency)) | Verified for Claude 4.6 and later, stacked on fast mode; other `inference_geo` values bill standard. |
 | `claude-sonnet-5-5-zen` | Z | Verified; Zen keeps the prior cache-read rate and publishes no one-hour write rate, so that field is omitted. |
 | `gpt-6-astra`, `gpt-6-sol`, `gpt-6-luna`, `gpt-5.6-sol`, `gpt-5.6-luna`, `gpt-5.6-terra`, `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.2` | O | Verified standard list price; subscription cost stays notional. GPT-5.6 Sol's rate is published as promotional. |
@@ -114,6 +115,7 @@ Sources: [A] [Anthropic pricing](https://platform.claude.com/docs/en/about-claud
 | `gpt-5.3-codex-spark` | O | Unverifiable: no exact model page; Zen's rate does not establish direct pricing, so the estimate is retained. |
 | `gpt-5-codex-zen`, `gpt-5.1-codex-zen` | Z | Verified Zen list price. |
 | `grok-4.7`, `grok-4.6`, `grok-4.5`, `grok-4.3`, `grok-4.20-0309-reasoning`, `grok-4.20-0309-non-reasoning`, `grok-4.20-multi-agent-0309`, `grok-build-0.1` | X | Verified; the direct xAI 200K threshold is inclusive. |
+| `grok-4.7-fast` | X | Verified Grok 4.7 Fast (Cursor and Grok Build only): $4/$1/$12 below 200K and $6/$1.50/$18 once the prompt exceeds 200K. The locally emitted id `grok-4.7-high-fast` aliases here. `cursor-grok-4.6-high-fast` stays unpriced; xAI publishes no Grok 4.6 Fast rate. |
 | `grok-4.7-opencode`, `grok-4.6-opencode`, `grok-4.5-opencode`, `grok-build-0.1-opencode` | Z | Verified; the gateway boundary is exclusive and Build is flat. |
 | `grok-composer-2.5-fast`, `grok-composer-2.5` | C | Input and output verified; cache rates unpublished. |
 | `gemini-3-flash-preview`, `gemini-2.5-pro`, `gemini-2.5-flash`, `gemini-2.5-flash-lite` | G | Verified text rates; audit-only provider. |

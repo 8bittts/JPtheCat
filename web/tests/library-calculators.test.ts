@@ -26,7 +26,7 @@ describe("library calculators", () => {
 	it("offers each live vendor's current flagship in the tokens-to-dollars picker", () => {
 		const ids: string[] = models("tokens-to-dollars").map((entry) => entry.id);
 		for (const id of [
-			"claude-fable-5-1",
+			"claude-fable-5-2",
 			"claude-opus-5-5",
 			"claude-sonnet-5-5",
 			"claude-haiku-5-5",
@@ -43,9 +43,9 @@ describe("library calculators", () => {
 
 	it("uses each model's published cache rates, not a flat 0.1x", () => {
 		// platform.claude.com/docs/en/about-claude/pricing
-		const fable = model("tokens-to-dollars", "claude-fable-5-1");
+		const fable = model("tokens-to-dollars", "claude-fable-5-2");
 		expect([perM(fable.input), perM(fable.cacheRead), perM(fable.cacheWrite)]).toEqual([
-			10, 0.25, 12.5,
+			8, 0.2, 10,
 		]);
 		const sol = model("tokens-to-dollars", "gpt-6.1-sol");
 		expect([perM(sol.input), perM(sol.cacheRead), perM(sol.cacheWrite)]).toEqual([2, 0.1, 2.5]);
@@ -106,6 +106,10 @@ describe("library calculators", () => {
 		expect(grok.tier?.lastBaseTokens).toBe(199_999);
 		const at200k = { input: 200, output: 0, cacheRead: 0, cacheWrite: 0 };
 		expect(priceTokenMix(grok, at200k, true).tiered).toBe(true);
+		const fast = model("context-200k-surcharge", "grok-4.7-fast");
+		expect(fast.tier?.lastBaseTokens).toBe(200_000);
+		expect(priceTokenMix(fast, at200k, true).tiered).toBe(false);
+		expect(priceTokenMix(fast, { ...at200k, input: 200.001 }, true).tiered).toBe(true);
 
 		const astra = model("context-200k-surcharge", "gpt-6-astra");
 		expect(astra.tier?.lastBaseTokens).toBe(272_000);

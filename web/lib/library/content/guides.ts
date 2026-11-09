@@ -122,7 +122,7 @@ const GUIDE_CONTENT: Record<string, GuideBody> = {
 		sections: [
 			{
 				heading: "Lean on the cache",
-				body: "On most Claude models a cache read costs 0.1× the input rate (0.05× on Opus 5.5, 0.025× on Fable 5.1). Keeping a stable context prefix so it can be cached — instead of reshuffling it every turn — is the single biggest lever. Reused context is nearly free; re-sent context is full price.",
+				body: "On most Claude models a cache read costs 0.1× the input rate (0.05× on Opus 5.5, 0.025× on Fable 5.2, Fable 5.1, and Mythos 5.1). Keeping a stable context prefix so it can be cached — instead of reshuffling it every turn — is the single biggest lever. Reused context is nearly free; re-sent context is full price.",
 			},
 			{
 				heading: "Right-size the model",
@@ -215,7 +215,7 @@ const GUIDE_CONTENT: Record<string, GuideBody> = {
 			},
 			{
 				heading: "Cache writes add up",
-				body: "The first time context is cached, you pay a write — 1.25× input for 5 minutes or 2× for an hour. Reused reads are then cheap (0.1× input on most Claude models, less on Opus 5.5 and Fable 5.1), but writes you never reuse are pure overhead.",
+				body: "The first time context is cached, you pay a write — 1.25× input for 5 minutes or 2× for an hour. Reused reads are then cheap (0.1× input on most Claude models, less on Opus 5.5, Fable 5.2, Fable 5.1, and Mythos 5.1), but writes you never reuse are pure overhead.",
 			},
 			{
 				heading: "Measure it",

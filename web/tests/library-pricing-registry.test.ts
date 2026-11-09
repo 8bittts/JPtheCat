@@ -29,11 +29,12 @@ describe("library pricing registry", () => {
 		expect(MODEL_SLUG_TO_ID["gpt-5-3-codex"]).toBe("gpt-5.3-codex");
 	});
 
-	it("admits exactly the 49 standalone-eligible model pages (field-weighted gate)", () => {
+	it("admits exactly the 51 standalone-eligible model pages (field-weighted gate)", () => {
 		expect(eligibleModelSlugs().sort()).toEqual(
 			[
 				"claude-fable-5",
 				"claude-fable-5-1",
+				"claude-fable-5-2",
 				"claude-mythos-5",
 				"claude-mythos-5-1",
 				"claude-haiku-5-5",
@@ -81,6 +82,7 @@ describe("library pricing registry", () => {
 				"grok-4-7-opencode",
 				"grok-4-6",
 				"grok-4-7",
+				"grok-4-7-fast",
 				"grok-build-0-1",
 			].sort(),
 		);
@@ -122,9 +124,9 @@ describe("library pricing registry", () => {
 		expect(populatedPriceFieldCount("claude-sonnet-4-5")).toBe(10);
 	});
 
-	it("groups all 112 models under exactly seven vendor families", () => {
+	it("groups all 114 models under exactly seven vendor families", () => {
 		const total = VENDORS.reduce((n, vendor) => n + modelsForVendor(vendor).length, 0);
-		expect(total).toBe(112);
+		expect(total).toBe(114);
 		expect(VENDORS).toEqual(["claude", "openai", "gemini", "xai", "meta", "deepseek", "opencode"]);
 		expect(modelVendor("gpt-5-codex")).toBe("openai");
 		expect(modelVendor("gemini-3")).toBe("gemini");
@@ -185,6 +187,34 @@ describe("library pricing registry", () => {
 			cache_read_input_token_cost_above_200k_tokens: 1e-6,
 			output_cost_per_token_above_200k_tokens: 1.2e-5,
 		});
+	});
+
+	it("prices Fable 5.2 below Fable 5.1 and aliases Cursor's Opus 5.5 medium id", () => {
+		expect(pricing("claude-fable-5-2")).toMatchObject({
+			input_cost_per_token: 8e-6,
+			output_cost_per_token: 4e-5,
+			cache_creation_input_token_cost: 1e-5,
+			cache_creation_input_token_cost_above_1hr: 1.6e-5,
+			cache_read_input_token_cost: 2e-7,
+		});
+		expect(pricing("claude-fable-5-2").input_cost_per_token).not.toBe(
+			pricing("claude-fable-5-1").input_cost_per_token,
+		);
+		expect(MODEL_ID_ALIASES["claude-opus-5-5-medium"]).toBe("claude-opus-5-5");
+		expect(modelKey("claude-opus-5-5-medium")).toBe("claude-opus-5-5");
+	});
+
+	it("prices Grok 4.7 Fast at the published 2x and 1.5x rates", () => {
+		expect(MODEL_ID_ALIASES["grok-4.7-high-fast"]).toBe("grok-4.7-fast");
+		expect(pricing("grok-4.7-fast")).toMatchObject({
+			input_cost_per_token: 4e-6,
+			cache_read_input_token_cost: 1e-6,
+			output_cost_per_token: 1.2e-5,
+			input_cost_per_token_above_200k_tokens: 6e-6,
+			cache_read_input_token_cost_above_200k_tokens: 1.5e-6,
+			output_cost_per_token_above_200k_tokens: 1.8e-5,
+		});
+		expect(pricing("grok-4.7-fast").context_tier_inclusive).toBeUndefined();
 	});
 
 	it("prices Claude Opus 5.5 cache hits at 0.05x input, not 0.1x", () => {

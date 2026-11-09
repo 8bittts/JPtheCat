@@ -104,7 +104,9 @@ Spot-check family-specific rates, aliases, and snapshots; a list-presence test w
 The `.agents/skills/jp-models/scripts/audit_model_coverage.py` inventories locally emitted ids, and `OpenCodeGoProviderTests.testEveryRoutedAccountingIDIsAnExactPriceRow` covers the accounting ids gateways derive.
 
 **A new generation is a distinct row until its rates prove otherwise.**
-Fable 5.1 and Mythos 5.1 bill cache reads at 0.025x input and Opus 5.5 at 0.05x, so normalizing them onto Fable 5 or Opus 5 would overbill the largest token class.
+Fable 5.2, Fable 5.1, and Mythos 5.1 bill cache reads at 0.025x input and Opus 5.5 at 0.05x, so normalizing a new generation onto the previous row overbills the largest token class.
+Fable 5.2 is $8/$40, not Fable 5.1's $10/$50.
+Grok 4.7 Fast is 2x below 200K and 1.5x once the prompt exceeds 200K, so its boundary is exclusive while direct Grok 4.7 stays inclusive.
 `grok-4.6` differs from `grok-4.5` only in its cached rate, and `gpt-6.1-sol` halves GPT-6 Sol's cached input.
 Costs are computed at query time from the stored raw model id, so a new row reprices existing turns without a `parserRevision` bump, and a web deploy of `pricing-v1.json` reaches installed apps through `RemotePricingStore`.
 Guards: per-model `PricingTableTests`, `MultiWindowSummariesParityTests`.

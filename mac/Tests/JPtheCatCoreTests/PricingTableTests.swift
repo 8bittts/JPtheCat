@@ -26,6 +26,8 @@ final class PricingTableTests: XCTestCase {
 		XCTAssertEqual(ModelIdentity.pricingID("composer-2.5-fast", aliases: table.aliases), "grok-composer-2.5-fast")
 		XCTAssertEqual(ModelIdentity.pricingID("claude-opus-5-5[1m]", aliases: table.aliases), "claude-opus-5-5")
 		XCTAssertEqual(ModelIdentity.pricingID("grok-4.7-build", aliases: table.aliases), "grok-4.7")
+		XCTAssertEqual(ModelIdentity.pricingID("grok-4.7-high-fast", aliases: table.aliases), "grok-4.7-fast")
+		XCTAssertEqual(ModelIdentity.pricingID("claude-opus-5-5-medium", aliases: table.aliases), "claude-opus-5-5")
 		XCTAssertEqual(ModelIdentity.pricingID("grok-4.6-build", aliases: table.aliases), "grok-4.6")
 		XCTAssertEqual(ModelIdentity.pricingID("grok-4.6-latest", aliases: table.aliases), "grok-4.6")
 		XCTAssertEqual(ModelIdentity.pricingID("grok-4.5-build", aliases: table.aliases), "grok-4.5")
@@ -35,7 +37,7 @@ final class PricingTableTests: XCTestCase {
 	func testBundledCoversActivelyLoggedModels() {
 		// Regression guard for new Claude families: real, logged models must never silently drop to $0.
 		for model in [
-			"claude-opus-5-5", "claude-opus-5", "claude-opus-4-8", "claude-opus-4-5", "claude-fable-5-1", "claude-fable-5",
+			"claude-opus-5-5", "claude-opus-5", "claude-opus-4-8", "claude-opus-4-5", "claude-fable-5-2", "claude-fable-5-1", "claude-fable-5",
 			"claude-mythos-5-1", "claude-mythos-5",
 			"claude-sonnet-5", "claude-sonnet-4-5", "claude-haiku-4-5",
 		] {
@@ -70,6 +72,22 @@ final class PricingTableTests: XCTestCase {
 	/// Fable 5.1 and Mythos 5.1 (platform.claude.com): $10 in / $50 out / $12.50 5m-write /
 	/// $20 1h-write, and a cache READ of $0.25 per MTok — 0.025x input, NOT the 0.1x every other
 	/// Claude model uses. A missing row would fall back to Fable 5's $1 read and overbill 4x.
+	/// Fable 5.2 (platform.claude.com): $8 in / $40 out / $10 5m-write / $16 1h-write / $0.20 cache read.
+	/// Cache reads stay 0.025x, but the base rate is lower than Fable 5.1, so this is its own row.
+	func testFable52IsItsOwnRow() {
+		XCTAssertEqual(calc.cost(model: "claude-fable-5-2", usage: TokenUsage(input: 1_000_000))!, 8.0, accuracy: 1e-9)
+		XCTAssertEqual(calc.cost(model: "claude-fable-5-2", usage: TokenUsage(output: 1_000_000))!, 40.0, accuracy: 1e-9)
+		XCTAssertEqual(calc.cost(model: "claude-fable-5-2", usage: TokenUsage(cacheCreate5m: 1_000_000))!, 10.0, accuracy: 1e-9)
+		XCTAssertEqual(calc.cost(model: "claude-fable-5-2", usage: TokenUsage(cacheCreate1h: 1_000_000))!, 16.0, accuracy: 1e-9)
+		XCTAssertEqual(calc.cost(model: "claude-fable-5-2", usage: TokenUsage(cacheRead: 1_000_000))!, 0.2, accuracy: 1e-9)
+		XCTAssertEqual(ModelIdentity.pricingID("claude-fable-5-2", aliases: table.aliases), "claude-fable-5-2")
+		XCTAssertEqual(ModelName.short("claude-fable-5-2"), "fable-5-2")
+		XCTAssertEqual(ModelEffort.level(for: "claude-fable-5-2"), .high)
+		// Cursor's effort suffix bills at Opus 5.5. Effort does not change Anthropic's per-token rate.
+		XCTAssertEqual(calc.cost(model: "claude-opus-5-5-medium", usage: TokenUsage(input: 1_000_000))!, 4.0, accuracy: 1e-9)
+		XCTAssertEqual(ModelEffort.level(for: "claude-opus-5-5-medium"), .high)
+	}
+
 	func testFable51AndMythos51PricedWithReducedCacheRead() {
 		for model in ["claude-fable-5-1", "claude-mythos-5-1"] {
 			XCTAssertEqual(calc.cost(model: model, usage: TokenUsage(input: 1_000_000))!, 10.0, accuracy: 1e-9)
@@ -262,6 +280,17 @@ final class PricingTableTests: XCTestCase {
 		XCTAssertEqual(calc.cost(model: "grok-4.7-build", usage: TokenUsage(input: 250_000))!, 1.0, accuracy: 1e-9)
 		XCTAssertEqual(calc.cost(model: "grok-4.7-build", usage: TokenUsage(cacheRead: 100_000))!, 0.05, accuracy: 1e-9)
 		XCTAssertEqual(calc.cost(model: "grok-4.7-build", usage: TokenUsage(output: 1_000_000))!, 6.0, accuracy: 1e-9)
+		// Grok 4.7 Fast (docs.x.ai): 2x below 200K, 1.5x once the prompt exceeds 200K.
+		// At exactly 200K the fast row stays on the short rate; direct grok-4.7 is already on the long rate.
+		XCTAssertEqual(calc.cost(model: "grok-4.7-high-fast", usage: TokenUsage(input: 200_000))!, 0.8, accuracy: 1e-9)
+		XCTAssertEqual(calc.cost(model: "grok-4.7-fast", usage: TokenUsage(input: 200_001))!, 1.200006, accuracy: 1e-9)
+		XCTAssertEqual(calc.cost(model: "grok-4.7-fast", usage: TokenUsage(cacheRead: 100_000))!, 0.1, accuracy: 1e-9)
+		XCTAssertEqual(calc.cost(model: "grok-4.7-fast", usage: TokenUsage(output: 1_000_000))!, 12.0, accuracy: 1e-9)
+		XCTAssertEqual(calc.cost(model: "grok-4.7", usage: TokenUsage(input: 200_000))!, 0.8, accuracy: 1e-9)
+		XCTAssertEqual(calc.cost(model: "grok-4.7", usage: TokenUsage(input: 199_999))!, 0.399998, accuracy: 1e-9)
+		XCTAssertNil(table.price(for: "cursor-grok-4.6-high-fast"))
+		XCTAssertEqual(ModelName.short("grok-4.7-fast"), "4.7-fast")
+		XCTAssertEqual(ModelEffort.level(for: "grok-4.7-high-fast"), .high)
 		XCTAssertEqual(calc.cost(model: "grok-4.6-build", usage: TokenUsage(input: 250_000))!, 1.0, accuracy: 1e-9)
 		XCTAssertEqual(calc.cost(model: "grok-4.6-build", usage: TokenUsage(cacheRead: 100_000))!, 0.05, accuracy: 1e-9)
 		XCTAssertEqual(calc.cost(model: "grok-4.5-build", usage: TokenUsage(input: 250_000))!, 1.0, accuracy: 1e-9)

@@ -80,7 +80,7 @@ function calcModel(id: ModelId): CalcModel {
 
 /** Current flagship per live vendor, newest first. Older models keep their own pricing pages. */
 const SCENARIO_MODELS: ModelId[] = [
-	"claude-fable-5-1",
+	"claude-fable-5-2",
 	"claude-opus-5-5",
 	"claude-sonnet-5-5",
 	"claude-haiku-5-5",
@@ -93,7 +93,7 @@ const SCENARIO_MODELS: ModelId[] = [
 ];
 
 const CLAUDE_CODE_MODELS: ModelId[] = [
-	"claude-fable-5-1",
+	"claude-fable-5-2",
 	"claude-opus-5-5",
 	"claude-sonnet-5-5",
 	"claude-haiku-5-5",
@@ -107,6 +107,7 @@ const SURCHARGE_MODELS: ModelId[] = [
 	"gpt-5.6-sol",
 	"gpt-5.5",
 	"grok-4.7",
+	"grok-4.7-fast",
 	"claude-sonnet-4-5",
 	"gemini-3-pro-preview",
 ];
@@ -148,7 +149,7 @@ export function calculatorLeaf(calc: CalculatorEntry): LeafContent {
 				body:
 					calculatorMode(calc) === "request"
 						? "Enter the token mix of ONE request. When input, cache reads, and cache writes together cross the model's published threshold (200K for Grok, Gemini, and Claude Sonnet 4.5; 272K for OpenAI), the WHOLE request is billed at the long-context rates — the same rule JP the Cat applies to each real turn. Totals summed across many turns never trip the surcharge on their own."
-						: "The calculator prices the token counts you enter — input, output, cache reads, and 5-minute cache writes — at each model's own published rates from JP the Cat's bundled pricing table. Cache-read discounts differ by model: 0.1× input for most, 0.05× on Claude Opus 5.5, and 0.025× on Claude Fable 5.1. Session totals are priced at base rates because the long-context surcharge is decided per request; use the 200K context surcharge calculator for one large turn. 1-hour cache writes cost more and are not modeled here.",
+						: "The calculator prices the token counts you enter — input, output, cache reads, and 5-minute cache writes — at each model's own published rates from JP the Cat's bundled pricing table. Cache-read discounts differ by model: 0.1× input for most, 0.05× on Claude Opus 5.5, and 0.025× on Claude Fable 5.2, Claude Fable 5.1, and Claude Mythos 5.1. Session totals are priced at base rates because the long-context surcharge is decided per request; use the 200K context surcharge calculator for one large turn. 1-hour cache writes cost more and are not modeled here.",
 			},
 		],
 		faq: [

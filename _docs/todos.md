@@ -43,6 +43,7 @@ Any promoted phase ends with owner-doc alignment and the affected declared gates
 - Google bills Gemini 3.6–3.8 Flash at $0.75/$3.75 through 2026-12-31 while Zen bills $1.50/$7.50, so JP leaves them unpriced; add one row when the rates converge, or `-zen` ids if a local Zen turn appears first.
 - Re-read the Go usage table if it publishes a new end date for DeepSeek V4.1 Flash.
 - Gemini 4 Argon is priced at the 50%-off rate Go and Zen bill today ($2/$10/cached $0.10, list $4/$20/cached $0.20); both tables date the discount through 2026-11-30, so move the row to list price on 2026-12-01 after re-reading both tables.
+- Cursor capture id `cursor-grok-4.6-high-fast` has no published Fast rate. xAI documents Fast only for Grok 4.7, so leave that id unpriced.
 
 ### OpenCode routes JP cannot price yet
 

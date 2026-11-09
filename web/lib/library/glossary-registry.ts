@@ -21,7 +21,7 @@ export const GLOSSARY: GlossaryTerm[] = [
 		short:
 			"Reusing a previously-sent context prefix instead of paying full input price for it again.",
 		mechanic:
-			"On most Claude models cache reads cost 0.1x the input rate (0.05x on Opus 5.5, 0.025x on Fable 5.1); the first write costs 1.25x (5-min) or 2x (1-hour).",
+			"On most Claude models cache reads cost 0.1x the input rate (0.05x on Opus 5.5, 0.025x on Fable 5.2, Fable 5.1, and Mythos 5.1); the first write costs 1.25x (5-min) or 2x (1-hour).",
 		related: "/library/calculators/prompt-cache-savings",
 	},
 	{
@@ -29,7 +29,7 @@ export const GLOSSARY: GlossaryTerm[] = [
 		term: "Cache read vs cache write",
 		short: "The difference between paying to store context (write) and paying to reuse it (read).",
 		mechanic:
-			"Write: 1.25x input (5-min) or 2x input (1-hour). Read: 0.1x input on most Claude models, 0.05x on Opus 5.5, 0.025x on Fable 5.1.",
+			"Write: 1.25x input (5-min) or 2x input (1-hour). Read: 0.1x input on most Claude models, 0.05x on Opus 5.5, 0.025x on Fable 5.2, Fable 5.1, and Mythos 5.1.",
 		related: "/library/pricing/claude-opus-4-8",
 	},
 	{
