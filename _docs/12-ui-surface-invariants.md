@@ -264,7 +264,7 @@ Guards: `AppResourcesTests.testBundlesEveryInteractiveSoundCue`, `web/tests/ui-s
 `mac/Sources/JPtheCatApp/JPAppDesignTokens.swift` owns native text and spacing roles — add a role there before introducing a new font size, padding, or spacing value.
 `JPAppColor` resolves from the active `JPTheme`; change a palette value there, never at the call site.
 
-Money-text scale: three monospaced roles — hero `metricHero` (split-flap), primary `metric` (header total, selector amounts), secondary `metricSmall` (nested detail, gauge %); `settingsPrice` is retained only as a type-role token, not a paid upgrade surface.
+Money-text scale: three monospaced roles — hero `metricHero` (split-flap), primary `metric` (header total, selector amounts), secondary `metricSmall` (nested detail, gauge %).
 Never render money at `metricCaption`/`micro`, and every money figure routes through `MoneyFormatter`.
 
 Native confirmations use `NSAlert(jpTitle:jpMessage:)` (`NSAlert+Spacing.swift`) with plain native layout; multi-paragraph bodies use `"\n\n"` inside the message.

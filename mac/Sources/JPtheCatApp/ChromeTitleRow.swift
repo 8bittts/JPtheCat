@@ -20,6 +20,7 @@ struct ChromeTitleRow<Trailing: View>: View {
   let windowChrome: Bool
   @ViewBuilder let trailing: () -> Trailing
 
+  // periphery:ignore - intentional theme dependency.
   @ObservedObject private var themeManager = ThemeManager.shared
 
   init(
@@ -69,6 +70,7 @@ struct RotationIndicatorLight: View {
   let isRotating: Bool
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @Environment(\.jpMotionPaused) private var motionPaused
+  // periphery:ignore - intentional theme dependency.
   @ObservedObject private var themeManager = ThemeManager.shared
 
   private let diameter: CGFloat = 7

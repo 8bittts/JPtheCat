@@ -1,5 +1,4 @@
 import Foundation
-import JPtheCatCore
 
 enum SupportReportSendResult: Sendable, Equatable {
   case sent

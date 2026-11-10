@@ -35,7 +35,6 @@ enum JPAppFont {
   static let metricCaption: Font = .system(size: 11, weight: .semibold, design: .monospaced)
   static let metricValue: Font = .system(size: 16, weight: .semibold, design: .monospaced)
   static let metricHero: Font = .system(size: 37, weight: .semibold, design: .monospaced)
-  static let settingsPrice: Font = .system(size: 22, weight: .semibold, design: .monospaced)
   /// The Advanced Analytics window's oversized money hero — the dashboard split-flap hero (`metricHero`,
   /// 37pt) scaled up ~1.25× for the large two-column analytics canvas. Monospaced so the digits stay
   /// column-aligned like every other money figure. Documented money role (see AGENTS.md "Money-text scale").
@@ -97,8 +96,7 @@ enum JPAppSpacing {
   static let noticeY: CGFloat = 8
   static let metricCardX: CGFloat = 9  // composition metric card
   static let metricCardY: CGFloat = 7
-  static let ctaPillX: CGFloat = 16  // accent CTA pill horizontal padding
-  static let ctaPillY: CGFloat = 6
+  static let ctaPillY: CGFloat = 6  // accent CTA pill vertical padding
   static let settingsBodyY: CGFloat = 14  // settings body vertical inset + inter-section gap
   static let panelInset: CGFloat = 14  // settings panel all-sides inset
 
@@ -169,7 +167,6 @@ enum JPAppColor {
   static var honey: Color { Color(hex: t.honey) }
   // periphery:ignore - named palette role documented in AGENTS.md/_docs/02-design-system.md.
   static var creamDeep: Color { Color(hex: t.creamDeep) }
-  static var gold: Color { Color(hex: t.gold) }
   /// Red/pink attention role — one of the five distinct, legible token-mix composition-bar segment
   /// tints (input/output/cache-5m/cache-1h/cache-read). A real palette role in every `JPTheme`; this
   /// accessor exposes it so the analytics token-mix bar reads as five distinct hues (never gold).

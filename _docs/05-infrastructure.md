@@ -46,7 +46,8 @@ Post-release proofs:
 - Back up the EdDSA private key (keychain account `jpthecat`, exported to `~/.config/jpthecat/sparkle_ed25519_priv.key`); losing it strands every installed user on their current build.
 - The feed sets `SURequireSignedFeed` and `SUVerifyUpdateBeforeExtraction`; an unsandboxed app needs no Sparkle XPC entitlements or mach-lookup exceptions.
 - `stage-widget-appintents-metadata.sh` stages native products from `mac/build/appintents/<configuration>/native-build`; never copy that flat resource bundle into swiftbuild's Contents-style bundle.
-- `mac/.periphery.yml` runs a Periphery unused-code scan configured for an AppKit and Sparkle `@objc` app; delete what it flags.
+- `mac/.periphery.yml` configures a Periphery unused-code scan for an AppKit and Sparkle `@objc` app: run `swift build --build-tests && periphery scan` from `mac/`, and delete what it flags.
+  The config pins SwiftPM's `.build/out` index store, so the scan reads the last build and never builds for itself.
 
 ## Update UI at runtime
 

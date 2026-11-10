@@ -1161,6 +1161,7 @@ private struct StatTile: View {
   // A pure-value leaf (only String inputs) reading `JP.*` freezes at first-render theme, since SwiftUI
   // skips its body when the parent re-colors but the strings are unchanged — see AGENTS.md "Theming
   // System" and the sibling `HeatmapCell`. Observing `ThemeManager` forces the re-render.
+  // periphery:ignore - intentional theme dependency.
   @ObservedObject private var themeManager = ThemeManager.shared
 
   var body: some View {
@@ -1683,6 +1684,7 @@ private struct TokenMixBar: View {
   // Observe the theme so this pure-value leaf re-renders on a theme change (else it freezes at the
   // first-render palette). The tints are an INSTANCE computed property, not a `static let` — a static
   // color array snapshots `JP.*` once for the process lifetime and never re-tints (AGENTS.md "Theming").
+  // periphery:ignore - intentional theme dependency.
   @ObservedObject private var themeManager = ThemeManager.shared
 
   private var segmentTints: [Color] { [JP.ginger, JP.sage, JP.honey, JP.coral, JP.inkSoft] }
@@ -1711,6 +1713,7 @@ private struct TokenMixBar: View {
 private struct TokenMixLegend: View {
   // Zero-input static leaf: observe the theme (else it freezes) and keep `entries` an INSTANCE computed
   // property so each swatch re-reads `JP.*` per render instead of a process-lifetime `static let` snapshot.
+  // periphery:ignore - intentional theme dependency.
   @ObservedObject private var themeManager = ThemeManager.shared
 
   private var entries: [(Color, String)] {

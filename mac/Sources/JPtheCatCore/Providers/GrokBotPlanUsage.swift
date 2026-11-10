@@ -28,17 +28,6 @@ public struct GrokBotPlanUsage: Sendable, Equatable, Codable {
 			planName: planName, planLabel: planLabel, isTeam: isTeam, weekly: weekly, fetchedAt: fetchedAt)
 	}
 
-	func carryingOver(from previous: GrokBotPlanUsage?, sandFailed: Bool, now: Date) -> GrokBotPlanUsage {
-		guard sandFailed, weekly == nil, let previous, let carried = previous.weekly, carried.isCurrent(at: now)
-		else { return self }
-		return GrokBotPlanUsage(
-			planName: planName ?? previous.planName,
-			planLabel: planLabel ?? previous.planLabel,
-			isTeam: isTeam,
-			weekly: carried,
-			fetchedAt: fetchedAt)
-	}
-
 	public static func decode(sand: Data, planInfo: Data?, fetchedAt: Date) -> GrokBotPlanUsage? {
 		guard let sandObject = jsonObject(sand) else { return nil }
 		let weekly = CursorPlanUsage.grokBotMeter(sandObject)
@@ -67,12 +56,6 @@ public enum GrokBotPlanUsageStore {
 	public static let markerFileName = "grok-bot-plan-usage.enabled"
 	public static let readingFileName = "grok-bot-plan-usage.json"
 
-	public enum State: Equatable, Sendable {
-		case active
-		case installable
-		case unavailable
-	}
-
 	public static func appSupportDirectory() -> URL {
 		CursorHookSetup.appSupportDirectory()
 	}
@@ -87,11 +70,6 @@ public enum GrokBotPlanUsageStore {
 
 	public static func isEnabled(appSupport: URL? = nil) -> Bool {
 		FileManager.default.fileExists(atPath: markerURL(appSupport: appSupport).path)
-	}
-
-	public static func state(appSupport: URL? = nil, detected: Bool? = nil) -> State {
-		if isEnabled(appSupport: appSupport) { return .active }
-		return (detected ?? GrokBotAuthToken.isSourcePresent()) ? .installable : .unavailable
 	}
 
 	public static func enable(appSupport: URL? = nil) throws {

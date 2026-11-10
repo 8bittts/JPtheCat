@@ -1,7 +1,5 @@
 import XCTest
 
-@testable import JPtheCatCore
-
 /// Guards the money-path fix: every accumulating scan loop in Core must let a real mid-scan
 /// `SQLiteError.step` PROPAGATE (so callers see nothing, or fall back to a fresh log read) rather
 /// than collapsing it to loop-end like `SQLITE_DONE`, which silently truncated a partial money total

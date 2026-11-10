@@ -2,7 +2,6 @@ import Foundation
 
 public enum JPWidgetContract {
 	public static let kind = "JPtheCatWidget"
-	public static let extensionBundleIdentifier = "com.8bittts.jpthecat.widget"
 }
 
 /// Legacy snapshot field: JP is free, so the app always writes `.premium`. The other cases stay only so

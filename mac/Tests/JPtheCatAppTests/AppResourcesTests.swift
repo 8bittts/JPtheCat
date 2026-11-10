@@ -37,8 +37,6 @@ final class AppResourcesTests: XCTestCase {
 		XCTAssertNotNil(AppResources.image(forResource: "jp-menubar"))
 		XCTAssertNotNil(AppResources.image(forResource: "jp-first-run-peek"))
 		XCTAssertNotNil(AppResources.url(forResource: "jp-meow", withExtension: "m4a"))
-		// The celebration confetti "pop" (app-only, like the meow — not a mirrored UI cue).
-		XCTAssertNotNil(AppResources.url(forResource: "confetti-pop", withExtension: "m4a"))
 		XCTAssertNotNil(AppResources.url(forResource: "provider-codex", withExtension: "svg"))
 		XCTAssertNotNil(AppResources.url(forResource: "provider-grok", withExtension: "svg"))
 		XCTAssertNotNil(AppResources.url(forResource: "provider-grok_bot", withExtension: "svg"))

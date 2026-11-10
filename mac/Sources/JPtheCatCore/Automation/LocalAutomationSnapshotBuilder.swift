@@ -8,10 +8,6 @@ public enum LocalAutomationSnapshotBuilder {
 		return supportedTimeframes.min(by: { abs($0 - days) < abs($1 - days) }) ?? 14
 	}
 
-	public static func liveProviderIDs() -> [ProviderID] {
-		ProviderCatalog.live.map(\.id)
-	}
-
 	public static func build(
 		summaries: UsageWindowSummaries,
 		providerIDs: [ProviderID],

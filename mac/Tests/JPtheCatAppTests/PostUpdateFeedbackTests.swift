@@ -1,5 +1,4 @@
 import Foundation
-import JPtheCatCore
 import XCTest
 
 @testable import JPtheCatApp

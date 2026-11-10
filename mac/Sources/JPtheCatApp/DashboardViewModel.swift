@@ -779,7 +779,7 @@ final class DashboardViewModel {
 			let events = copilot.loadEvents()
 			if let row = Self.makeTokenEstimateRow(
 				id: "copilot", name: "Copilot", tintHex: JPAppColor.copilotTintHex,
-				events: events, days: days, calculator: calculator,
+				events: events, days: days,
 				// AIU consumption over the selected window (github.copilot.nano_aiu), nil when the
 				// OTel export carries no AIU signal. Consumption count only — never $, never %.
 				aiuWindow: copilot.windowAIU(days: days))
@@ -983,25 +983,22 @@ final class DashboardViewModel {
 	}
 
 	/// Shared presentation contract for providers with trustworthy local token counts but no
-	/// trustworthy local dollars or quota percentage. Used by Copilot and Cursor so estimate badge,
-	/// token charting, self-relative meter, and aggregate exclusion cannot drift between them.
+	/// trustworthy local dollars or quota percentage. Copilot is the one such row today; the estimate
+	/// badge, token charting, self-relative meter, and aggregate exclusion all derive from here.
 	nonisolated private static func makeTokenEstimateRow(
 		id: String,
 		name: String,
 		tintHex: String,
 		events: [UsageEvent],
 		days: Int,
-		calculator: CostCalculator,
-		aiuWindow: Double? = nil,
-		cursorPlan: CursorPlanUsage? = nil
+		aiuWindow: Double? = nil
 	) -> ProviderRow? {
 		// These providers are contractually token-only even when their emitted model id happens to
 		// match the global list-price table. An empty table prevents an accidental model match from
 		// turning the estimate row back into dollars on some surfaces.
 		let tokenOnlyCalculator = CostCalculator(pricing: PricingTable(models: [:]))
 		let rollup = UsageStore(calculator: tokenOnlyCalculator).rollup(events, days: days)
-		guard rollup.today.eventCount > 0 || rollup.last7d.eventCount > 0 || cursorPlan != nil
-		else { return nil }
+		guard rollup.today.eventCount > 0 || rollup.last7d.eventCount > 0 else { return nil }
 		let breakdown = Self.modelBreakdown(rollup, calculator: tokenOnlyCalculator)
 		// Same derivation as the official-row builder: `.estimate` is what makes these rows
 		// non-aggregable, and it comes from Core's table rather than a literal here.
@@ -1020,7 +1017,7 @@ final class DashboardViewModel {
 			byModel7d: breakdown.lines, cacheSavings7d: breakdown.cacheSavings,
 			resetsAt5h: nil, resetsAtWeekly: nil,
 			windowMinutes5h: nil, windowMinutesWeekly: nil,
-			isAggregable: basis.isAggregable, aiuWindow: aiuWindow, cursorPlan: cursorPlan)
+			isAggregable: basis.isAggregable, aiuWindow: aiuWindow)
 	}
 
 
@@ -1122,18 +1119,22 @@ final class DashboardViewModel {
 	}
 
 	/// Provider log directories for FSEvents-based instant refresh — the single source of truth is
-	/// the providers' own `watchPaths()` (respects any custom root override).
+	/// the providers' own `watchPaths()` (respects any custom root override). Every OpenCode-derived
+	/// row shares one store root, so the list is deduplicated before it reaches the watcher.
 	func watchPaths() -> [URL] {
 		var paths: [URL] = []
 		if settingsStore.claudeProviderEnabled { paths += claude.watchPaths() }
 		if settingsStore.codexProviderEnabled { paths += codex.watchPaths() }
 		if settingsStore.grokProviderEnabled { paths += grok.watchPaths() }
 		if settingsStore.museSparkProviderEnabled { paths += museSpark.watchPaths() }
+		if settingsStore.openCodeZenProviderEnabled { paths += openCodeZen.watchPaths() }
+		if settingsStore.openCodeGoProviderEnabled { paths += openCodeGo.watchPaths() }
 		for provider in brands where settingsStore.isBrandEnabled(provider.brand) {
 			paths += provider.watchPaths()
 		}
 		if CursorHookSetup.state() == .active { paths += cursor.watchPaths() }
-		return paths
+		var seen = Set<String>()
+		return paths.filter { seen.insert($0.standardizedFileURL.path).inserted }
 	}
 
 	// MARK: - Selected-view accessors (drive the header + chart + detail)

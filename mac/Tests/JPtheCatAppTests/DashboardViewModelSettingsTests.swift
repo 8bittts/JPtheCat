@@ -1,3 +1,4 @@
+import JPtheCatCore
 import XCTest
 
 @testable import JPtheCatApp
@@ -55,6 +56,34 @@ final class DashboardViewModelSettingsTests: XCTestCase {
 
 		XCTAssertFalse(SettingsStore.providerEnabled(.codex, defaults))
 		XCTAssertTrue(SettingsStore.providerEnabled(.claude, defaults))
+	}
+
+	/// The gateways used to be watched only by accident, through a Muse Spark or brand row sharing their
+	/// store root, so turning those rows off left OpenCode Zen and Go on timer-only refresh.
+	func testWatchPathsCoverTheOpenCodeGatewaysWithoutABrandRow() {
+		let store = SettingsStore(defaults: defaults)
+		store.museSparkProviderEnabled = false
+		store.nemotronProviderEnabled = false
+		store.mimoProviderEnabled = false
+		store.bigPickleProviderEnabled = false
+		store.deepSeekProviderEnabled = false
+		let openCodeRoot = OpenCodeStorePaths.defaultRoot().standardizedFileURL.path
+		let model = DashboardViewModel(index: nil, settingsStore: store)
+
+		XCTAssertTrue(store.openCodeZenProviderEnabled)
+		XCTAssertEqual(model.watchPaths().filter { $0.standardizedFileURL.path == openCodeRoot }.count, 1)
+
+		store.openCodeZenProviderEnabled = false
+		store.openCodeGoProviderEnabled = false
+		XCTAssertFalse(model.watchPaths().contains { $0.standardizedFileURL.path == openCodeRoot })
+	}
+
+	func testWatchPathsNeverRepeatASharedStoreRoot() {
+		let paths = DashboardViewModel(index: nil, settingsStore: SettingsStore(defaults: defaults))
+			.watchPaths().map(\.standardizedFileURL.path)
+
+		XCTAssertFalse(paths.isEmpty)
+		XCTAssertEqual(paths.count, Set(paths).count)
 	}
 
 	private func drainMainQueue() {

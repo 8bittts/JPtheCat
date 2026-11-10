@@ -691,7 +691,6 @@ private struct GatewayExplainerPopover: View {
 
 private struct EstimateExplainerPopover: View {
 	let providerName: String
-	@Environment(\.dismiss) private var dismiss
 
 	var body: some View {
 		VStack(alignment: .leading, spacing: 12) {

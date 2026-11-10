@@ -1,5 +1,4 @@
 import SwiftUI
-import JPtheCatCore
 
 /// A small icon-only footer button (mirrors `DashboardFooterActionButton`'s exact recipe — same font/
 /// frame/hover/content-shape — since it sits in that SAME icon row, right after Refresh). Opens the

@@ -92,6 +92,7 @@ enum JPWidgetTimeframeChoice: String, AppEnum {
 
 struct JPtheCatWidgetConfigurationIntent: WidgetConfigurationIntent {
 	static var title: LocalizedStringResource { "JP the Cat" }
+	// periphery:ignore - AppIntent metadata the system reads; nothing in the package calls it.
 	static var description: IntentDescription {
 		"Choose the provider view for the JP the Cat widget."
 	}

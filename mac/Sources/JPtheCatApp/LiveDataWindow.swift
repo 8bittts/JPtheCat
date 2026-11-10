@@ -1,5 +1,4 @@
 import AppKit
-import JPtheCatCore
 import SwiftUI
 
 /// The dedicated "Live data" window, opened from the single Settings → "Live data" row. It re-hosts the

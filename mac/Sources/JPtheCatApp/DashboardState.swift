@@ -403,7 +403,7 @@ extension DashboardViewModel.ProviderRow {
 		let meters = cursorPlan?.current(at: now)?.meters ?? []
 		return meters.filter { meter in
 			if meter.key == CursorPlanMeter.grokBotKey && weeklyUsedPct != nil { return false }
-			if heroShowsOfficialPlanUsage(now: now), meter.key == selectorPlanMeter(now: now)?.key {
+			if heroShowsOfficialPlanUsage(), meter.key == selectorPlanMeter(now: now)?.key {
 				return false
 			}
 			return true
@@ -436,7 +436,7 @@ extension DashboardViewModel.ProviderRow {
 	}
 
 	func heroFooterCaption(now: Date = Date()) -> String? {
-		guard heroShowsOfficialPlanUsage(now: now) else { return nil }
+		guard heroShowsOfficialPlanUsage() else { return nil }
 		return ProviderRelativeReset.resetsInPhrase(until: primaryPlanReset, now: now) ?? primaryPlanWindowLabel
 	}
 
@@ -448,33 +448,33 @@ extension DashboardViewModel.ProviderRow {
 	}
 
 	/// Selector badge when official plan usage is the row's only signal.
-	func selectorOfficialPlanBadge(now: Date = Date()) -> String? {
+	func selectorOfficialPlanBadge() -> String? {
 		guard isOfficialPlanOnly, isAvailable else { return nil }
 		return ProviderBasis.officialPlan.badge
 	}
 
 	/// With no local usage ledger, the hero surfaces official included usage instead of a
 	/// fabricated zero-dollar chart, including while a newly reset window awaits refresh.
-	func heroShowsOfficialPlanUsage(now: Date = Date()) -> Bool { isOfficialPlanOnly }
+	func heroShowsOfficialPlanUsage() -> Bool { isOfficialPlanOnly }
 
 	func heroPrimaryTextOverride(now: Date = Date()) -> String? {
-		guard heroShowsOfficialPlanUsage(now: now) else { return nil }
+		guard heroShowsOfficialPlanUsage() else { return nil }
 		return (selectorQuota(now: now)?.percent ?? selectorPlanMeter(now: now)?.usedPercent).map { "\(Int($0.rounded()))%" } ?? "—"
 	}
 
 	func heroBasisLabel(now: Date = Date()) -> String? {
-		guard heroShowsOfficialPlanUsage(now: now) else { return nil }
+		guard heroShowsOfficialPlanUsage() else { return nil }
 		return selectorQuota(now: now)?.weekly == true || selectorPlanMeter(now: now)?.key == CursorPlanMeter.grokBotKey
 			? "OFFICIAL PLAN USAGE · WEEKLY" : "OFFICIAL PLAN USAGE"
 	}
 
-	func heroSecondaryCaption(now: Date = Date()) -> String? {
-		guard heroShowsOfficialPlanUsage(now: now) else { return nil }
+	func heroSecondaryCaption() -> String? {
+		guard heroShowsOfficialPlanUsage() else { return nil }
 		return planLabel ?? "Official included usage"
 	}
 
 	func heroChartQuotaFraction(now: Date = Date()) -> Double? {
-		guard heroShowsOfficialPlanUsage(now: now) else { return nil }
+		guard heroShowsOfficialPlanUsage() else { return nil }
 		let pct = selectorQuota(now: now)?.percent ?? selectorPlanMeter(now: now)?.usedPercent ?? 0
 		return min(1, max(0, pct / 100))
 	}

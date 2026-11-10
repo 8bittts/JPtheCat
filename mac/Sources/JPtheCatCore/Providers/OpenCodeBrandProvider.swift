@@ -54,10 +54,6 @@ public enum OpenCodeBrand: String, CaseIterable, Sendable {
 		ProviderCatalog.descriptor(for: id)?.shortName ?? rawValue
 	}
 
-	public static func brand(for id: ProviderID) -> OpenCodeBrand? {
-		allCases.first { $0.id == id }
-	}
-
 	/// True when `modelID` belongs to this brand (any vendor prefix, any tier suffix).
 	public func matches(modelID: String?) -> Bool {
 		guard let modelID, !modelID.isEmpty else { return false }

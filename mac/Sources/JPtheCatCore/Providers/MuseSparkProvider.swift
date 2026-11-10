@@ -109,20 +109,6 @@ public struct MuseSparkProvider: UsageProvider {
 			matches: matches, normalize: normalizedModelID)
 	}
 
-	public static func decodeMessagesFromDatabase(fileURL: URL) -> [UsageEvent] {
-		guard let store = OpenCodeStore(fileURL: fileURL) else { return [] }
-		return OpenCodeModelReader.messages(
-			store: store, createdAtOrAfterMillis: 0, provider: .museSpark,
-			matches: matches, normalize: normalizedModelID
-		).events
-	}
-
-	public static func decodeSessionsFromDatabase(fileURL: URL) -> [UsageEvent] {
-		guard let store = OpenCodeStore(fileURL: fileURL) else { return [] }
-		return OpenCodeModelReader.sessions(
-			store: store, provider: .museSpark, matches: matches, normalize: normalizedModelID)
-	}
-
 	/// Parse-time normalisation through the same `OpenCodeGateway.normalizedModelID` the gateway and
 	/// brand rows use, so one turn always carries one accounting id on every row. A `-contributor` /
 	/// `-contributor-free` suffix stays: `PricingTable` prices `muse-spark-1.3-contributor` at its own

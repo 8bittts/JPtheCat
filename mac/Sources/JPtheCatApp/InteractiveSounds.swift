@@ -20,7 +20,6 @@ final class InteractiveSounds {
 	}
 
 	private var players: [Cue: AVAudioPlayer] = [:]
-	private var celebrationPlayer: AVAudioPlayer?
 
 	private init() {}
 
@@ -64,26 +63,6 @@ final class InteractiveSounds {
 
 	/// A bottom footer button (refresh, quit, help, share) was clicked.
 	func bottomClick() { play(.clickBottom) }
-
-	/// The one-shot party-popper "pop" for the full-desktop upgrade celebration (`FullScreenConfetti`).
-	/// A CELEBRATION asset like the meow — NOT one of the four mirrored UI cues — so it lives only in the
-	/// app Resources (`confetti-pop.m4a`) and is cached separately. Gated on the same master switch.
-	@discardableResult
-	func celebration() -> Bool {
-		guard enabled else { return false }
-		if celebrationPlayer == nil {
-			guard let url = AppResources.url(forResource: "confetti-pop", withExtension: "m4a"),
-				let player = try? AVAudioPlayer(contentsOf: url) else { return false }
-			player.volume = 0.55
-			player.prepareToPlay()
-			celebrationPlayer = player
-		}
-		guard let player = celebrationPlayer else { return false }
-		if player.isPlaying { player.stop() }
-		player.currentTime = 0
-		player.prepareToPlay()
-		return player.play()
-	}
 
 	/// A dashboard selector row — a provider or the "All providers" aggregate — was clicked. Reuses the
 	/// light top-click cue (selector rows are the card's primary navigation), named so the intent is

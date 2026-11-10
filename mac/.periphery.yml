@@ -1,9 +1,18 @@
 # Periphery config for JP the Cat's SwiftPM macOS package.
 # Run from this directory with:
-#   periphery scan
+#   swift build --build-tests && periphery scan
 #
 # There is no Xcode project in this package. Leave project/schemes unset so
-# Periphery uses SwiftPM (`swift build`) rather than xcodebuild.
+# Periphery reads the package manifest rather than xcodebuild.
+#
+# SwiftPM's default `swiftbuild` backend writes its index store to `.build/out`,
+# not the `.build/debug/index/store` Periphery assumes, so the path is pinned
+# here. Pinning it makes Periphery skip its own build, which is why the build
+# with tests comes first: an index without the test targets reports every
+# test-only seam as unused.
+index_store_path:
+  - .build/out
+skip_build: true
 retain_public: true
 retain_objc_accessible: true
 retain_unused_protocol_func_params: true

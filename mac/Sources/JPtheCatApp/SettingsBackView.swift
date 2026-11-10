@@ -1020,6 +1020,7 @@ struct LiveDataWindowContent: View {
 
   var model: DashboardViewModel
   @ObservedObject private var settings = SettingsStore.shared
+  // periphery:ignore - intentional theme dependency.
   @ObservedObject private var themeManager = ThemeManager.shared
   @State private var detection: Detection
   /// `nil` in production: `.onAppear` re-probes so an install or uninstall performed outside the app is

@@ -1,4 +1,3 @@
-import JPtheCatCore
 import SwiftUI
 import XCTest
 

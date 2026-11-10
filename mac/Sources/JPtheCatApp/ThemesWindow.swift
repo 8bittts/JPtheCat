@@ -32,6 +32,7 @@ final class ThemesWindowController: TrayChildWindowController {
 /// `ThemesWindowGrid`. Fixed width, intrinsic height. Observes `ThemeManager` so selecting a theme
 /// re-highlights the active tile live and the whole window re-colors.
 struct ThemesWindowContent: View {
+  // periphery:ignore - intentional theme dependency.
   @ObservedObject private var themeManager = ThemeManager.shared
 
   var body: some View {

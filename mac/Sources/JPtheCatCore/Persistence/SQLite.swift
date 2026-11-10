@@ -96,7 +96,6 @@ public final class SQLiteStatement {
 
 	deinit { sqlite3_finalize(stmt) }
 
-	public func bind(_ index: Int32, _ value: Int64) { sqlite3_bind_int64(stmt, index, value) }
 	public func bind(_ index: Int32, _ value: Int) { sqlite3_bind_int64(stmt, index, Int64(value)) }
 	public func bind(_ index: Int32, _ value: Double) { sqlite3_bind_double(stmt, index, value) }
 

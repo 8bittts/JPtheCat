@@ -1,7 +1,5 @@
 import XCTest
 
-@testable import JPtheCatApp
-
 /// [Regression guard — Advanced Analytics stalled the main thread on open]
 ///
 /// `AdvancedAnalyticsTrayView` is a `View`, and in Swift 6 that conformance infers `@MainActor` onto the

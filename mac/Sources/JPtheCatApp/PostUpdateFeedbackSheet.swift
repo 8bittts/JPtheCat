@@ -1,5 +1,4 @@
 import AppKit
-import JPtheCatCore
 import SwiftUI
 
 /// The one time JP asks for something back: a single text box, shown on the first dashboard open

@@ -1,17 +1,17 @@
 import Foundation
 
-/// A pluggable source of usage events. Adding a provider = one file conforming to this + one
-/// entry in the providers array. Claude ships live; the rest conform with stubs until wired.
+/// A pluggable source of usage events. The checklist for adding one is
+/// `_docs/11-adding-a-provider.md`.
 public protocol UsageProvider: Sendable {
 	var id: ProviderID { get }
 
-	/// Directories to watch for changes (FSEvents wiring lands in Phase 2).
+	/// Directories the app's FSEvents watcher observes for instant refresh.
 	func watchPaths() -> [URL]
 
 	/// True if this tool has any local data on this machine.
 	func isAvailable() -> Bool
 
-	/// All de-duplicated usage events currently on disk. Incremental cursors land in Phase 2.
+	/// All de-duplicated usage events currently on disk.
 	func loadEvents() -> [UsageEvent]
 
 	/// The provider's latest current official rate-limit snapshot (subscription usage), if it exposes

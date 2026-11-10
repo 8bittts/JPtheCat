@@ -442,7 +442,6 @@ final class OpenCodeStore {
 
 /// Both event sets a single `opencode.log` traversal yields. Each side is already deduped.
 struct OpenCodeLogParse {
-	static let empty = OpenCodeLogParse(opencode: [], museSpark: [])
 	let opencode: [UsageEvent]
 	let museSpark: [UsageEvent]
 }

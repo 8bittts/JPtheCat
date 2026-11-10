@@ -40,7 +40,6 @@ public enum CursorHookSetup {
 	public enum SetupError: Error, Equatable {
 		case cursorNotDetected
 		case malformedHooks
-		case noAppSupport
 	}
 
 	public static func cursorHome(

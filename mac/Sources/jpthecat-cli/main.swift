@@ -78,8 +78,6 @@ struct CLIProvider: Sendable {
 	let selectionTokens: [String]
 	/// Value of the legacy JSON `provider` field.
 	let name: String
-	/// Human-readable name used in `CLIError.providerUnavailable`.
-	let displayName: String
 	let id: ProviderID
 	/// Where the legacy path tells the user to look when the local source is missing.
 	let sourceDescription: String
@@ -102,63 +100,63 @@ struct CLIProvider: Sendable {
 enum CLIProviderTable {
 	/// Claude Code is the default target: the row selected when no legacy flag is passed at all.
 	static let claude = CLIProvider(
-		flag: "--claude", selectionTokens: ["claude"], name: "claude", displayName: "Claude Code",
+		flag: "--claude", selectionTokens: ["claude"], name: "claude",
 		id: .claude, sourceDescription: "~/.claude/projects", includedInAll: true,
 		make: { ClaudeProvider(root: $0) })
 
 	static let all: [CLIProvider] = [
 		claude,
 		CLIProvider(
-			flag: "--codex", selectionTokens: ["codex"], name: "codex", displayName: "Codex",
+			flag: "--codex", selectionTokens: ["codex"], name: "codex",
 			id: .codex, sourceDescription: "~/.codex/sessions", includedInAll: true,
 			make: { CodexProvider(root: $0) }),
 		CLIProvider(
-			flag: "--grok", selectionTokens: ["grok", "cursor", "grok-bot", "grok_bot", "grokbot"], name: "grok", displayName: "Grok",
+			flag: "--grok", selectionTokens: ["grok", "cursor", "grok-bot", "grok_bot", "grokbot"], name: "grok",
 			id: .grok, sourceDescription: "~/.grok/sessions", includedInAll: true,
 			make: { GrokProvider(root: $0) }),
 
 		CLIProvider(
 			flag: "--muse-spark", selectionTokens: ["muse-spark", "muse_spark", "musespark"],
-			name: "muse_spark", displayName: "Muse Spark", id: .museSpark,
+			name: "muse_spark", id: .museSpark,
 			sourceDescription: "~/.local/share/opencode (Muse Spark and Muse Wonder turns in opencode.db)",
 			includedInAll: true, make: { MuseSparkProvider(root: $0) }),
 		CLIProvider(
-			flag: "--gemini", selectionTokens: ["gemini"], name: "gemini", displayName: "Gemini",
+			flag: "--gemini", selectionTokens: ["gemini"], name: "gemini",
 			id: .gemini, sourceDescription: "~/.gemini/tmp", includedInAll: false,
 			make: { GeminiProvider(root: $0) }),
 		CLIProvider(
 			flag: "--opencode", selectionTokens: ["opencode", "opencode-zen", "opencode_zen", "zen"],
-			name: "opencode", displayName: "OpenCode Zen", id: .opencode,
+			name: "opencode", id: .opencode,
 			sourceDescription: "~/.local/share/opencode (Opencode Zen rows in opencode.db)",
 			includedInAll: true, make: { OpenCodeProvider(root: $0) }),
 		CLIProvider(
 			flag: "--opencode-go", selectionTokens: ["opencode-go", "opencode_go", "opencodego"],
-			name: "opencode_go", displayName: "OpenCode Go", id: .opencodego,
+			name: "opencode_go", id: .opencodego,
 			sourceDescription: "~/.local/share/opencode (OpenCode Go rows in opencode.db)",
 			includedInAll: true, make: { OpenCodeGoProvider(root: $0) }),
 		CLIProvider(
 			flag: "--copilot", selectionTokens: ["copilot"], name: "copilot",
-			displayName: "GitHub Copilot", id: .copilot, sourceDescription: "~/.copilot/otel",
+			id: .copilot, sourceDescription: "~/.copilot/otel",
 			includedInAll: false, make: { CopilotProvider(root: $0) }),
 
 		CLIProvider(
 			flag: "--nemotron", selectionTokens: ["nemotron"], name: "nemotron",
-			displayName: "Nemotron", id: .nemotron,
+			id: .nemotron,
 			sourceDescription: "~/.local/share/opencode (nemotron sessions in opencode.db)",
 			includedInAll: true, make: { OpenCodeBrandProvider(brand: .nemotron, root: $0) }),
 		CLIProvider(
 			flag: "--mimo", selectionTokens: ["mimo"], name: "mimo",
-			displayName: "MiMo", id: .mimo,
+			id: .mimo,
 			sourceDescription: "~/.local/share/opencode (mimo sessions in opencode.db)",
 			includedInAll: true, make: { OpenCodeBrandProvider(brand: .mimo, root: $0) }),
 		CLIProvider(
 			flag: "--big-pickle", selectionTokens: ["big-pickle", "big_pickle", "bigpickle"],
-			name: "big_pickle", displayName: "Big Pickle", id: .bigPickle,
+			name: "big_pickle", id: .bigPickle,
 			sourceDescription: "~/.local/share/opencode (big-pickle sessions in opencode.db)",
 			includedInAll: true, make: { OpenCodeBrandProvider(brand: .bigPickle, root: $0) }),
 		CLIProvider(
 			flag: "--deepseek", selectionTokens: ["deepseek"], name: "deepseek",
-			displayName: "DeepSeek", id: .deepseek,
+			id: .deepseek,
 			sourceDescription: "~/.local/share/opencode (deepseek sessions in opencode.db)",
 			includedInAll: true, make: { OpenCodeBrandProvider(brand: .deepseek, root: $0) }),
 	]
@@ -175,10 +173,7 @@ let selectedCLIProvider = CLIProviderTable.selected(arguments: args)
 
 let useCodex = selectedCLIProvider.id == .codex
 let useGrok = selectedCLIProvider.id == .grok
-let useMuseSpark = selectedCLIProvider.id == .museSpark
 let useGemini = selectedCLIProvider.id == .gemini
-let useOpenCode = selectedCLIProvider.id == .opencode
-let useOpenCodeGo = selectedCLIProvider.id == .opencodego
 let useCopilot = selectedCLIProvider.id == .copilot
 let useIndex = args.contains("--indexed")
 // Copilot stays a token estimate; unified Grok prices known local models at notional list rates.

@@ -75,7 +75,7 @@ public enum ClaudeRateLimitStore {
 	/// `resets_at` is unix epoch seconds. Returns nil when neither window is present — or when every
 	/// window has already passed its own `resets_at`. The capture's AGE never nils it.
 	public static func decode(_ data: Data, now: Date = Date()) -> RateLimitSnapshot? {
-		decodeRaw(data, now: now)?.current(at: now)
+		decodeRaw(data)?.current(at: now)
 	}
 
 	/// True when the fresh capture's 5-hour/weekly window has just rolled past its reset boundary — blank
@@ -83,7 +83,7 @@ public enum ClaudeRateLimitStore {
 	/// than the gauge vanishing. Reads pre-strip so it can see the expired window `decode` drops.
 	public static func awaitingResetHint(now: Date = Date(), url: URL? = nil) -> Bool {
 		guard let url = url ?? defaultURL(), let data = try? Data(contentsOf: url) else { return false }
-		return decodeRaw(data, now: now)?.awaitingFreshDataAfterReset(at: now) ?? false
+		return decodeRaw(data)?.awaitingFreshDataAfterReset(at: now) ?? false
 	}
 
 	/// `decode` without the trailing expired-window strip, so callers can still see a just-rolled-over
@@ -94,7 +94,7 @@ public enum ClaudeRateLimitStore {
 	/// the statusline only when it answers, so an idle night leaves a reading hours old while its 7-day
 	/// boundary is still ahead. `capturedAt` is diagnostics (the frozen-high limit warning) and the
 	/// `isActive` freshness indicator — never a display gate.
-	static func decodeRaw(_ data: Data, now: Date = Date()) -> RateLimitSnapshot? {
+	static func decodeRaw(_ data: Data) -> RateLimitSnapshot? {
 		guard
 			let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
 		else { return nil }
