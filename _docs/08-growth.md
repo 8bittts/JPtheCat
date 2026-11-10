@@ -52,6 +52,7 @@ The 30-day PII redaction nulls `ip`, `ua`, and `referer`; `is_bot`, `is_mac`, an
 - `web/scripts/growth-extra.ts [days] [--json]` — the per-layer filter table and Vercel Web Analytics; it reads the Vercel CLI's own auth, so no token is copied into `.env.local`, and it prints aggregates only.
 - `web/scripts/analytics-pull.ts` — Search Console queries, pages, trends, and countries; run at 30 and 90 days to diff rising queries.
   The OAuth refresh token is per Google account, so the existing DeathNote client with `webmasters.readonly` is reused; a clean worktree without credentials prints a setup notice and exits 0.
+- The three readers share `web/lib/analytics/reader-cli.ts` for the env-file loader, the pooler connection string and the `[days]` argument (guard: `web/tests/reader-cli.test.ts`).
 - **Website traffic** is Vercel Web Analytics and Speed Insights (no GA4); custom events (`download_cta_clicked`, `library_download_cta_clicked`, `download_modal_opened`, `library_download_modal_opened`, `repo_link_clicked`) are not bot-filtered.
   `repo_link_clicked` fires from every public-repository link through `components/site/repo-link.tsx`, with `placement` (`home_callout`, `faq`, `footer`, `demo_settings`) and `target` (`repo`, `contributing`).
   They were Title Case until 2026-10-22; `LEGACY_PRODUCT_EVENT_NAMES` lets the digest count both spellings until no window reaches back that far.

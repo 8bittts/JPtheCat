@@ -22,58 +22,16 @@
 // NEXT_PUBLIC_SUPABASE_URL) for the ref, SUPABASE_DB_PASSWORD for the pooler
 // password. Pooler host defaults to aws-0-us-east-1; override SUPABASE_POOLER_HOST.
 
-import { existsSync, readFileSync } from "node:fs";
 import { SQL } from "bun";
 import { humanDownloadsCte } from "../lib/analytics/growth-download-sql";
-
-const ENV_FILES = [".env.local", ".env"];
-
-function unquote(value: string): string {
-	if (value.startsWith('"') && value.endsWith('"')) return value.slice(1, -1);
-	if (value.startsWith("'") && value.endsWith("'")) return value.slice(1, -1);
-	return value;
-}
-
-function applyEnvLine(line: string): void {
-	const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
-	if (!m) return;
-	const [, k, rawV] = m;
-	if (process.env[k]) return;
-	process.env[k] = unquote(rawV.trim());
-}
-
-function loadEnv() {
-	for (const file of ENV_FILES) {
-		if (!existsSync(file)) continue;
-		for (const line of readFileSync(file, "utf8").split("\n")) {
-			applyEnvLine(line);
-		}
-	}
-}
-
-function projectRef(): string {
-	const ref = process.env.SUPABASE_PROJECT_REF?.trim();
-	if (ref) return ref;
-	const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-	if (!url) throw new Error("SUPABASE_PROJECT_REF or NEXT_PUBLIC_SUPABASE_URL required");
-	const derived = new URL(url).hostname.split(".")[0];
-	if (!derived) throw new Error(`Could not derive project ref from ${url}`);
-	return derived;
-}
-
-function buildConnectionString(): string {
-	const password = process.env.SUPABASE_DB_PASSWORD;
-	if (!password) throw new Error("SUPABASE_DB_PASSWORD not set");
-	const host = process.env.SUPABASE_POOLER_HOST ?? "aws-0-us-east-1.pooler.supabase.com";
-	const user = `postgres.${projectRef()}`;
-	return `postgresql://${user}:${encodeURIComponent(password)}@${host}:5432/postgres?sslmode=require`;
-}
+import {
+	loadReaderEnv,
+	supabasePoolerUrl,
+	trailingDaysArgument,
+} from "../lib/analytics/reader-cli";
 
 const JSON_MODE = process.argv.includes("--json");
-const DAYS = (() => {
-	const n = Number(process.argv.find((a) => /^\d+$/.test(a)) ?? "30");
-	return Number.isFinite(n) && n > 0 ? n : 30;
-})();
+const DAYS = trailingDaysArgument();
 
 type Row = Record<string, unknown>;
 const out: Record<string, unknown> = {};
@@ -105,8 +63,8 @@ function humanCte(sql: SQL) {
 }
 
 async function main() {
-	loadEnv();
-	const sql = new SQL(buildConnectionString());
+	loadReaderEnv();
+	const sql = new SQL(supabasePoolerUrl());
 
 	try {
 		// Headline: total vs human vs Mac-human vs bot in the window, plus datacenter-filter coverage.

@@ -19,38 +19,11 @@
 // https://jpthecat.com/ and must be a verified Search Console property. Without any
 // credential the script prints a dormant-leg notice and exits 0 (never throws).
 
-import { existsSync, readFileSync } from "node:fs";
+import { loadReaderEnv, trailingDaysArgument } from "../lib/analytics/reader-cli";
 
-const ENV_FILES = [".env.local", ".env"];
 const DEFAULT_SITE_URL = "https://jpthecat.com/";
 
-function unquote(value: string): string {
-	if (value.startsWith('"') && value.endsWith('"')) return value.slice(1, -1);
-	if (value.startsWith("'") && value.endsWith("'")) return value.slice(1, -1);
-	return value;
-}
-
-function applyEnvLine(line: string): void {
-	const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
-	if (!m) return;
-	const [, k, rawV] = m;
-	if (process.env[k]) return;
-	process.env[k] = unquote(rawV.trim());
-}
-
-function loadEnv() {
-	for (const file of ENV_FILES) {
-		if (!existsSync(file)) continue;
-		for (const line of readFileSync(file, "utf8").split("\n")) {
-			applyEnvLine(line);
-		}
-	}
-}
-
-const DAYS = (() => {
-	const n = Number(process.argv.find((a) => /^\d+$/.test(a)) ?? "30");
-	return Number.isFinite(n) && n > 0 ? n : 30;
-})();
+const DAYS = trailingDaysArgument();
 
 // Mint a fresh access token from a stored refresh token (headless), falling back to a
 // static access token. Returns null when no credential is configured (dormant leg).
@@ -135,7 +108,7 @@ function printGscTable(title: string, report: GscResult, dimensions: string[]): 
 }
 
 async function main() {
-	loadEnv();
+	loadReaderEnv();
 	const token = await mintAccessToken();
 	if (!token) {
 		console.log(

@@ -479,16 +479,8 @@ function ThemesPopup({
 	);
 }
 
-/** The dedicated "Live data" popup — mirrors the native app's `LiveDataWindowController`. Opens as a
- *  real top-layer modal (native Esc + focus trap + backdrop) carrying the same `JP the Cat 🐾 — Live
- *  data` chrome as the analytics window, and hosts the same `LiveDataSection` rows. */
-function LiveDataPopup({
-	themeStyle,
-	onClose,
-	...section
-}: {
-	themeStyle: CSSProperties | undefined;
-	onClose: () => void;
+/** The provider and live-limit switches the Live data popup hands straight to its one section. */
+type LiveDataToggles = {
 	claudeEnabled: boolean;
 	setClaudeEnabled: (fn: (v: boolean) => boolean) => void;
 	codexEnabled: boolean;
@@ -505,7 +497,19 @@ function LiveDataPopup({
 	setGrokLimits: (fn: (v: boolean) => boolean) => void;
 	cursorHook: boolean;
 	setCursorHook: (fn: (v: boolean) => boolean) => void;
-}) {
+};
+
+/** The dedicated "Live data" popup — mirrors the native app's `LiveDataWindowController`. Opens as a
+ *  real top-layer modal (native Esc + focus trap + backdrop) carrying the same `JP the Cat 🐾 — Live
+ *  data` chrome as the analytics window, and hosts the same `LiveDataSection` rows. */
+function LiveDataPopup({
+	themeStyle,
+	onClose,
+	...section
+}: {
+	themeStyle: CSSProperties | undefined;
+	onClose: () => void;
+} & LiveDataToggles) {
 	const titleId = useId();
 	const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -562,24 +566,7 @@ function LiveDataSection({
 	setGrokLimits,
 	cursorHook,
 	setCursorHook,
-}: {
-	claudeEnabled: boolean;
-	setClaudeEnabled: (fn: (v: boolean) => boolean) => void;
-	codexEnabled: boolean;
-	setCodexEnabled: (fn: (v: boolean) => boolean) => void;
-	grokEnabled: boolean;
-	setGrokEnabled: (fn: (v: boolean) => boolean) => void;
-	museSparkEnabled: boolean;
-	setMuseSparkEnabled: (fn: (v: boolean) => boolean) => void;
-	openCodeGoEnabled: boolean;
-	setOpenCodeGoEnabled: (fn: (v: boolean) => boolean) => void;
-	claudeLimits: boolean;
-	setClaudeLimits: (fn: (v: boolean) => boolean) => void;
-	grokLimits: boolean;
-	setGrokLimits: (fn: (v: boolean) => boolean) => void;
-	cursorHook: boolean;
-	setCursorHook: (fn: (v: boolean) => boolean) => void;
-}) {
+}: LiveDataToggles) {
 	return (
 		<Section title="">
 			{/* No section title — the popup chrome already reads "Live data". Grouped by provider so each

@@ -16,56 +16,16 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { SQL } from "bun";
 import { loadVercelAnalytics } from "../lib/analytics/growth-source-vercel";
+import {
+	loadReaderEnv,
+	supabasePoolerUrl,
+	trailingDaysArgument,
+} from "../lib/analytics/reader-cli";
 
-const ENV_FILES = [".env.local", ".env"];
 const JSON_MODE = process.argv.includes("--json");
-const DAYS = (() => {
-	const n = Number(process.argv.find((a) => /^\d+$/.test(a)) ?? "30");
-	return Number.isFinite(n) && n > 0 ? n : 30;
-})();
+const DAYS = trailingDaysArgument();
 
 const out: Record<string, unknown> = {};
-
-function unquote(value: string): string {
-	if (value.startsWith('"') && value.endsWith('"')) return value.slice(1, -1);
-	if (value.startsWith("'") && value.endsWith("'")) return value.slice(1, -1);
-	return value;
-}
-
-function applyEnvLine(line: string): void {
-	const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
-	if (!m) return;
-	const [, k, rawV] = m;
-	if (process.env[k]) return;
-	process.env[k] = unquote(rawV.trim());
-}
-
-function loadEnv() {
-	for (const file of ENV_FILES) {
-		if (!existsSync(file)) continue;
-		for (const line of readFileSync(file, "utf8").split("\n")) {
-			applyEnvLine(line);
-		}
-	}
-}
-
-function projectRef(): string {
-	const ref = process.env.SUPABASE_PROJECT_REF?.trim();
-	if (ref) return ref;
-	const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-	if (!url) throw new Error("SUPABASE_PROJECT_REF or NEXT_PUBLIC_SUPABASE_URL required");
-	const derived = new URL(url).hostname.split(".")[0];
-	if (!derived) throw new Error(`Could not derive project ref from ${url}`);
-	return derived;
-}
-
-function buildConnectionString(): string {
-	const password = process.env.SUPABASE_DB_PASSWORD;
-	if (!password) throw new Error("SUPABASE_DB_PASSWORD not set");
-	const host = process.env.SUPABASE_POOLER_HOST ?? "aws-0-us-east-1.pooler.supabase.com";
-	const user = `postgres.${projectRef()}`;
-	return `postgresql://${user}:${encodeURIComponent(password)}@${host}:5432/postgres?sslmode=require`;
-}
 
 function vercelTokenFromCli(): string | null {
 	const authPath = join(homedir(), "Library/Application Support/com.vercel.cli/auth.json");
@@ -208,8 +168,8 @@ async function vercelAnalytics() {
 }
 
 async function main() {
-	loadEnv();
-	const sql = new SQL(buildConnectionString());
+	loadReaderEnv();
+	const sql = new SQL(supabasePoolerUrl());
 	try {
 		await filterLayers(sql);
 		await vercelAnalytics();
