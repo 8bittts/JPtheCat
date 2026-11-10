@@ -29,7 +29,7 @@ public enum HeatmapRamp {
 		trackHex: String,
 		maxAlpha: Double
 	) -> String {
-		hexString(cellComponents(t: t, accentHex: accentHex, trackHex: trackHex, maxAlpha: maxAlpha))
+		HexColor.string(cellComponents(t: t, accentHex: accentHex, trackHex: trackHex, maxAlpha: maxAlpha))
 	}
 
 	/// The same composited cell color as ``cellHex(t:accentHex:trackHex:maxAlpha:)``, handed back as sRGB
@@ -51,8 +51,8 @@ public enum HeatmapRamp {
 	) -> (Double, Double, Double) {
 		let clampedT = min(max(t, 0), 1)
 		let alpha = clampedT * max(0, min(1, maxAlpha))
-		let track = rgb(trackHex)
-		let accent = rgb(accentHex)
+		let track = HexColor.componentsOrFallback(trackHex)
+		let accent = HexColor.componentsOrFallback(accentHex)
 		// A straight segment in sRGB from `track` (t=0) toward `accent`, only as far as `maxAlpha`. Because
 		// every channel moves monotonically in the same direction on every theme, the composite luminance
 		// is monotonic in `t` (see the type doc + `HeatmapRampTests`).
@@ -65,19 +65,9 @@ public enum HeatmapRamp {
 
 	// MARK: pure helpers
 
-	/// Snap a channel to the 8-bit grid the hex form rounds to, so `hexString(cellComponents(...))` is
-	/// byte-for-byte the old `cellHex` output and a component-built color matches the hex-built one.
+	/// Snap a channel to the 8-bit grid the hex form rounds to, so `HexColor.string(cellComponents(...))`
+	/// equals `cellHex` byte for byte and a component-built color matches the hex-built one.
 	private static func quantized(_ x: Double) -> Double {
 		(max(0, min(1, x)) * 255).rounded() / 255
-	}
-
-	private static func rgb(_ hex: String) -> (Double, Double, Double) {
-		let components = HexColor.componentsOrFallback(hex)
-		return (components.red, components.green, components.blue)
-	}
-
-	private static func hexString(_ c: (Double, Double, Double)) -> String {
-		func h(_ x: Double) -> String { String(format: "%02X", Int((max(0, min(1, x)) * 255).rounded())) }
-		return h(c.0) + h(c.1) + h(c.2)
 	}
 }

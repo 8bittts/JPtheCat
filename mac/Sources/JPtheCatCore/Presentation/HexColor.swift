@@ -37,4 +37,13 @@ public enum HexColor {
 	) -> (red: Double, green: Double, blue: Double) {
 		components(hex) ?? fallback
 	}
+
+	/// Six uppercase hex digits, no `#`, for sRGB components in `0...1`. Out-of-range channels clamp,
+	/// and each channel rounds to the nearest 8-bit step.
+	public static func string(_ components: (Double, Double, Double)) -> String {
+		func channel(_ value: Double) -> String {
+			String(format: "%02X", Int((max(0, min(1, value)) * 255).rounded()))
+		}
+		return channel(components.0) + channel(components.1) + channel(components.2)
+	}
 }

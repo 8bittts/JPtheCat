@@ -5,10 +5,6 @@ import Foundation
 /// this type just produces text. Same columns/field values as `AnalyticsCSVExporter`, formatted as a
 /// pasteable table (numeric columns right-aligned; `cost_usd` at the CSV's `%.4f` precision).
 public enum AnalyticsMarkdownExporter {
-	private static let headers = [
-		"date", "provider", "model", "events", "input_tokens", "output_tokens", "cache_5m_tokens",
-		"cache_1h_tokens", "cache_read_tokens", "cost_usd",
-	]
 	// Left-align text columns, right-align the numeric ones (index ≥ 3), matching the header order.
 	private static let alignments = [":--", ":--", ":--", "--:", "--:", "--:", "--:", "--:", "--:", "--:"]
 
@@ -19,40 +15,16 @@ public enum AnalyticsMarkdownExporter {
 		rows: [ModelDaySummary],
 		calendar: Calendar = .current
 	) -> String {
-		let formatter = DateFormatter()
-		formatter.calendar = calendar
-		formatter.timeZone = calendar.timeZone
-		formatter.dateFormat = "yyyy-MM-dd"
-
-		var lines = [
-			"| \(headers.joined(separator: " | ")) |",
-			"| \(alignments.joined(separator: " | ")) |",
-		]
-		for row in rows {
-			let cells: [String] = [
-				formatter.string(from: row.day),
-				row.provider.rawValue,
-				row.model,
-				String(row.eventCount),
-				String(row.inputTokens),
-				String(row.outputTokens),
-				String(row.cache5mTokens),
-				String(row.cache1hTokens),
-				String(row.cacheReadTokens),
-				String(format: "%.4f", row.cost),
-			]
-			lines.append("| \(cells.map(escape).joined(separator: " | ")) |")
-		}
-		return lines.joined(separator: "\n")
+		let formatter = AnalyticsExportTable.dayFormatter(calendar: calendar)
+		let body = rows.map { AnalyticsExportTable.cells(for: $0, dayFormatter: formatter).map(escape) }
+		return ([AnalyticsExportTable.headers, alignments] + body)
+			.map { "| \($0.joined(separator: " | ")) |" }
+			.joined(separator: "\n")
 	}
 
 	/// A default export filename, e.g. `jpthecat-analytics-2026-07-09.md`.
 	public static func defaultFilename(now: Date = Date(), calendar: Calendar = .current) -> String {
-		let formatter = DateFormatter()
-		formatter.calendar = calendar
-		formatter.timeZone = calendar.timeZone
-		formatter.dateFormat = "yyyy-MM-dd"
-		return "jpthecat-analytics-\(formatter.string(from: now)).md"
+		AnalyticsExportTable.defaultFilename(fileExtension: "md", now: now, calendar: calendar)
 	}
 
 	/// Escapes a table cell: `|` would start a new column and a newline would break the row, so both are

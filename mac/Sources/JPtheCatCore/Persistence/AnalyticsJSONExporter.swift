@@ -1,8 +1,7 @@
 import Foundation
 
-/// JSON serialization of `ModelDaySummary` rows for the Advanced Analytics export (gated on
-/// `LicenseFeature.export`). Pure and testable — the App target owns the `NSSavePanel`; this type just
-/// produces text. Mirrors `AnalyticsCSVExporter`'s columns/field names exactly (so a spreadsheet, a
+/// JSON serialization of `ModelDaySummary` rows for the Advanced Analytics export. Pure and
+/// testable — the App target owns the `NSSavePanel`; this type just produces text. Mirrors `AnalyticsCSVExporter`'s columns/field names exactly (so a spreadsheet, a
 /// `jq` pipeline, and the CSV all describe the same rows), emitting a pretty-printed array of objects.
 public enum AnalyticsJSONExporter {
 	private struct Row: Encodable {
@@ -25,11 +24,7 @@ public enum AnalyticsJSONExporter {
 		rows: [ModelDaySummary],
 		calendar: Calendar = .current
 	) -> String {
-		let formatter = DateFormatter()
-		formatter.calendar = calendar
-		formatter.timeZone = calendar.timeZone
-		formatter.dateFormat = "yyyy-MM-dd"
-
+		let formatter = AnalyticsExportTable.dayFormatter(calendar: calendar)
 		let dtos = rows.map { row in
 			Row(
 				date: formatter.string(from: row.day),
@@ -54,10 +49,6 @@ public enum AnalyticsJSONExporter {
 
 	/// A default export filename, e.g. `jpthecat-analytics-2026-07-09.json`.
 	public static func defaultFilename(now: Date = Date(), calendar: Calendar = .current) -> String {
-		let formatter = DateFormatter()
-		formatter.calendar = calendar
-		formatter.timeZone = calendar.timeZone
-		formatter.dateFormat = "yyyy-MM-dd"
-		return "jpthecat-analytics-\(formatter.string(from: now)).json"
+		AnalyticsExportTable.defaultFilename(fileExtension: "json", now: now, calendar: calendar)
 	}
 }

@@ -444,7 +444,13 @@ extension DashboardViewModel.ProviderRow {
 	/// a dead em dash (no local dollar or token ledger on the Mac).
 	func selectorTrailingAmount(now: Date = Date()) -> String? {
 		guard isOfficialPlanOnly, isContributing else { return nil }
-		return (selectorQuota(now: now)?.percent ?? selectorPlanMeter(now: now)?.usedPercent).map { "\(Int($0.rounded()))%" } ?? "—"
+		return officialPlanPercentText(now: now)
+	}
+
+	/// Official plan usage as a whole percentage, or an em dash while no pool has reported.
+	private func officialPlanPercentText(now: Date) -> String {
+		(selectorQuota(now: now)?.percent ?? selectorPlanMeter(now: now)?.usedPercent)
+			.map { "\(Int($0.rounded()))%" } ?? "—"
 	}
 
 	/// Selector badge when official plan usage is the row's only signal.
@@ -459,7 +465,7 @@ extension DashboardViewModel.ProviderRow {
 
 	func heroPrimaryTextOverride(now: Date = Date()) -> String? {
 		guard heroShowsOfficialPlanUsage() else { return nil }
-		return (selectorQuota(now: now)?.percent ?? selectorPlanMeter(now: now)?.usedPercent).map { "\(Int($0.rounded()))%" } ?? "—"
+		return officialPlanPercentText(now: now)
 	}
 
 	func heroBasisLabel(now: Date = Date()) -> String? {

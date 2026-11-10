@@ -37,14 +37,15 @@ public enum ProviderTintLegibility {
 		minContrast: Double = 2.9
 	) -> String {
 		if isDark, tintHex.caseInsensitiveCompare(codexTintHex) == .orderedSame { return codexDarkLift }
-		let bg = rgb(backgroundHex)
-		let brand = rgb(tintHex)
+		let bg: (Double, Double, Double) = HexColor.componentsOrFallback(backgroundHex)
+		let brand: (Double, Double, Double) = HexColor.componentsOrFallback(tintHex)
 		if contrast(brand, bg) >= minContrast { return normalized(tintHex) }
-		let ink = rgb(inkHex)  // light on a dark theme, dark on a light theme
+		// Ink is light on a dark theme and dark on a light theme, so mixing toward it always adds contrast.
+		let ink: (Double, Double, Double) = HexColor.componentsOrFallback(inkHex)
 		var mixT = 0.15
 		while mixT < 1 {
 			let lifted = mix(brand, ink, mixT)
-			if contrast(lifted, bg) >= minContrast { return hexString(lifted) }
+			if contrast(lifted, bg) >= minContrast { return HexColor.string(lifted) }
 			mixT += 0.1
 		}
 		return normalized(inkHex)
@@ -54,14 +55,6 @@ public enum ProviderTintLegibility {
 
 	private static func normalized(_ hex: String) -> String {
 		(hex.hasPrefix("#") ? String(hex.dropFirst()) : hex).uppercased()
-	}
-	private static func rgb(_ hex: String) -> (Double, Double, Double) {
-		let components = HexColor.componentsOrFallback(hex)
-		return (components.red, components.green, components.blue)
-	}
-	private static func hexString(_ c: (Double, Double, Double)) -> String {
-		func h(_ x: Double) -> String { String(format: "%02X", Int((max(0, min(1, x)) * 255).rounded())) }
-		return h(c.0) + h(c.1) + h(c.2)
 	}
 	private static func mix(_ a: (Double, Double, Double), _ b: (Double, Double, Double), _ t: Double)
 		-> (Double, Double, Double)

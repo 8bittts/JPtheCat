@@ -144,20 +144,6 @@ public enum CopilotOtelSetup {
 	}
 
 	static func removingBlock(from script: String) -> String {
-		guard
-			let begin = script.range(of: beginMarker),
-			let end = script.range(of: endMarker)
-		else { return script }
-		// Extend the cut to swallow the trailing newline after END and any blank line we added.
-		var lower = begin.lowerBound
-		var upper = end.upperBound
-		if upper < script.endIndex, script[upper] == "\n" { upper = script.index(after: upper) }
-		while lower > script.startIndex {
-			let prev = script.index(before: lower)
-			if script[prev] == "\n" { lower = prev } else { break }
-		}
-		var out = script
-		out.removeSubrange(lower..<upper)
-		return out
+		MarkedScriptBlock.removing(from: script, beginMarker: beginMarker, endMarker: endMarker)
 	}
 }
