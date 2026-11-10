@@ -41,6 +41,14 @@ Shell gates had the same shape: a command left of `&&` is `set -e`-exempt, a `ca
 Mutation-test every new guard: break what it protects and watch it fail.
 Three guards failed that check on first write (`PackageResourceBundleTests`, `testColdStartSkipsFingerprintReadViaPersistedCtime` before `Stats.fingerprintReads` existed, and the `[notes]` guard before it ran the real awk).
 
+**A presence pin proves a string exists, not that the product uses it.**
+`design-system-normalization.test.ts` asserted seven role classes were "defined" and `site-copy.test.ts` pinned the marquee speed on `.animate-marquee`; no component applied any of them, so both tests guarded dead CSS, and the first also passed on a rule that sat inside a comment.
+A pin now names the rule the component applies and reads comment-stripped CSS, and `web/tests/stylesheet-dead-rules.test.ts` fails on any class, custom property or keyframe that nothing uses.
+
+**A dead-code scanner that cannot run reports nothing, which reads as clean.**
+`periphery scan` exited on a missing index store once SwiftPM's default backend moved it to `.build/out`, and 30 findings accumulated behind it; `mac/.periphery.yml` now pins the path.
+knip had the same blind spot for stylesheets and for `scripts/*.mjs`, which sat outside its entry list while one imported an unlisted package.
+
 **A score gate must fail on the score it promises.**
 `react-doctor` exits 0 on warnings, so `bun run quality` and the release script's "react-doctor 100/100" step passed a 97/100 run (a non-component export in a component file).
 `bun run doctor` now passes `--blocking warning`, which exits 1 on that same run.
@@ -265,6 +273,7 @@ Guards: `MultiWindowSummariesParityTests`, `GroupedScanGuardsTests`, `WidgetSnap
 #### Sustained-CPU Postmortem: The Refresh Storm (2026-07-26/27, shipped v1.083)
 
 macOS flagged JP for significant energy use: about 1.2 cores in steady state.
+- The OpenCode gateways had no entry of their own in the FSEvents watch list; they were covered only while a Muse Spark or brand row sharing their store root was enabled, so turning those rows off left OpenCode Zen and Go on timer-only refresh.
 - `RefreshCoordinator.fileChanged()` refreshed on every FSEvents callback with no debounce, 63.9 refreshes a minute against a designed 1, and the 2-second floor never applied to window-only passes.
 - `reindex: false` skipped only the indexer walk; the window scan, three Copilot OTel parses, Codex sweeps, and the widget publish still ran every time.
 - The app had logged `refresh_finished … budget_ms=50` violations about once a second, unread.

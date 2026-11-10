@@ -103,6 +103,12 @@ No local file holds an official quota: `~/.copilot/data.db` token columns belong
 Never revive it by taking a GitHub token from Copilot storage, the Keychain, or `gh`, by calling `copilot_internal/user`, by embedding the Copilot SDK, or by deriving a percentage from tokens.
 Revive trigger: Copilot CLI writes an official remaining-quota snapshot to a local file; then add it as an opt-in Live Data source that stays non-aggregable.
 
+### File-watch coverage
+
+Both gaps leave a provider on timer-only refresh; neither loses data.
+- Copilot's `~/.copilot/otel` root is absent from `DashboardViewModel.watchPaths()`. Profile live before adding it, because the OTel exporter appends continuously while Copilot runs.
+- `StatusBarController` reads the watch list once at launch, so a provider enabled later gets instant refresh only after a relaunch. Re-arm the watcher from the `SettingsStore.Change` fan-out.
+
 ### Copilot OTel invoke detail (low priority)
 
 Only if users need per-invocation diagnostics: surface local duration, time to first chunk, and per-token-type counts when attributes exist; display-only and local-only, never dollars or headroom.

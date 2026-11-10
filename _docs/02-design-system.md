@@ -98,6 +98,7 @@ Money uses only `metricHero`, `metric`, and `metricSmall` ([12-ui-surface-invari
 - Layout widths: `sb-shell`, `reading-shell`; `<dialog>` geometry stays on `dialog-panel` in `globals.css`, with `dialog-panel-sb` for Sticker Bomb surfaces.
 - Palette: cream dot-grid canvas (`--sb-bg`), ink outlines, ginger/orange CTAs (`--sb-orange`, `--sb-orange-ink`, `--sb-honey`, `--sb-yellow`, `--sb-pink`). No mint/seafoam panel fills on public routes (guard: `web/tests/sticker-typography.test.ts`).
 The homepage **demo card** keeps Sunlit Ledger compact roles in `globals.css` (`ui-*`, `demo-*`, `compact-*`) — native parity, not the Sticker Bomb marketing scale.
+A class, custom property or keyframe exists in either stylesheet only while a component uses it (guard: `web/tests/stylesheet-dead-rules.test.ts`); add the rule in the change that applies it.
 Email may duplicate values inline, but `web/tests/design-system-normalization.test.ts` proves its brand colors equal the site tokens.
 
 ## 4. Motion

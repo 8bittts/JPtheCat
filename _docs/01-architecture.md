@@ -31,6 +31,9 @@ FSEvents + adaptive timer → RefreshCoordinator (cadence, triggers)
 ```
 
 - Refresh intent is typed: a timeframe change enqueues a window-only requery ahead of any queued reindex; never collapse intent back to one boolean.
+- `DashboardViewModel.watchPaths()` builds the FSEvents list from each enabled provider's own `watchPaths()`, deduplicated, and `StatusBarController` reads it once at launch.
+  Every OpenCode-derived row shares one store root, so each of those rows is listed on its own and never relies on a sibling row being enabled (guard: `DashboardViewModelSettingsTests`).
+  Copilot is not in the list and refreshes on the timer.
 - `UsageIndex` serializes connection work with a recursive lock and `SQLiteDatabase` opens `FULLMUTEX` with a busy timeout, but writes still route through the one owner (`mac/AGENTS.md`).
 - `DashboardState` moves provider rows, aggregate totals and series, selection, timeframe, refresh status, and tri-state provenance together.
 - `SettingsStore` posts a typed `SettingsStore.Change` only after a real write; non-SwiftUI consumers observe it and remove their tokens on teardown.
