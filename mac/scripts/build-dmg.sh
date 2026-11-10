@@ -167,12 +167,17 @@ can_notarize() {
 		&& [ "$CODESIGN_IDENTITY" != "-" ]
 }
 
-require_notarization_access() {
-	if can_notarize; then
-		xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null \
-			|| fail "Notarization unavailable; resolve the Apple error above before releasing"
-		step "Notarization access verified"
+# The default mode is the release mode, so it fails closed before the build: an ad-hoc signature
+# or a skipped notarization is a choice (--unsigned, --local), never a fallback.
+require_release_credentials() {
+	if [ "$BUILD_ONLY" = true ] || [ "$LOCAL_MODE" = true ] || [ "$UNSIGNED" = true ]; then
+		return 0
 	fi
+	[ "$CODESIGN_IDENTITY" != "-" ] \
+		|| fail "No Developer ID Application identity found. Pass --unsigned for an ad-hoc build."
+	xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null \
+		|| fail "Notary profile '${NOTARY_PROFILE}' is unavailable. Pass --local to skip notarization, or resolve the Apple error above"
+	step "Release credentials verified"
 }
 
 json_value() { /usr/bin/plutil -extract "$1" raw -o - "$2" 2>/dev/null || true; }
@@ -235,7 +240,7 @@ wait_for_notary_status() {
 # broken updater — nothing checked).
 verify_sparkle_vendor() {
 	local version_file="tools/sparkle/VERSION"
-	[ -d "$SPARKLE_SOURCE" ] || return 0
+	[ -d "$SPARKLE_SOURCE" ] || fail "Sparkle.framework missing at ${SPARKLE_SOURCE}"
 	[ -f "$version_file" ] || fail "Missing ${version_file}; cannot verify vendored Sparkle"
 	# shellcheck disable=SC1090
 	source "$version_file"
@@ -417,7 +422,7 @@ BUILD_NUMBER="${JPTHECAT_BUILD:-$CURRENT_BUILD}"
 info "Packaging ${APP_NAME} v${VERSION} (build ${BUILD_NUMBER})"
 resolve_signing_identity
 codesign_base_args
-require_notarization_access
+require_release_credentials
 
 info "Cleaning previous release artifacts"
 /bin/rm -rf "${BUILD_DIR}/${APP_NAME}.app" "${BUILD_DIR}/${APP_NAME}"-*.dmg \
@@ -499,16 +504,12 @@ step "Embedded WidgetKit extension with App Intents metadata"
 cp -R en.lproj "$RESOURCES_DIR/"
 step "Copied localized app name"
 
-if [ -d "$SPARKLE_SOURCE" ]; then
-	ditto "$SPARKLE_SOURCE" "$FRAMEWORKS_DIR/Sparkle.framework"
-	step "Copied Sparkle.framework"
-	# Sparkle's MIT license requires its notice in every copy we ship, so the bundle carries it.
-	[ -f "$SPARKLE_LICENSE_SOURCE" ] || fail "Missing ${SPARKLE_LICENSE_SOURCE}; the shipped app must carry Sparkle's MIT notice"
-	cp "$SPARKLE_LICENSE_SOURCE" "$RESOURCES_DIR/Sparkle-LICENSE.txt"
-	step "Copied Sparkle license notice"
-else
-	warn "Sparkle.framework not found — auto-update disabled"
-fi
+ditto "$SPARKLE_SOURCE" "$FRAMEWORKS_DIR/Sparkle.framework"
+step "Copied Sparkle.framework"
+# Sparkle's MIT license requires its notice in every copy we ship, so the bundle carries it.
+[ -f "$SPARKLE_LICENSE_SOURCE" ] || fail "Missing ${SPARKLE_LICENSE_SOURCE}; the shipped app must carry Sparkle's MIT notice"
+cp "$SPARKLE_LICENSE_SOURCE" "$RESOURCES_DIR/Sparkle-LICENSE.txt"
+step "Copied Sparkle license notice"
 
 cp "$SOURCE_PLIST" "$INFO_PLIST"
 plist_set "$INFO_PLIST" "CFBundleShortVersionString" string "$VERSION"

@@ -13,7 +13,8 @@ One command owns it: `bash mac/scripts/release-jpthecat.sh [version]` (also `/jp
 - **Signing:** Developer ID Application (team `GRNGR33Z8A`), hardened runtime, no sandbox; `mac/JPtheCat.entitlements` carries only the `com.apple.security.application-groups` array for the widget snapshot.
   Sign inner to outer (Sparkle XPC services → `Updater.app` → framework → app) and never use `--deep`, which corrupts the XPC signatures.
 - **Notarization:** the DMG goes through the keychain profile `JPtheCat-Notarization`, then `stapler staple`, `stapler validate`, and `spctl` (`source=Notarized Developer ID`).
-  The release checks Apple access before rebuilding; HTTP 403 can mean an unsigned developer agreement rather than a missing profile.
+  The default `build-dmg.sh` mode stops before the build when the Developer ID identity, the notary profile or the vendored Sparkle framework is missing; `--unsigned` and `--local` are the only ways to skip signing or notarization.
+  HTTP 403 from the notary check can mean an unsigned developer agreement rather than a missing profile.
   If `notarytool submit --wait` succeeds with an empty JSON capture, recover the submission from `notarytool history` / `info` and proceed only if the DMG staples and validates.
 - **DMG:** `build-dmg.sh` builds a read-write HFS+ image, applies the Finder layout, verifies `.DS_Store` kept the background, and converts to UDZO; `verify-dmg-layout.sh` guards the frozen geometry in `mac/scripts/dmg-resources/README.md`.
   Drag-to-Applications un-quarantines the copy and avoids app translocation; a notarized, stapled app still shows one friendly first-launch prompt.
