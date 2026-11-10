@@ -10,20 +10,21 @@
 	"description": "JP the Cat — the cat that counts your agent tokens. Marketing site.",
 	"scripts": {
 		"dev": "lsof -ti:4444 | xargs kill -9 2>/dev/null || true && rm -rf .next && next dev -p 4444",
-		"build": "next build && bun run scan:secrets",
-		"scan:secrets": "bun run scripts/scan-client-bundle-secrets.ts",
+		"build": "next build && bun run check:perf-budget && bun run scan:client-secrets",
+		"check:perf-budget": "bun scripts/perf-budget.ts",
+		"scan:client-secrets": "bun run scripts/scan-client-bundle-secrets.ts",
 		"start": "next start -p 4444",
-		"lint": "biome check --write",
-		"lint:check": "biome check",
+		"lint": "biome check",
+		"lint:fix": "biome check --write",
 		"format": "biome format --write",
 		"type-check": "tsc --noEmit",
-		"check": "tsc --noEmit && biome check",
+		"check": "bun run lint && bun run type-check",
 		"test": "bun test",
 		"a11y": "bun scripts/a11y-audit.ts",
 		"knip": "knip",
 		"doctor": "react-doctor . --verbose --blocking warning",
 		"doctor:diff": "react-doctor . --verbose --scope changed --base main",
-		"quality": "bun run check && bun run test && bun run knip && bun run doctor && bun run build"
+		"check:full": "bun run check && bun run test && bun run knip && bun run doctor && bun run build"
 	},
 	"dependencies": {
 		"@react-email/components": "^1.0.12",

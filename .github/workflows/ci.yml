@@ -79,4 +79,4 @@ jobs:
       # Runs without any secrets on purpose: the suite must stay green from a clean checkout, so a
       # test that silently needs a developer's .env.local fails here instead of passing only locally.
       - name: Quality gate
-        run: bun run quality
+        run: bun run check:full

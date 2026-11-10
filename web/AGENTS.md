@@ -13,19 +13,20 @@ The package is ESM, pins `node` `24.x` in `engines`, and pins the toolchain via 
 
 ```bash
 bun run dev          # kills port 4444, wipes .next, then next dev -p 4444
-bun run build        # next build (server-rendered, see force-dynamic below) && scan:secrets
+bun run build        # next build (server-rendered, see force-dynamic below) && check:perf-budget && scan:client-secrets
 bun run start        # next start -p 4444
 bun run type-check   # tsc --noEmit
-bun run lint:check   # biome check (read-only)
-bun run lint         # biome check --write (auto-fixes)
+bun run lint         # biome check (read-only)
+bun run lint:fix     # biome check --write (auto-fixes)
 bun run format       # biome format --write
-bun run check        # tsc --noEmit && biome check
+bun run check        # lint && type-check, read-only
 bun test             # Bun's native test runner over tests/
 bun run knip         # dead-code / unused-dependency check
 bun run doctor       # react-doctor . --verbose --blocking warning
 bun run doctor:diff  # react-doctor . --verbose --scope changed --base main
-bun run quality      # check && test && knip && doctor && build — the full gate, in that order
-bun run scan:secrets # byte-scan the built browser output for secret VALUES (last step of build)
+bun run check:full   # check && test && knip && doctor && build — the full gate, in that order
+bun run check:perf-budget   # per-route first-load JS caps and rendering classes vs perf-budget.json (runs inside build)
+bun run scan:client-secrets # byte-scan the built browser output for secret VALUES (last step of build)
 ```
 
 The dev server runs on port 4444, not 3000.
@@ -33,14 +34,14 @@ The dev server runs on port 4444, not 3000.
 `scripts/scan-client-bundle-secrets.ts` is the final step of `bun run build`, so it never runs on a stale tree.
 It byte-scans `.next/static` and `.next/server/app` for every credential-shaped env VALUE in four encodings, and fails closed when zero artifacts or zero credential values were scanned.
 
-**[CRITICAL] A green/READY Vercel deploy is NOT proof the quality gate passed — run `bun run quality` locally before any web-touching push.**
+**[CRITICAL] A green/READY Vercel deploy is NOT proof the quality gate passed — run `bun run check:full` locally before any web-touching push.**
 Vercel's build runs only `next build`, not `bun test`, knip, or react-doctor, so a failing test or doctor regression ships while Vercel still shows READY.
 `.github/workflows/ci.yml` is disabled on purpose, so the local run is the only gate; a WCAG target-size failure once deployed "green" this way.
 `react-doctor` must score 100/100 to deploy; `--blocking warning` makes any warning fail `bun run doctor`, because the tool exits 0 on warnings by default.
 Justified exceptions live in `doctor.config.json` — never suppress a finding the code could fix instead.
 
 Every tool in the `quality` chain (Biome, knip, react-doctor) is a pinned devDependency resolved from `node_modules/.bin` — never reintroduce `bunx <tool>@latest`.
-Playwright is pinned on the same terms but is NOT in the `quality` chain and has no browser specs; consumers are `scripts/generate-og-image.mjs` (OG/Twitter card) and asset guards in `tests/social-assets.test.ts`.
+Playwright is pinned on the same terms but is NOT in the `check:full` chain and has no browser specs; consumers are `scripts/generate-og-image.mjs` (OG/Twitter card) and asset guards in `tests/social-assets.test.ts`.
 Regenerate PWA PNGs with `scripts/generate-web-icons.mjs` (macOS can still use repo-root `./scripts/generate-brand-icons.sh`).
 The `react-email` preview CLI (`bunx react-email dev -d emails -p 4445`) is the one deliberate unpinned carve-out: it gates nothing.
 

@@ -33,7 +33,7 @@ Run everything from the repo root (`git rev-parse --show-toplevel`).
 |---|---|---|
 | `/jp` | **Full release (default).** Commit ALL working-tree changes → `release-jpthecat.sh`: web quality gate → notarized DMG → smoke → appcast → Supabase upload → `web/public/stable/*` + `Casks/jpthecat.rb` → `release: … [deploy]` commit + tag → push → verify. Ships mac + web. | ✅ **works now** |
 | `/jp release` | Explicit alias for the bare-`/jp` full release above. | ✅ **works now** |
-| `/jp check` | **Full green check** (old default): mac (build + test + staged-app verify + CLI smoke) **and** web (`bun run quality`). No shipping. | ✅ works now |
+| `/jp check` | **Full green check** (old default): mac (build + test + staged-app verify + CLI smoke) **and** web (`bun run check:full`). No shipping. | ✅ works now |
 | `/jp local` | Build + launch the local Dock-visible `.app` and confirm the bundle shape (`mac/scripts/build_and_run.sh --verify`). | ✅ works now |
 | `/jp cli` | Build + run `jpthecat-cli --json` (today/7d cost readout). | ✅ works now |
 
@@ -75,10 +75,10 @@ Gates:
 ### Phase 3 — Web gate (only when the commit touches `web/`)
 
 ```bash
-cd "$(git rev-parse --show-toplevel)"/web && bun run quality
+cd "$(git rev-parse --show-toplevel)"/web && bun run check:full
 ```
 
-`quality` = type-check → biome → `bun test` → knip → **react-doctor (must be 100/100)** → build.
+`check:full` = biome → type-check → `bun test` → knip → **react-doctor (must be 100/100)** → build.
 **Production gate:** never deploy the web app without react-doctor at 100/100 (see `AGENTS.md`).
 
 ### Phase 4-pre — Commit ALL working-tree changes (bare `/jp` / `/jp release`)
@@ -105,7 +105,7 @@ git commit -m "<summary of WIP>"                            # NO [deploy] — re
 The release script runs this **every single time**, before the mac steps:
 
 ```bash
-cd "$(git rev-parse --show-toplevel)"/web && bun run quality   # GATE: 100/100 doctor + green build
+cd "$(git rev-parse --show-toplevel)"/web && bun run check:full   # GATE: 100/100 doctor + green build
 # release-jpthecat.sh then makes the release commit + push:
 #   git commit -m "release: JPtheCat vX [deploy]"           # [deploy] is REQUIRED — it triggers Vercel
 #   git push origin main                                    # pass dangerouslyDisableSandbox:true on this call

@@ -1,0 +1,100 @@
+{
+	"routes": {
+		"/": {
+			"maxJsBytes": 632832,
+			"rendering": "dynamic"
+		},
+		"/_not-found": {
+			"maxJsBytes": 529408,
+			"rendering": "dynamic"
+		},
+		"/contact": {
+			"maxJsBytes": 535552,
+			"rendering": "dynamic"
+		},
+		"/library": {
+			"maxJsBytes": 529408,
+			"rendering": "dynamic"
+		},
+		"/library/alternatives": {
+			"maxJsBytes": 529408,
+			"rendering": "dynamic"
+		},
+		"/library/alternatives/[tool]": {
+			"maxJsBytes": 532480,
+			"rendering": "dynamic"
+		},
+		"/library/calculators": {
+			"maxJsBytes": 529408,
+			"rendering": "dynamic"
+		},
+		"/library/calculators/[calc]": {
+			"maxJsBytes": 535552,
+			"rendering": "dynamic"
+		},
+		"/library/compare": {
+			"maxJsBytes": 529408,
+			"rendering": "dynamic"
+		},
+		"/library/compare/[pair]": {
+			"maxJsBytes": 532480,
+			"rendering": "dynamic"
+		},
+		"/library/glossary": {
+			"maxJsBytes": 529408,
+			"rendering": "dynamic"
+		},
+		"/library/glossary/[term]": {
+			"maxJsBytes": 532480,
+			"rendering": "dynamic"
+		},
+		"/library/guides": {
+			"maxJsBytes": 529408,
+			"rendering": "dynamic"
+		},
+		"/library/guides/[slug]": {
+			"maxJsBytes": 532480,
+			"rendering": "dynamic"
+		},
+		"/library/limits": {
+			"maxJsBytes": 529408,
+			"rendering": "dynamic"
+		},
+		"/library/limits/[provider]": {
+			"maxJsBytes": 532480,
+			"rendering": "dynamic"
+		},
+		"/library/plans": {
+			"maxJsBytes": 529408,
+			"rendering": "dynamic"
+		},
+		"/library/plans/[plan]": {
+			"maxJsBytes": 532480,
+			"rendering": "dynamic"
+		},
+		"/library/pricing": {
+			"maxJsBytes": 529408,
+			"rendering": "dynamic"
+		},
+		"/library/pricing/[model]": {
+			"maxJsBytes": 532480,
+			"rendering": "dynamic"
+		},
+		"/library/pricing/family/[vendor]": {
+			"maxJsBytes": 532480,
+			"rendering": "dynamic"
+		},
+		"/library/track": {
+			"maxJsBytes": 529408,
+			"rendering": "dynamic"
+		},
+		"/library/track/[provider]": {
+			"maxJsBytes": 532480,
+			"rendering": "dynamic"
+		},
+		"/terms": {
+			"maxJsBytes": 538624,
+			"rendering": "dynamic"
+		}
+	}
+}

@@ -114,13 +114,13 @@ step "clean metadata + Supabase reachable; local HEAD includes origin/main"
 # production gate forbids deploying the web app without a passing quality chain (doctor 100/100).
 # Fail fast here so a web regression can never ride out on a notarized release. Runs for --dry-run
 # too, so a dry run is a true release-readiness check. ---
-info "Web production gate (bun run quality)"
+info "Web production gate (bun run check:full)"
 command -v bun >/dev/null 2>&1 || fail "bun CLI not found — required for the web quality gate"
 if [ ! -d "${RROOT}/web/node_modules" ]; then
 	step "restoring pinned web devDependencies (bun install)"
 	( cd "${RROOT}/web" && bun install ) || fail "bun install failed in web/ — cannot run the web quality gate"
 fi
-( cd "${RROOT}/web" && bun run quality ) \
+( cd "${RROOT}/web" && bun run check:full ) \
 	|| fail "web quality gate failed (type-check / biome / tests / knip / react-doctor / build) — fix before releasing"
 step "web quality passed (react-doctor 100/100 + green build)"
 

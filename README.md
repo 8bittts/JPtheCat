@@ -73,7 +73,7 @@ Run each line from the repository root:
 bash mac/scripts/build_and_run.sh                                               # stage and launch the real .app
 (cd mac && swift run jpthecat-cli snapshot --json --provider all --indexed)     # local automation snapshot
 (cd web && bun install && bun run dev)                                          # http://localhost:4444
-(cd web && bun run quality)                                                     # full web gate
+(cd web && bun run check:full)                                                     # full web gate
 ```
 
 `swift run JPtheCat` is not an app-shell smoke test; use the staged `.app`.

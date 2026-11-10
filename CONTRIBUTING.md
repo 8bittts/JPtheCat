@@ -24,7 +24,7 @@ Run each line from the repository root:
 
 ```sh
 (cd mac && swift build && swift test --parallel)   # native gates
-(cd web && bun install && bun run quality)         # full web gate
+(cd web && bun install && bun run check:full)         # full web gate
 ```
 
 Use Bun for all JavaScript package work.

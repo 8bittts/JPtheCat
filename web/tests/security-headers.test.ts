@@ -21,8 +21,8 @@ describe("security headers", () => {
 			scripts?: Record<string, string>;
 		};
 
-		expect(packageJson.scripts?.build).toContain("bun run scan:secrets");
-		expect(packageJson.scripts?.["scan:secrets"]).toBe(
+		expect(packageJson.scripts?.build).toContain("bun run scan:client-secrets");
+		expect(packageJson.scripts?.["scan:client-secrets"]).toBe(
 			"bun run scripts/scan-client-bundle-secrets.ts",
 		);
 	});

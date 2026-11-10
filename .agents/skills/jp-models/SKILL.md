@@ -187,7 +187,7 @@ Widget (**mandatory audit even when the answer is "exclude"**, tier 3+):
 - docs: active work in `_docs/todos.md`; completed evidence belongs in git; `_docs/03-data.md` (parser origin), `_docs/11-adding-a-provider.md` (only if the PATTERN itself changed), and any live-set reference in `README.md`/`08-growth.md`. `AGENTS.md` (root + web) only for a new load-bearing invariant — terse, pointing to `00-foundation.md`.
 
 ### Step 9 — Gates & report
-Focused Swift tests → `swift test --parallel` → `swift build -c release` → a warning-free `/bin/rm -rf mac/.build && swift build`. Web: `cd web && bun run quality` (React Doctor 100/100) before any deploy. Report the tier landed, every surface block touched (A–K), any block deliberately skipped with the reason, official sources consulted, and gates run.
+Focused Swift tests → `swift test --parallel` → `swift build -c release` → a warning-free `/bin/rm -rf mac/.build && swift build`. Web: `cd web && bun run check:full` (React Doctor 100/100) before any deploy. Report the tier landed, every surface block touched (A–K), any block deliberately skipped with the reason, official sources consulted, and gates run.
 
 ---
 
