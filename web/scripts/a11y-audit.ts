@@ -2,11 +2,11 @@
 // WCAG 2.2 AA audit: runs axe-core against every public route at mobile and desktop widths.
 // Exits non-zero on any violation, so it can gate a release.
 //
-// Usage: bun scripts/a11y-audit.ts [baseUrl]   (default http://localhost:4460; start `bun run dev` first)
+// Usage: bun scripts/a11y-audit.ts [baseUrl]   (default http://localhost:4444; start `bun run dev` first)
 import AxeBuilder from "@axe-core/playwright";
 import { chromium } from "@playwright/test";
 
-const base = (process.argv[2] ?? "http://localhost:4460").replace(/\/+$/, "");
+const base = (process.argv[2] ?? "http://localhost:4444").replace(/\/+$/, "");
 const routes = (
 	process.env.ROUTES ??
 	"/,/contact,/terms,/library,/library/pricing,/library/alternatives,/does-not-exist"

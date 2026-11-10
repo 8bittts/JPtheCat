@@ -1,10 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-	reactStrictMode: true,
-	compress: true,
 	poweredByHeader: false,
-	productionBrowserSourceMaps: false,
 	images: {
 		formats: ["image/avif", "image/webp"],
 		qualities: [75, 90],

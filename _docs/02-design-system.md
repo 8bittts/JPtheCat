@@ -56,7 +56,7 @@ Accent, status, and provider color are three channels and never mix.
 
 **Gradient.** The one shipped gradient is the warm `honey`→`ginger` ribbon (estimate gauge, email accent rule); everything else is flat.
 
-**Interactive rollover (hard).** Every clickable control has a visible warm hover: Sticker Bomb word CTAs use `.sb-btn`, the support modal keeps `.btn-primary` or `.btn-ghost`; icon controls (modal close, mobile-nav summary, FAQ toggle) turn `hover:border-ginger` + `hover:text-ginger-deep` over a `hover:bg-paper-2` wash.
+**Interactive rollover (hard).** Every clickable control has a visible warm hover: Sticker Bomb word CTAs use `.sb-btn`, and the support modal's secondary action uses `.sb-btn-ghost`; icon controls (modal close, mobile-nav summary, FAQ toggle) turn `hover:border-ginger` + `hover:text-ginger-deep` over a `hover:bg-paper-2` wash.
 
 ### App themes
 
@@ -95,7 +95,7 @@ Money uses only `metricHero`, `metric`, and `metricSmall` ([12-ui-surface-invari
 - Hand accents: `sb-hand` (+ `--lg` / `--xl`), `sb-hand-accent`, `sb-accent`, `sb-cap`.
 - Footer: `sb-footer-brand`, `sb-footer-body`, `sb-footer-support`, `sb-footer-legal`, `sb-footer-signoff`.
 - Dialogs on marketing surfaces: `sb-dialog-title`, `sb-dialog-body`, `sb-dialog-fine`, `sb-ui-title`, `sb-ui-copy`, `sb-ui-label`; forms `sb-form-label`, `sb-form-control`, `sb-form-panel`.
-- Layout widths: `sb-shell`, `reading-shell`, `copy-measure`; `<dialog>` geometry stays on `dialog-panel` in `globals.css`, with `dialog-panel-sb` for Sticker Bomb surfaces.
+- Layout widths: `sb-shell`, `reading-shell`; `<dialog>` geometry stays on `dialog-panel` in `globals.css`, with `dialog-panel-sb` for Sticker Bomb surfaces.
 - Palette: cream dot-grid canvas (`--sb-bg`), ink outlines, ginger/orange CTAs (`--sb-orange`, `--sb-orange-ink`, `--sb-honey`, `--sb-yellow`, `--sb-pink`). No mint/seafoam panel fills on public routes (guard: `web/tests/sticker-typography.test.ts`).
 The homepage **demo card** keeps Sunlit Ledger compact roles in `globals.css` (`ui-*`, `demo-*`, `compact-*`) — native parity, not the Sticker Bomb marketing scale.
 Email may duplicate values inline, but `web/tests/design-system-normalization.test.ts` proves its brand colors equal the site tokens.

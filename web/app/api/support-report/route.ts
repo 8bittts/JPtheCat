@@ -2,8 +2,6 @@ import { consumeRateLimit } from "@/lib/analytics/rate-limit";
 import { notifySupportReport } from "@/lib/email/support-report";
 import { cleanString, EMAIL_PATTERN, jsonResponse } from "@/lib/http/api-response";
 
-export const runtime = "nodejs";
-
 const SUPPORT_REPORT_THROTTLE_WINDOW_SECONDS = 60;
 const MIN_REPORT_LENGTH = 80;
 const MAX_REPORT_LENGTH = 20_000;

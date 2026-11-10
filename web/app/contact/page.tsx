@@ -141,7 +141,7 @@ export default function ContactPage() {
 					</div>
 
 					<div className="sb-cta-row">
-						<ContactSupportCta className="sb-btn sb-btn--small" />
+						<ContactSupportCta />
 						<Link href="/#faq" className="sb-link">
 							Read the FAQ →
 						</Link>

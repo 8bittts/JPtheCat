@@ -698,13 +698,16 @@ describe("public launch copy", () => {
 	});
 
 	it("keeps the provider marquee slow enough to read", async () => {
-		const css = await Bun.file("app/globals.css").text();
+		const css = await Bun.file("app/sticker.css").text();
+		const home = await Bun.file("components/sticker/home.tsx").text();
 
-		expect(css).toContain("--marquee-duration: 180s");
-		expect(css).toContain("animation: marquee var(--marquee-duration) linear infinite");
-		expect(css).toContain("@media (max-width: 640px)");
-		expect(css).toContain("--marquee-duration: 88s");
-		expect(css).not.toContain("animation-duration: 0.001ms !important");
+		// The rule the homepage actually applies; the old pin guarded a class no component used.
+		expect(home).toContain('className="sb-marquee__track"');
+		expect(css).toContain(".sb-marquee__track {\n\tdisplay: flex;");
+		expect(css).toContain("animation: sb-scroll 34s linear infinite");
+		expect(css).toMatch(
+			/prefers-reduced-motion: reduce\) \{[\s\S]*\.sb-marquee__track \{\n\t\tanimation: none;/,
+		);
 	});
 
 	it("keeps the packaged meow hover hooks wired", async () => {

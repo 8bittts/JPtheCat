@@ -64,9 +64,6 @@
 	--font-display: var(--font-fraunces), ui-serif, Georgia, "Times New Roman", serif;
 	--font-sans: var(--font-hanken), ui-sans-serif, system-ui, -apple-system, sans-serif;
 	--font-mono: var(--font-jb), ui-monospace, "SF Mono", Menlo, monospace;
-
-	/* Motion */
-	--ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* -----------------------------------------------------------------------------
@@ -77,10 +74,8 @@
 		--header-h: 68px;
 		--page-gutter: 24px;
 		--measure-shell: 1320px;
-		--measure-page: 1120px;
 		--measure-well: 1080px;
 		--measure-reading: 860px;
-		--measure-copy: 720px;
 		--measure-dialog-sm: 340px;
 		--measure-dialog-md: 400px;
 		--measure-dialog-lg: 430px;
@@ -90,7 +85,6 @@
 		--radius-card: 18px;
 		--dialog-backdrop: rgba(34, 29, 21, 0.45);
 		--shadow-card: 0 1px 2px rgba(76, 52, 16, 0.05), 0 18px 40px -22px rgba(96, 64, 22, 0.28);
-		--shadow-soft: 0 1px 2px rgba(76, 52, 16, 0.04), 0 10px 30px -18px rgba(96, 64, 22, 0.22);
 		--shadow-pop: 0 2px 4px rgba(60, 40, 12, 0.06), 0 30px 60px -28px rgba(70, 46, 14, 0.4);
 		--bar-fill-opacity: 0.55;
 	}
@@ -151,13 +145,6 @@
    Components
    ----------------------------------------------------------------------------- */
 @layer components {
-	.wrap {
-		width: 100%;
-		max-width: var(--measure-page);
-		margin-inline: auto;
-		padding-inline: var(--page-gutter);
-	}
-
 	.home-shell {
 		width: 100%;
 		max-width: var(--measure-shell);
@@ -165,110 +152,11 @@
 		padding-inline: var(--page-gutter);
 	}
 
-	.home-well {
-		width: 100%;
-		max-width: var(--measure-well);
-		margin-inline: auto;
-		padding-inline: var(--page-gutter);
-	}
-
-	.home-copy {
-		max-width: var(--measure-copy);
-	}
-
-	.eyebrow {
-		font-family: var(--font-mono);
-		font-size: 12px;
-		letter-spacing: 0;
-		text-transform: uppercase;
-		color: var(--color-ginger-deep);
-		font-weight: 500;
-	}
-
-	/* The brand's ONE sanctioned "foil" cue: a ~1px honey→ginger hairline that fades in
-	   and out. Deployed sparingly as a premium section signature (nav base, hero base) —
-	   never a bright-gold (#fdcd2d) fill, which stays JP's mascot art only. Decorative;
-	   always paired with aria-hidden at the call site. */
-	.foil-rule {
-		height: 1px;
-		width: 100%;
-		background: linear-gradient(
-			90deg,
-			transparent,
-			var(--color-honey),
-			var(--color-ginger),
-			transparent
-		);
-	}
-
 	.tnum {
 		font-family: var(--font-mono);
 		font-feature-settings: "tnum", "zero";
 		font-variant-numeric: tabular-nums;
 		letter-spacing: 0;
-	}
-
-	/* Oversized app-ledger figure for the 404 page — the tabular-numeral display role.
-	   Pairs with .tnum (which owns the mono/tabular treatment); this owns only the
-	   responsive display size, so the not-found numeral stays token-driven instead of
-	   an inline text-[9rem] arbitrary size. */
-	.numeral-404 {
-		font-size: 6rem;
-		line-height: 1;
-	}
-	@media (min-width: 768px) {
-		.numeral-404 {
-			font-size: 9rem;
-		}
-	}
-
-	/* Buttons */
-	.btn {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		height: 50px;
-		padding-inline: 22px;
-		border-radius: 13px;
-		font-weight: 560;
-		font-size: 15px;
-		letter-spacing: 0;
-		transition:
-			transform 0.18s var(--ease-out-soft),
-			box-shadow 0.25s var(--ease-out-soft),
-			background-color 0.2s ease,
-			border-color 0.2s ease;
-		cursor: pointer;
-		white-space: nowrap;
-	}
-	.btn:active {
-		transform: translateY(1px) scale(0.99);
-	}
-
-	.btn-primary {
-		background: linear-gradient(180deg, var(--color-cta) 0%, var(--color-cta-deep) 100%);
-		color: #fff7ec;
-		box-shadow:
-			0 1px 0 rgba(255, 255, 255, 0.35) inset,
-			0 10px 24px -10px rgba(192, 92, 24, 0.6);
-	}
-	.btn-primary:hover {
-		box-shadow:
-			0 1px 0 rgba(255, 255, 255, 0.35) inset,
-			0 14px 30px -10px rgba(192, 92, 24, 0.72);
-		transform: translateY(-1px);
-	}
-
-	.btn-ghost {
-		background: var(--color-card);
-		color: var(--color-ink);
-		border: 1px solid var(--color-line-strong);
-		box-shadow: var(--shadow-soft);
-	}
-	.btn-ghost:hover {
-		border-color: var(--color-ginger);
-		transform: translateY(-1px);
 	}
 
 	/* Cards */
@@ -279,133 +167,8 @@
 		box-shadow: var(--shadow-card);
 	}
 
-	/* Hairline-ruled card grid: cells sit on a 1px `line` background with gap-px gutters, so the
-	   gutters read as thin rules and the outer border + clipped radius fuse them into one panel.
-	   Shared by the library link/alternatives/faq grids and the homepage notes/how-it-works strips;
-	   each caller adds only its own top margin + grid-template-columns. */
-	.hairline-grid {
-		display: grid;
-		gap: 1px;
-		overflow: hidden;
-		border-radius: 16px;
-		border: 1px solid var(--color-line);
-		background: var(--color-line);
-	}
-
-	.chip {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.45rem;
-		height: 32px;
-		padding-inline: 12px;
-		border-radius: 999px;
-		background: color-mix(in oklab, var(--color-card) 70%, transparent);
-		border: 1px solid var(--color-line);
-		font-size: 13px;
-		color: var(--color-ink-soft);
-		backdrop-filter: blur(8px);
-	}
-
-	.section-y {
-		padding-block: 5rem;
-	}
-	@media (min-width: 768px) {
-		.section-y {
-			padding-block: 7rem;
-		}
-	}
-
-	.hero-title {
-		font-size: 2.45rem;
-		line-height: 1.04;
-		letter-spacing: 0;
-	}
-	@media (min-width: 768px) {
-		.hero-title {
-			font-size: 4.1rem;
-		}
-	}
-
-	.section-title {
-		font-size: 2rem;
-		line-height: 1.06;
-		letter-spacing: 0;
-	}
-	@media (min-width: 768px) {
-		.section-title {
-			font-size: 3rem;
-		}
-	}
-
-	.hero-lede {
-		margin-top: 1.25rem;
-		max-width: 43ch;
-		font-size: 17px;
-		line-height: 1.65;
-		color: var(--color-ink-soft);
-	}
-	@media (min-width: 768px) {
-		.hero-lede {
-			font-size: 18px;
-		}
-	}
-
-	.section-lede {
-		font-size: 17px;
-		line-height: 1.65;
-		color: var(--color-ink-soft);
-	}
-	.body-copy {
-		font-size: 15px;
-		line-height: 1.65;
-		color: var(--color-ink-soft);
-	}
-	.small-copy {
-		font-size: 14px;
-		line-height: 1.55;
-		color: var(--color-ink-soft);
-	}
-	/* Shared body size for the /library data-table family (value-benchmark, comparison,
-	   vendor-models, pricing) — same size as .small-copy but without its ink-soft color, since
-	   table cells set their own text color per row (highlight rows, price cells, etc). */
-	.table-copy {
-		font-size: 14px;
-		line-height: 1.55;
-	}
-	.micro-copy {
-		font-size: 13px;
-		line-height: 1.5;
-		color: var(--color-ink-soft);
-	}
-	.fine-print {
-		font-size: 12px;
-		line-height: 1.5;
-		color: var(--color-ink-faint);
-	}
-
-	/* Display-money "hero figure" roles — the single largest money figure on a marketing surface.
-	   Sizes stay token-owned (like the demo's `.demo-total`) so the homepage pricing hero and the
-	   pSEO calculator estimate read as one family instead of inline `text-[Npx]` values; the
-	   `tnum font-display` treatment stays a call-site utility (and `.tnum` already zeroes tracking). */
-	.money-hero {
-		font-size: 58px;
-		line-height: 1;
-		color: var(--color-ink);
-	}
-	@media (min-width: 640px) {
-		.money-hero {
-			font-size: 72px;
-		}
-	}
-	.money-figure {
-		font-size: 34px;
-		line-height: 1;
-		color: var(--color-ink);
-	}
-
-	/* Compact-interface type roles. Marketing prose uses the copy roles above;
-	   dialogs, forms, sticky bars, and dense utility controls use these roles so
-	   their 11-15px hierarchy cannot drift independently across components. */
+	/* Compact-interface type roles. Dialogs, forms, and dense utility controls use these
+	   roles so their 11-14px hierarchy cannot drift independently across components. */
 	.ui-title {
 		font-size: 14px;
 		line-height: 1.25;
@@ -423,21 +186,6 @@
 		font-weight: 600;
 		color: var(--color-ink-soft);
 	}
-	.ui-control-copy {
-		font-size: 13px;
-		line-height: 1.4;
-	}
-	.ui-action-copy {
-		font-size: 12px;
-		line-height: 1;
-		font-weight: 600;
-	}
-	.dialog-title {
-		font-family: var(--font-display);
-		font-size: 28px;
-		line-height: 1.25;
-		color: var(--color-ink);
-	}
 	.ui-item-copy {
 		font-size: 12.5px;
 		line-height: 1.25;
@@ -450,17 +198,8 @@
 	.reading-shell {
 		max-width: var(--measure-reading);
 	}
-	.copy-measure {
-		max-width: var(--measure-copy);
-	}
 	.compact-radius {
 		border-radius: var(--radius-compact);
-	}
-	.form-measure {
-		max-width: 620px;
-	}
-	.prose-measure {
-		max-width: 78ch;
 	}
 	.dialog-panel {
 		margin: auto;
@@ -480,12 +219,6 @@
 	}
 	.dialog-panel-lg {
 		width: min(92vw, var(--measure-dialog-lg));
-	}
-	.dialog-surface {
-		position: relative;
-		overflow: hidden;
-		border-radius: var(--radius-dialog);
-		padding: 1rem;
 	}
 	.compact-field {
 		width: 100%;
@@ -508,49 +241,6 @@
 		line-height: 1;
 		font-weight: 600;
 		transition: 150ms ease;
-	}
-	.nav-copy {
-		font-size: 14px;
-		line-height: 1;
-	}
-	.card-title {
-		font-family: var(--font-display);
-		font-size: 20px;
-		line-height: 1.18;
-		letter-spacing: 0;
-		color: var(--color-ink);
-	}
-	/* Compact display heading for dense library cards (link-grid, alternatives-list)
-	   — same display serif + ink as .card-title, one step down in size so the size
-	   stays token-owned instead of an inline text-[15px] override. */
-	.card-title-sm {
-		font-family: var(--font-display);
-		font-size: 15px;
-		line-height: 1.2;
-		letter-spacing: 0;
-		color: var(--color-ink);
-	}
-	/* Shared "membership card" wordmark size — contact cards all
-	   lock the Wordmark to the same compact scale next to a small BrandMark. */
-	.card-wordmark {
-		white-space: nowrap;
-		font-size: 17px;
-	}
-	/* Shared "membership card" masthead line — the 15px ink emphasis slot below the status
-	   dot on the contact cards (holds the
-	   tagline). Owns only size + color so the three cards can't drift; each instance keeps its
-	   own font/tracking (font-display italic, tnum, etc.). */
-	.card-masthead {
-		font-size: 15px;
-		color: var(--color-ink);
-	}
-	/* JP's closing-note signature (Fraunces italic, ginger-deep). Size + margin stay
-	   contextual (bigger inside a membership card, smaller under a plain paragraph)
-	   so this only owns the three properties that must never drift independently. */
-	.jp-signature {
-		font-family: var(--font-display);
-		font-style: italic;
-		color: var(--color-ginger-deep);
 	}
 	.demo-eyebrow {
 		font-family: var(--font-mono);
@@ -681,62 +371,14 @@
 }
 
 /* -----------------------------------------------------------------------------
-   Keyframes — mascot + atmosphere
+   Keyframes
    ----------------------------------------------------------------------------- */
-@keyframes jp-blink {
-	0%,
-	92%,
-	100% {
-		transform: scaleY(1);
-	}
-	95%,
-	97% {
-		transform: scaleY(0.08);
-	}
-}
-@keyframes jp-tail {
-	0%,
-	100% {
-		transform: rotate(0deg);
-	}
-	50% {
-		transform: rotate(-9deg);
-	}
-}
-@keyframes jp-breathe {
-	0%,
-	100% {
-		transform: translateY(0) scale(1);
-	}
-	50% {
-		transform: translateY(-2px) scale(1.006);
-	}
-}
-@keyframes float-soft {
-	0%,
-	100% {
-		transform: translateY(0) rotate(-0.4deg);
-	}
-	50% {
-		transform: translateY(-10px) rotate(0.4deg);
-	}
-}
 @keyframes marquee {
 	from {
 		transform: translateX(0);
 	}
 	to {
 		transform: translateX(-50%);
-	}
-}
-@keyframes rise-in {
-	from {
-		opacity: 0;
-		transform: translateY(18px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
 	}
 }
 
@@ -755,52 +397,14 @@
 .demo-face-enter {
 	animation: demo-fade 150ms ease both;
 }
-/* Upgrade-celebration confetti (mirrors the app). One shower, top→bottom, then fades. */
-@keyframes demo-confetti-fall {
-	0% {
-		transform: translateY(-24px) rotate(0deg);
-		opacity: 1;
-	}
-	100% {
-		transform: translateY(340px) rotate(var(--confetti-spin, 360deg));
-		opacity: 0;
-	}
-}
-.demo-confetti-piece {
-	position: absolute;
-	top: 0;
-	border-radius: 1.5px;
-	animation: demo-confetti-fall var(--confetti-dur, 1.4s) ease-in var(--confetti-delay, 0s) forwards;
-	will-change: transform, opacity;
-}
 .demo-ticker {
 	animation: marquee 13s linear infinite;
 	will-change: transform;
 }
 
-/* Staggered entrance primitive — set --rise-delay inline for the stagger.
-   Replaces repeated inline `style={{ animation: "rise-in ..." }}`. */
-.rise-in {
-	animation: rise-in 0.7s var(--ease-out-soft) var(--rise-delay, 0ms) both;
-}
-
-.animate-marquee {
-	--marquee-duration: 180s;
-	animation: marquee var(--marquee-duration) linear infinite;
-	will-change: transform;
-}
-@media (max-width: 640px) {
-	.animate-marquee {
-		--marquee-duration: 88s;
-	}
-}
-.animate-float {
-	animation: float-soft 7s ease-in-out infinite;
-}
-/* Grounding shadow for the floating demo, synced 1:1 with float-soft (same 7s ease-in-out):
-   settled (0/100%, card down) → tighter + darker; lifted (50%, card up) → larger, deeper, softer.
-   The base box-shadow is the settled state so reduced-motion (animation neutralized) keeps a strong
-   static shadow. */
+/* Grounding shadow for the homepage demo card (7s ease-in-out): settled (0/100%) is tighter and
+   darker; lifted (50%) is larger, deeper, and softer. The base box-shadow is the settled state, so
+   reduced-motion (animation neutralized) keeps a strong static shadow. */
 .animate-float-shadow {
 	box-shadow:
 		0 3px 8px rgba(60, 40, 12, 0.12),
@@ -825,20 +429,14 @@
 	}
 }
 
-/* Honor prefers-reduced-motion (AGENTS.md: "no autoplaying looping motion for
-   reduced-motion users"). A universal reset neutralizes every looping/entrance
-   animation — marquee, float, float-shadow, rise-in, and any future motion — in
-   one place. The float-shadow base box-shadow is already the settled state, so
-   stopping the animation leaves a correct static shadow. */
+/* Honor prefers-reduced-motion: one universal reset neutralizes every looping animation (ticker,
+   float-shadow, and any future motion). The float-shadow base box-shadow is already the settled
+   state, so stopping the animation leaves a correct static shadow. */
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,
 	*::after {
 		animation: none !important;
 		transition-duration: 0.01ms !important;
-	}
-	/* Confetti is pure motion — hide it entirely rather than leaving static dots parked at the top. */
-	.demo-confetti-piece {
-		display: none;
 	}
 }

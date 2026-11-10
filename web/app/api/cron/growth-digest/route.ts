@@ -13,7 +13,6 @@ import { isCronRequestAuthorized } from "@/lib/email/cron-auth";
 import { DEFAULT_DOWNLOAD_NOTIFICATION_FROM } from "@/lib/email/download-notification";
 import { sendEmail } from "@/lib/email/send-helper";
 
-export const runtime = "nodejs";
 export const maxDuration = 300;
 
 type GrowthDigestDeps = {

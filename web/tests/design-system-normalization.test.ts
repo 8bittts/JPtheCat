@@ -6,6 +6,8 @@ import { emailColors, emailRadius } from "@/emails/email-styles";
 
 const root = join(import.meta.dir, "..");
 const css = readFileSync(join(root, "app/globals.css"), "utf8");
+/** Rules only: a selector that survives inside a comment is not a defined role. */
+const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
 
 function cssColor(name: string): string {
 	const match = css.match(new RegExp(`--color-${name}:\\s*(#[0-9a-fA-F]{6})`));
@@ -45,21 +47,14 @@ describe("web design-system normalization", () => {
 			"ui-title",
 			"ui-copy",
 			"ui-label",
-			"ui-control-copy",
-			"ui-action-copy",
 			"ui-item-copy",
-			"dialog-title",
 			"reading-shell",
-			"copy-measure",
 			"compact-radius",
-			"prose-measure",
-			"form-measure",
 			"dialog-panel",
-			"dialog-surface",
 			"compact-field",
 			"compact-action",
 		]) {
-			expect(css).toContain(`.${role}`);
+			expect(cssRules, role).toMatch(new RegExp(`\\.${role}\\s*\\{`));
 		}
 	});
 

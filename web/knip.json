@@ -1,6 +1,6 @@
 {
 	"$schema": "https://unpkg.com/knip@6/schema.json",
-	"entry": ["tests/**/*.test.ts", "scripts/**/*.ts"],
-	"project": ["**/*.{ts,tsx}", "*.mjs"],
+	"entry": ["tests/**/*.test.ts", "scripts/**/*.{ts,mjs,cjs}"],
+	"project": ["**/*.{ts,tsx,mjs,cjs}"],
 	"ignoreDependencies": ["tailwindcss"]
 }

@@ -20,7 +20,7 @@ function buildReport(message: string) {
 	return lines.join("\n");
 }
 
-export function ContactSupportCta({ className }: { className?: string }) {
+export function ContactSupportCta() {
 	const [email, setEmail] = useState("");
 	const [message, setMessage] = useState("");
 	const [state, setState] = useState<SendState>("idle");
@@ -85,7 +85,7 @@ export function ContactSupportCta({ className }: { className?: string }) {
 
 	return (
 		<>
-			<button type="button" onClick={open} className={className ?? "btn btn-primary"}>
+			<button type="button" onClick={open} className="sb-btn sb-btn--small">
 				Get Support
 			</button>
 			<dialog

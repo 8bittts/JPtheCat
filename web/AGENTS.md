@@ -47,7 +47,7 @@ The `react-email` preview CLI (`bunx react-email dev -d emails -p 4445`) is the 
 ## Tests
 
 Tests live in `tests/*.test.ts(x)` and run on Bun's built-in runner, importing from `bun:test` — not vitest or jest.
-`knip.json` treats `tests/**/*.test.ts` and `scripts/**/*.ts` as entry points, so a test file that imports nothing reachable surfaces as dead code.
+`knip.json` treats `tests/**/*.test.ts` and `scripts/**/*.{ts,mjs,cjs}` as entry points, so a test file that imports nothing reachable surfaces as dead code and every script's imports must be listed dependencies.
 Many tests are content guardrails (SEO length limits, copy pins, no-fiction/honesty checks, security headers, pricing parity); when marketing copy or library data changes, update the asserted source rather than the test.
 `tests/site-copy.test.ts` renders several components as raw function calls (`renderToStaticMarkup(Hero())`), which crashes once that component adopts a hook — swap to `createElement(Component, props)` first ([incident](../_docs/00-foundation.md#hook-crash-in-site-copy-tests)).
 
@@ -102,7 +102,7 @@ Resend tag values are ASCII letters, numbers, underscore, and dash only; today's
 
 Text contrast >= 4.5:1 (>= 3:1 for large text and UI objects), full keyboard operability, visible `:focus-visible`, semantic landmarks, ordered headings, and `alt` on every image.
 The download-started modal keeps `aria-labelledby`/`aria-describedby`, moves focus to its Got it button, traps Tab, and preserves Esc, backdrop, and button dismissal.
-Honor `prefers-reduced-motion`: the universal reset in `app/globals.css` stops every animation and hides demo confetti, and `app/sticker.css` drops the sticker tilt and marquee motion.
+Honor `prefers-reduced-motion`: the universal reset in `app/globals.css` stops every animation, and `app/sticker.css` drops the sticker tilt and marquee motion.
 Do not animate wrappers containing live controls.
 
 ## Responsive

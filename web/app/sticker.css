@@ -19,7 +19,6 @@
 	--sb-sky: #6ec3ff;
 	--sb-white: #ffffff;
 	--sb-border: 3px solid var(--sb-ink);
-	--sb-shadow: 6px 6px 0 var(--sb-ink);
 	--sb-font-display: var(--font-bagel), "Arial Black", system-ui, sans-serif;
 	--sb-font-hand: var(--font-gaegu), "Comic Sans MS", cursive;
 	--sb-font-body: var(--font-space), ui-sans-serif, system-ui, sans-serif;
@@ -315,11 +314,6 @@
 [data-purr-state="playing"] .sb-meow-bubble {
 	opacity: 1;
 	transform: scale(1) rotate(8deg);
-}
-.sb-hero-copy {
-	max-width: 720px;
-	margin: 30px auto 0;
-	font-size: clamp(22px, 2.4vw, 28px);
 }
 .sb-sub {
 	max-width: 720px;
