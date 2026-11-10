@@ -8,7 +8,7 @@
 
 A calm, light macOS menu-bar app that shows Claude Code spend, Codex rate-limit usage, a unified
 Grok view for Grok Build / Cursor / Grok Bot activity and optional official plan pools, Muse Spark
-notional list-price cost, and OpenCode Zen / Go gateway usage, with a labelled provider catalog.
+notional list-price cost, and OpenCode Zen / Go gateway usage, with a labeled provider catalog.
 Native, local-first, private, free, and open source under the MIT license.
 
 `macOS 14+` · `Apple Silicon` · `Free` · `No account` · `MIT`
@@ -48,7 +48,8 @@ JP the Cat answers one question: what are my AI coding agents costing right now,
   The website uses disclosed Vercel Web Analytics; Mac app product analytics stay opt-in and off.
 - **No provider pretending.** Only providers marked `live` in `ProviderCatalog` are marketed as supported.
 
-Every feature — dashboard, limit gauges, widget, alerts, analytics, export, and all 24 themes — is free. There is no license, trial, or checkout.
+Every feature — dashboard, limit gauges, widget, alerts, analytics, export, and all 24 themes — is free.
+There is no license, trial, or checkout.
 
 ## Repository layout
 

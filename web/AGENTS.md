@@ -36,10 +36,12 @@ It byte-scans `.next/static` and `.next/server/app` for every credential-shaped 
 **[CRITICAL] A green/READY Vercel deploy is NOT proof the quality gate passed — run `bun run quality` locally before any web-touching push.**
 Vercel's build runs only `next build`, not `bun test`, knip, or react-doctor, so a failing test or doctor regression ships while Vercel still shows READY.
 `.github/workflows/ci.yml` is disabled on purpose, so the local run is the only gate; a WCAG target-size failure once deployed "green" this way.
-`react-doctor` must score 100/100 to deploy; `--blocking warning` makes any warning fail `bun run doctor`, because the tool exits 0 on warnings by default. Justified exceptions live in `doctor.config.json` — never suppress a finding the code could fix instead.
+`react-doctor` must score 100/100 to deploy; `--blocking warning` makes any warning fail `bun run doctor`, because the tool exits 0 on warnings by default.
+Justified exceptions live in `doctor.config.json` — never suppress a finding the code could fix instead.
 
 Every tool in the `quality` chain (Biome, knip, react-doctor) is a pinned devDependency resolved from `node_modules/.bin` — never reintroduce `bunx <tool>@latest`.
-Playwright is pinned on the same terms but is NOT in the `quality` chain and has no browser specs; consumers are `scripts/generate-og-image.mjs` (OG/Twitter card) and asset guards in `tests/social-assets.test.ts`. Regenerate PWA PNGs with `scripts/generate-web-icons.mjs` (macOS can still use repo-root `./scripts/generate-brand-icons.sh`).
+Playwright is pinned on the same terms but is NOT in the `quality` chain and has no browser specs; consumers are `scripts/generate-og-image.mjs` (OG/Twitter card) and asset guards in `tests/social-assets.test.ts`.
+Regenerate PWA PNGs with `scripts/generate-web-icons.mjs` (macOS can still use repo-root `./scripts/generate-brand-icons.sh`).
 The `react-email` preview CLI (`bunx react-email dev -d emails -p 4445`) is the one deliberate unpinned carve-out: it gates nothing.
 
 ## Tests
@@ -87,7 +89,8 @@ A download never emails the owner on its own: `/download` only persists the row,
 
 ## Email
 
-JP sends no customer mail (no license, newsletter, or broadcast). Every owner/admin notice uses the spartan `emails/admin-email-shell.tsx`, which reads `email-styles.ts` (hex mirrored from `app/globals.css`), and the design is owned by [02-design-system.md](../_docs/02-design-system.md#email--the-owner-ledger).
+JP sends no customer mail (no license, newsletter, or broadcast).
+Every owner/admin notice uses the spartan `emails/admin-email-shell.tsx`, which reads `email-styles.ts` (hex mirrored from `app/globals.css`), and the design is owned by [02-design-system.md](../_docs/02-design-system.md#email--the-owner-ledger).
 **A new owner notice builds an `AdminEmailContent` for `AdminEmail`, with anything wrong in `issues`** (guard: `tests/admin-email-shell.test.tsx`).
 **The headline must be `emailColors.gingerDeep`, NOT ink** — Gmail mobile dark mode force-lightens large near-black inline text to white (guard: `tests/admin-email-shell.test.tsx`).
 Layout is Row/Column tables, never CSS flex or grid; every surface needs an explicit background plus `color-scheme: light`; every text/CTA pair passes WCAG AA.
@@ -108,7 +111,9 @@ Mobile-first: every layout must hold at 375px with no horizontal overflow, and m
 Take 375px evidence from a real 375px viewport (Playwright `viewport`), never Chrome `--headless --window-size=375`, which lays out wider than 375px and fakes a clipped right edge.
 Pair `md:` font-size growth with `xl:whitespace-nowrap`, never `md:whitespace-nowrap`, which overflows only in a narrow mid-range band.
 A persistent `position: fixed` bar that looks like "space below the footer" is a visibility bug: hide it once `getBoundingClientRect().bottom <= window.innerHeight` for the real CTA, never via `scrollHeight` or `IntersectionObserver`.
-Public marketing routes use Sticker Bomb type roles in `app/sticker.css` (`sb-*`); see `_docs/02-design-system.md` §3 and `tests/sticker-typography.test.ts`. The homepage demo card keeps Sunlit Ledger roles in `globals.css` (`ui-*`, `compact-*`). Never inline arbitrary `text-[…]` sizes on marketing surfaces.
+Public marketing routes use Sticker Bomb type roles in `app/sticker.css` (`sb-*`); see `_docs/02-design-system.md` §3 and `tests/sticker-typography.test.ts`.
+The homepage demo card keeps Sunlit Ledger roles in `globals.css` (`ui-*`, `compact-*`).
+Never inline arbitrary `text-[…]` sizes on marketing surfaces.
 Incidents: [_docs/00-foundation.md#responsive-overflow](../_docs/00-foundation.md#responsive-overflow).
 
 ## SEO & crawlers

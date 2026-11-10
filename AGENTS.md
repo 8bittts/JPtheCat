@@ -1,6 +1,6 @@
 # AGENTS.md — jpthecat (root)
 
-JP the Cat (code identifier `JPtheCat`) is a calm, light-themed macOS menu-bar app showing Claude Code spend, Codex and Grok rate-limit usage, Muse Spark notional list-price cost, and OpenCode Zen / OpenCode Go gateway usage, with a labelled provider catalog behind it.
+JP the Cat (code identifier `JPtheCat`) is a calm, light-themed macOS menu-bar app showing Claude Code spend, Codex and Grok rate-limit usage, Muse Spark notional list-price cost, and OpenCode Zen / OpenCode Go gateway usage, with a labeled provider catalog behind it.
 It ships as a native Swift app (`mac/`) plus a Next.js marketing/pSEO site (`web/`), alongside `supabase/` (migrations for release storage and download growth), `Casks/`, `brand/`, and `scripts/`.
 
 Directory-scoped rules load automatically beside the code and are not restated here:
@@ -86,7 +86,14 @@ Copilot, OpenCode Zen, and OpenCode Go are dashboard-visible but **non-aggregabl
 Gateway usage can overlap a model-brand row (Muse Spark/Nemotron/MiMo/Big Pickle/DeepSeek), so gateways stay out of `--provider all` totals and every dollar total, including models without a supported brand row.
 Nemotron, MiMo, Big Pickle, and DeepSeek are `ProviderCatalog.localAccountingIDs`: summed into the dashboard aggregate and `--provider all`, never marketed; every OpenCode-derived row follows [one store, one reader, one pricing rule](_docs/11-adding-a-provider.md#opencode-derived-rows-one-store-one-reader-one-pricing-rule).
 OpenCode Go's 5-hour/weekly/monthly gauge is measured local cost against its PUBLISHED per-model dollar caps, never a provider-reported percentage; it sets `quotaIsMeasured` and NOT `usageOfficial`, so it draws a `measured` meter in the selector and provider detail but stays out of the widget's official capsule and every alert, and the monthly bar is detail-only.
-Grok is the one public provider for Grok Build, Cursor, and Grok Bot. Raw source IDs remain distinct in the warehouse; reporting projects them into `.grok` without rewriting history. Local priced activity is aggregable **notional** list price; all-unpriced activity shows tokens. `GrokPlanUsageStore` / `GrokPlanUsageClient` own one opt-in, cache and five-minute attempt throttle. The API weekly pool wins over local hook capture; only that weekly pool feeds `weeklyUsedPct`, menu-bar headroom and widget quota capsules. Without weekly access, the API's Cursor Models (then combined included usage, then first reported pool) drives the selector and plan-only hero as a **billing-cycle** meter, never a fabricated weekly/5-hour window. Percentages never enter dollar totals. Guard: `GrokConsolidationTests`.
+Grok is the one public provider for Grok Build, Cursor, and Grok Bot.
+Raw source IDs remain distinct in the warehouse; reporting projects them into `.grok` without rewriting history.
+Local priced activity is aggregable **notional** list price; all-unpriced activity shows tokens.
+`GrokPlanUsageStore` / `GrokPlanUsageClient` own one opt-in, cache and five-minute attempt throttle.
+The API weekly pool wins over local hook capture; only that weekly pool feeds `weeklyUsedPct`, menu-bar headroom and widget quota capsules.
+Without weekly access, the API's Cursor Models (then combined included usage, then first reported pool) drives the selector and plan-only hero as a **billing-cycle** meter, never a fabricated weekly/5-hour window.
+Percentages never enter dollar totals.
+Guard: `GrokConsolidationTests`.
 A fully-unpriced provider needs TOKEN-based display, never a dead `$0.00` (`ProviderRow.isFullyUnpriced`, `tokenSeries`).
 Pricing coverage is emitted-ID coverage, not a vendor-name checklist: lookup normalizes through `ModelIdentity`, and bundled, remote, and web pricing mirrors stay parity-guarded.
 
@@ -105,7 +112,10 @@ Codex writes `rate_limits` only while a CLI turn runs against that pool, so a we
 The same rule binds Claude's opt-in statusline capture (`ClaudeRateLimitStore`): capture age feeds only the `isActive` indicator, never the gauge.
 Both capture-age gates shipped once and were reverted: [_docs/00-foundation.md#rate-limit-window-freshness](_docs/00-foundation.md#rate-limit-window-freshness).
 
-Claude live limits require opt-in local statusline capture. Grok supports opt-in official plan API usage, with opt-in `GrokRateLimitCapture` as a weekly fallback. Neither ever invents quota from local tokens. A local-hook opt-in alone is not consent to network sign-in access.
+Claude live limits require opt-in local statusline capture.
+Grok supports opt-in official plan API usage, with opt-in `GrokRateLimitCapture` as a weekly fallback.
+Neither ever invents quota from local tokens.
+A local-hook opt-in alone is not consent to network sign-in access.
 Copilot's OTel `token_limit`/`current_tokens` attrs are the model CONTEXT WINDOW, not a spend quota; the one honest signal is summed per-request `github.copilot.nano_aiu` deltas, never the cumulative counter.
 
 **[HARD REQUIREMENT] Any UI offering to enable, connect, or configure a provider must first detect it is locally present and stay hidden until it is.**
@@ -148,7 +158,8 @@ Incidents: [_docs/00-foundation.md#sparkle-release-notes](_docs/00-foundation.md
 ## Safety & Privacy
 
 **The one privacy invariant: prompts, code, transcripts, provider credentials, and local usage databases must never leave the user's Mac.**
-The exception is unified opt-in Grok plan usage: it sends a saved Cursor or Grok Bot sign-in token only to the existing three DashboardService methods on `api2.cursor.sh`; no refresh tokens, prompts, code, paths or local usage. The public privacy policy discloses it.
+The exception is unified opt-in Grok plan usage: it sends a saved Cursor or Grok Bot sign-in token only to the existing three DashboardService methods on `api2.cursor.sh`; no refresh tokens, prompts, code, paths or local usage.
+The public privacy policy discloses it.
 Every telemetry, analytics, and email surface (Vercel Analytics, the owner daily report, download notices, support reports) must honor it — none may ever include prompts, code, transcripts, token history, costs, credentials, project paths, or local-usage-database contents.
 Mac app product analytics stay opt-in and off by default.
 The app's least-privilege posture (no Full Disk Access, no Accessibility) is a shipped marketing claim guarded by `web/tests/site-copy.test.ts`; the rules that keep it true live in [mac/AGENTS.md](mac/AGENTS.md).
@@ -162,4 +173,5 @@ The pre-open-source history lives only in the private `8bittts/JPtheCat-archive`
 
 **Never edit agent-harness config ad hoc; use only the explicit opt-in setup paths. `~/.claude/settings.json` remains read-only.**
 The Claude-limits capture feature (`StatuslineCapture`) only READS `statusLine.command` to find the user's own statusline script and then edits that script, and only after explicit opt-in.
-Grok-limits capture only writes a marked file under `~/.grok/hooks/` after the same opt-in — never `config.toml`, never `auth.json`. Cursor's opt-in `CursorHookSetup` is the designed `~/.cursor/hooks.json` exception: preserve unrelated hooks and remove only JP's own entry (`CursorProviderTests.testSetupMergesAndRemovesOnlyItsExistingStopHook`).
+Grok-limits capture only writes a marked file under `~/.grok/hooks/` after the same opt-in — never `config.toml`, never `auth.json`.
+Cursor's opt-in `CursorHookSetup` is the designed `~/.cursor/hooks.json` exception: preserve unrelated hooks and remove only JP's own entry (`CursorProviderTests.testSetupMergesAndRemovesOnlyItsExistingStopHook`).

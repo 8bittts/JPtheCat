@@ -100,7 +100,7 @@ Local outputs carry rollups, provider rows, provenance, and official windows onl
 
 ## 10. No license gate
 
-JP the Cat is free: every feature is available with no license, lease, trial, or Keychain state. The license, trial, and paywall code was removed in November 2026.
+JP the Cat is free: every feature is available with no license, lease, trial, or Keychain state.
 
 ## 11. Launch-mode boundary
 

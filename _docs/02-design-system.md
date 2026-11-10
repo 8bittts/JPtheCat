@@ -29,7 +29,8 @@ The six provider identities apply to homepage copy, marquee, FAQ, demo selection
 Do not add providers to the homepage when the native app or `/library` gains support.
 Keep the existing homepage layout, dimensions, typography, color roles, controls, motion, and responsive behavior; native geometry experiments do not change homepage geometry.
 Shared controls retain semantic parity for units, provenance, badges, actions, and themes.
-The frozen homepage Cursor illustration stays token-based and non-aggregable; OpenCode Go stays a measured, non-aggregable gateway. The native unified Grok source/accounting contract is owned by [03-data.md](03-data.md#unified-grok-plan-usage-and-cursor-local-activity); a homepage illustration never creates another native provider.
+The frozen homepage Cursor illustration stays token-based and non-aggregable; OpenCode Go stays a measured, non-aggregable gateway.
+The native unified Grok source/accounting contract is owned by [03-data.md](03-data.md#unified-grok-plan-usage-and-cursor-local-activity); a homepage illustration never creates another native provider.
 Demo aggregate and composition figures sum only represented aggregable rows, with no hidden-provider contribution or gateway double counting.
 The full native catalog, CLI, widget eligibility, and `/library` remain independent of this boundary.
 `web/lib/homepage-providers.ts` owns the allowlist; `web/tests/homepage-providers.test.tsx` pins it.
@@ -59,7 +60,8 @@ Accent, status, and provider color are three channels and never mix.
 
 ### App themes
 
-`JPTheme.all` is the catalog: Sunlit Ledger (light) and Midnight Ledger (dark) show inline in Settings; the rest (`inMoreThemes: true`) live in the More themes window. Every theme is free.
+`JPTheme.all` is the catalog: Sunlit Ledger (light) and Midnight Ledger (dark) show inline in Settings; the rest (`inMoreThemes: true`) live in the More themes window.
+Every theme is free.
 Adding a theme is data in `mac/Sources/JPtheCatApp/Theme.swift`; color resolution and the pickers need no view changes, and the web demo catalog regenerates (`web/components/site/demo-themes.ts`).
 Palette roles per theme: `paper`, `paper2`, `card`, `ink`, `inkSoft`, `inkFaint`, `line`, `lineStrong`, `track`, `ginger`, `gingerDeep`, `sage`, `sageSoft`, `sageDeep`, `honey`, `creamDeep`, `gold`, `cta`, `ctaDeep`, `ctaText`, `coral`.
 Derived helpers in `JPAppColor`: `trackFill` draws every groove (never `paper2`, which collapses onto the card in dark themes); `barFillOpacity` keeps a fill distinct from its track; `providerTint(_:)` lifts a too-dark brand tint on dark cards, while the icon chip keeps the raw tint; `ctaGradient` is the one accent-button gradient with `ctaText` on it (never `.white` on bright ginger).
@@ -114,7 +116,8 @@ The homepage mascot meows on hover or focus only after a real user activation un
 Charts are quiet and number-first: no gridlines beyond one hairline baseline, no boxed legends, 2px sparkline strokes with one endpoint dot, flat bars, and the literal figure beside every chart.
 Gauges read as a temperature ramp: sage below 70%, honey at 70–89%, coral at 90% and above.
 SF Symbols are the base glyph set; the JP badge is the emotional brand mark and is never replaced with a generic gauge.
-Provider marks are self-hosted with a source note in `web/public/provider-icons/SOURCE-NOTES.md`; a geometric monogram is only a fallback. Cursor marks remain used by the frozen homepage and native hook setup, and legacy Cursor/Grok Bot marks remain available for older widget snapshots and cached pages; retiring a public catalog row does not invalidate those assets.
+Provider marks are self-hosted with a source note in `web/public/provider-icons/SOURCE-NOTES.md`; a geometric monogram is only a fallback.
+Cursor marks remain used by the frozen homepage and native hook setup, and legacy Cursor/Grok Bot marks remain available for older widget snapshots and cached pages; retiring a public catalog row does not invalidate those assets.
 No emoji in chrome, navigation, badges, or provider identity; the first-run empty state may use one paw print.
 
 ## 6. Homepage demo mirror
@@ -158,7 +161,7 @@ JP sends no customer mail; the one shell is the owner/admin "Owner Ledger".
 - Issues lead and stay rare: support reports, automated-looking download networks, and the digest's failed legs.
   A routine download never raises one, and `coral` is used for nothing else.
 - Sections run who / what first and forensic IDs last; the digest runs Health, Downloads, Traffic, Search, Signals.
-- Humanize values (friendly browser, labelled Pacific time); a raw string kept for forensics, such as the user agent, gets its own row.
+- Humanize values (friendly browser, labeled Pacific time); a raw string kept for forensics, such as the user agent, gets its own row.
 - Every value, list item, and block uses the same body text; the mono face marks only the uppercase section labels (guard: `web/tests/admin-email-shell.test.tsx`).
 - An absent value uses the one vocabulary `OWNER_VALUE` in `web/lib/email/owner-vocabulary.ts`, where each word means one thing (`not configured` never ran, `failed` errored, `none in this window` ran and found nothing); a real zero prints as a number (`0`), never a word.
 

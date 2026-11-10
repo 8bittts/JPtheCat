@@ -44,7 +44,6 @@ Code, scripts and tests, then the owner doc, then `AGENTS.md`, then `README.md`.
 
 ## Known doc drift
 
-- `growth/` snapshots describe the state on their pull date.
 - `10-gtm.md` launch copy must be re-synced with `web/lib/site.ts` before use.
 - An applied migration under `supabase/migrations/` cites `_docs/17-engineering-log.md`, now the engineering log inside `00-foundation.md`; applied migrations are not edited.
 - The `_comment` field of the served `web/public/stable/pricing.json` cites a `_docs/04-pricing-and-limits.md` that no longer exists; the served pricing file is not edited in a documentation pass.

@@ -35,7 +35,7 @@ Source of truth for the numbers: `web/lib/site.ts` (`SITE`), `mac/Sources/JPtheC
 > today, live, to the cent.
 >
 > Right now it tracks **Claude Code** (real dollars, from your local usage logs), **Codex** and
-> **Grok** (official rate-limit windows where available, plus clearly-labelled *notional* list-price
+> **Grok** (official rate-limit windows where available, plus clearly-labeled *notional* list-price
 > figures), **Muse Spark**, and **OpenCode Zen / Go** (notional list prices from local OpenCode usage).
 > Gateway rows stay separate from combined totals.
 > A
@@ -69,7 +69,7 @@ Source of truth for the numbers: `web/lib/site.ts` (`SITE`), `mac/Sources/JPtheC
 > So that's the whole design constraint: **JP keeps usage accounting on your Mac.** No Full
 > Disk Access, no Accessibility, no account, no gateway. It parses the usage files the tools already
 > write to your home folder (`~/.claude`, `~/.codex`) and shows you Claude's real dollars and Codex's
-> official rate-limit windows (with a clearly-labelled notional list-price estimate, since a ChatGPT
+> official rate-limit windows (with a clearly-labeled notional list-price estimate, since a ChatGPT
 > subscription has no real per-call dollar figure).
 >
 > Today it's honest about scope: **Claude Code, Codex, Grok, Muse Spark, OpenCode Zen, and OpenCode Go are live.** The 64-provider
@@ -98,7 +98,7 @@ Source of truth for the numbers: `web/lib/site.ts` (`SITE`), `mac/Sources/JPtheC
 > Claude Code writes real per-call token usage locally, so JP can compute actual dollars. A Codex
 > ChatGPT subscription doesn't have a real per-call price — so JP shows available official
 > subscription windows, separately reported credits, and a *notional* "what this would cost at API list price" figure,
-> always labelled notional so it's never mistaken for a bill.
+> always labeled notional so it's never mistaken for a bill.
 
 **"Does it support Cursor / Gemini / Copilot / <tool>?"**
 > Live today: Claude Code, Codex, Grok, Muse Spark, OpenCode Zen, and OpenCode Go.

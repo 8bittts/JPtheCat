@@ -5,18 +5,23 @@ The privacy invariant, the permissions posture, Keychain access rules and update
 ## Privacy invariant
 
 Prompts, code, transcripts, provider credentials and local usage databases never leave the Mac.
-Unified opt-in Grok plan usage sends only a saved Cursor or Grok Bot access token to the existing three DashboardService methods on `api2.cursor.sh`, on one shared five-minute throttle. Alternate sign-ins are fallback accounts, never merged quota pools. Turning it off clears unified and legacy plan markers/readings; a local-hook opt-in does not authorize network access. The public privacy policy discloses this exception.
+Unified opt-in Grok plan usage sends only a saved Cursor or Grok Bot access token to the existing three DashboardService methods on `api2.cursor.sh`, on one shared five-minute throttle.
+Alternate sign-ins are fallback accounts, never merged quota pools.
+Turning it off clears unified and legacy plan markers/readings; a local-hook opt-in does not authorize network access.
+The public privacy policy discloses this exception.
 Every telemetry, analytics and email surface honors the invariant; Mac app product analytics stay opt-in and off by default.
 
 ## Keychain
 
 JP the Cat makes no Security-framework Keychain access of its own (guard: `PlanTierKeychainReadTests`).
-Reading another app's Keychain item for a cosmetic label makes macOS prompt for the login password, so plan tiers are never read that way; the reviewed Keychain exceptions use `/usr/bin/security` only and never a refresh token. Cursor can also supply its existing app access token from the exact opt-in store documented in [03-data.md](03-data.md#unified-grok-plan-usage-and-cursor-local-activity).
+Reading another app's Keychain item for a cosmetic label makes macOS prompt for the login password, so plan tiers are never read that way; the reviewed Keychain exceptions use `/usr/bin/security` only and never a refresh token.
+Cursor can also supply its existing app access token from the exact opt-in store documented in [03-data.md](03-data.md#unified-grok-plan-usage-and-cursor-local-activity).
 The incident is in [00-foundation.md](00-foundation.md#keychain-and-identity).
 
 ## Harness configuration
 
-Provider setup changes require explicit opt-in. Claude-limits capture only reads `~/.claude/settings.json` and edits the user's own statusline script; Grok capture writes its marked `~/.grok/hooks/` file; Cursor capture installs only JP's entry in the designed `~/.cursor/hooks.json`, preserving unrelated hooks.
+Provider setup changes require explicit opt-in.
+Claude-limits capture only reads `~/.claude/settings.json` and edits the user's own statusline script; Grok capture writes its marked `~/.grok/hooks/` file; Cursor capture installs only JP's entry in the designed `~/.cursor/hooks.json`, preserving unrelated hooks.
 
 ## Permissions posture
 

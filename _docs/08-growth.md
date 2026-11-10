@@ -80,7 +80,8 @@ Everything else stays aggregate: download spine, Vercel analytics, and Search Co
 It never includes prompts, code, transcripts, token history, costs, credentials, project paths, raw IPs, or the local usage database.
 Search Console queries and pages rank by clicks, then impressions.
 
-Immediate notices are limited to customer messages: the in-app support report. Downloads never email one by one beyond the owner download notice.
+Immediate notices are limited to customer messages: the in-app support report.
+Downloads never email one by one beyond the owner download notice.
 Owner-notice idempotency keys come from body-visible event fields plus a hashed identity, never an hourly bucket.
 
 **Production env:** `CRON_SECRET`; `RESEND_API_KEY` with `RESEND_FROM_EMAIL` and the `*_NOTIFICATION_TO` / `GROWTH_DIGEST_TO` overrides; `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`; `VERCEL_TOKEN`; `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`, `GSC_SITE_URL`; optional `GITHUB_TOKEN`.
@@ -102,7 +103,7 @@ Every count is a gate-computed ceiling, never a target; padding to a number is w
 
 - **Out-data the field:** every page is fed by data the app ships — the bundled pricing table, the provider registry, and documented plan mechanics.
   Where our data is deep (cache-write split, model-specific context tiers) we beat flat price recaps; where it is thin, we fold the model into a family table.
-- **Out-honest the field:** real dollars (Claude), notional list price (other providers), official percentages (Codex automatic; Claude and Grok opt-in), and measured gateway caps (OpenCode Go) are labelled everywhere.
+- **Out-honest the field:** real dollars (Claude), notional list price (other providers), official percentages (Codex automatic; Claude and Grok opt-in), and measured gateway caps (OpenCode Go) are labeled everywhere.
   Only the live set is called tracked, which itself differentiates JP.
 - **Convert intent:** the highest-intent clusters (usage tracker, cost calculator, "am I going to hit my limit", ccusage alternative) map to shipped features and a real interactive calculator.
 - **Boundedness is the moat:** pages are bounded by real models, providers, plans, tools, and terms.

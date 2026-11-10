@@ -24,7 +24,7 @@ A `Button` nested inside another `Button`'s label gets no independent tap target
 `SelectorRow` is therefore THREE sibling `.buttonStyle(.plain)` controls (select-button, badge-button, and an amount select-button sharing the leading button's action); the card chrome lives on the enclosing `HStack`.
 `selectorMeter` needs an explicit `.frame(minWidth: 20, maxWidth: .infinity)`, and the badge-plus-amount group keeps `.layoutPriority(1)`.
 
-Provider rows show a quota-shaped meter for exactly two honest sources: a current OFFICIAL pool (a rolling window or explicitly labelled billing cycle), or a MEASURED gateway window (`ProviderRow.quotaIsMeasured`, badged `measured`, never `official`).
+Provider rows show a quota-shaped meter for exactly two honest sources: a current OFFICIAL pool (a rolling window or explicitly labeled billing cycle), or a MEASURED gateway window (`ProviderRow.quotaIsMeasured`, badged `measured`, never `official`).
 `ProviderRow.selectorQuota(now:)` and the official billing-pool fallback `selectorPlanMeter(now:)` are the semantic sources; either suppresses the trend sparkline.
 Otherwise `ProviderRow.selectorTrendSeries` supplies selected-window dollars for priced providers, or tokens for free, fully unpriced, and non-aggregable rows.
 Never turn self-relative `estimatedSharePct` or aggregate spend share into a quota-shaped percentage; `estimatedSharePct` only drives the hero's `~NN% activity` text when no window exists.
@@ -194,11 +194,17 @@ The tooltip is a multi-line summary (today, selected window, basis, official win
 
 The hero leads with the full-width basis-label ticker (`BasisLabelChip`), then `SplitFlapMoney` left and the provider eyebrow/window total right, with the `last N days` caption beneath.
 A selected provider never inherits the aggregate split-flap or series — `today: nil` is not permission to show All providers' dollars.
-Any official-plan-only window (including unified Grok with no local events) uses the official primary included-usage % in the split-flap, a plan caption on the right, basis `OFFICIAL PLAN USAGE` (weekly suffix only for a weekly primary), and `HeroOfficialQuotaMeter` instead of a flat $0 `SparkChart`. The primary gauge may appear in hero + compact selector only: detail hides that duplicate, retains only distinct secondary pools and never reserves a blank gauge gap. With local events, hero remains the cost/token sparkline and detail shows each pool once. See `03-data.md` for source precedence and monthly-only semantics.
-The plan-only reset countdown appears once, beneath the hero meter, never repeated in the top-right plan caption. The chart band names the actual primary window (`7-day` or `Billing-cycle`) with a sage `official` pill and no timeframe picker. A detail section that already names the plan uses pool-only labels such as `Weekly included usage`, never repeats the plan on each bar.
+Any official-plan-only window (including unified Grok with no local events) uses the official primary included-usage % in the split-flap, a plan caption on the right, basis `OFFICIAL PLAN USAGE` (weekly suffix only for a weekly primary), and `HeroOfficialQuotaMeter` instead of a flat $0 `SparkChart`.
+The primary gauge may appear in hero + compact selector only: detail hides that duplicate, retains only distinct secondary pools and never reserves a blank gauge gap.
+With local events, hero remains the cost/token sparkline and detail shows each pool once.
+See `03-data.md` for source precedence and monthly-only semantics.
+The plan-only reset countdown appears once, beneath the hero meter, never repeated in the top-right plan caption.
+The chart band names the actual primary window (`7-day` or `Billing-cycle`) with a sage `official` pill and no timeframe picker.
+A detail section that already names the plan uses pool-only labels such as `Weekly included usage`, never repeats the plan on each bar.
 Its header comes from `CursorPlanUsage.detailHeader(providerName:)`, which never prefixes the provider name onto a plan label that already starts with it (`Grok Bot Plan · included usage`, not `Grok Grok Bot Plan`; guard: `CursorPlanUsageTests.testDetailHeaderNeverRepeatsTheProviderName`).
 Selector-row trend sparklines use the 18pt sparkline height (`SelectorRowMeterMetrics.pulseFrameHeight`); the 5pt height is reserved for quota capsules only.
-Pills: sage for `real` and `official`; `local` and `gateway` use the row `vizTint` wash (`gateway` opens a gateway explainer). Priced gateway rows badge `gateway`; token-display gateways badge `local`.
+Pills: sage for `real` and `official`; `local` and `gateway` use the row `vizTint` wash (`gateway` opens a gateway explainer).
+Priced gateway rows badge `gateway`; token-display gateways badge `local`.
 The widget's official limit capsule uses `usedPercent ?? weeklyUsedPercent`; `MiniSparkline` shares Core's `SparklineScale` min-anchored mapping.
 
 `SparkChart` auto-ranges PER PROVIDER with a MIN-anchored baseline: `y = (v - seriesMin) / max(seriesMax - seriesMin, seriesMax * 0.15, epsilon)`.
@@ -306,5 +312,5 @@ Re-render every face at its exact size via the `ImageRenderer` harness (`JP_REND
 Provider detail shows the last-reported Codex credit balance and its capture time separately from subscription windows.
 Credits are neither dollars nor subscription percentages, and never affect the selector gauge, menu bar, widget, alerts, headroom, or aggregate cost.
 A depleted weekly allowance can coexist with available credits, and a missing five-hour window stays absent; a window's position in the payload does not define its duration.
-The homepage uses labelled sample credits with the same units and disclosure.
+The homepage uses labeled sample credits with the same units and disclosure.
 Guards: `CodexCreditsTests`, `CodexCreditsPresentationTests`, `menubar-demo-series.test.ts`.
