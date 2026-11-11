@@ -120,3 +120,12 @@ Copy is ready in [`10-gtm.md`](10-gtm.md).
 - [ ] Pick a launch date.
 - [ ] Export the six gallery assets.
 - [ ] Re-sync the launch copy with `SITE`, current features, the open-source repository, and the theme count immediately before launch.
+
+### Fleet pattern adoption
+
+The target patterns are in `8leeai/_docs/13-starter-kit.md`; each item below is a measured gap against it.
+
+- [ ] Raise the web app's TypeScript to the target set, one flag per slice, fixing by narrowing and never by a non-null assertion: `noUncheckedIndexedAccess` (82 errors), `exactOptionalPropertyTypes` (34) and `noPropertyAccessFromIndexSignature` (68; it also needs Biome's `useLiteralKeys` rule off). `noImplicitOverride` is already on.
+- [ ] Add `web/.env.example` listing every environment name the web app reads, with a test that fails when the code reads a name the file omits.
+- [ ] Move the untracked hooks in `.git/hooks` into a tracked `.githooks/` with a setup step, keeping the pre-push archive guard; setting `core.hooksPath` before that move would turn the existing hooks off.
+- [ ] Move the remaining `ObservableObject` models in `mac/Sources` to `@Observable`, and write new Swift suites with Swift Testing; the 1,220 XCTest tests stay until a suite is touched.
