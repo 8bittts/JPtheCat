@@ -4,30 +4,30 @@ IMPORTANT: This file was signed by Sparkle. Any modifications to this file requi
     <channel>
         <title>JPtheCat</title>
         <item>
-            <title>1.154</title>
-            <pubDate>Tue, 10 Nov 2026 14:44:16 -0800</pubDate>
-            <sparkle:version>287</sparkle:version>
-            <sparkle:shortVersionString>1.154</sparkle:shortVersionString>
+            <title>1.155</title>
+            <pubDate>Tue, 10 Nov 2026 19:17:35 -0800</pubDate>
+            <sparkle:version>288</sparkle:version>
+            <sparkle:shortVersionString>1.155</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
             <description><![CDATA[<style>body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;padding:14px 18px;line-height:1.55;color:#1c1b19;background:#fffaf0}h2{font-size:16px;margin:0 0 6px}h3{font-size:13px;margin:14px 0 4px;color:#8a4a17;text-transform:uppercase;letter-spacing:.04em}.lede,.fine{font-size:12px;margin:0 0 10px;color:#6b6254}ul{margin:0 0 8px 18px;padding:0}li{font-size:13px;margin-bottom:5px}</style>
 <h2>Small paws, strict standards. Here are the improvements:</h2>
 <ul>
-<li>OpenCode Zen and OpenCode Go now refresh the moment OpenCode writes new usage, even with every model row switched off</li>
+<li>Show Cursor, Grok, and Grok Bot as separate plans</li>
 </ul>
 <p class="fine">Built with ❤️ from San Francisco and Honolulu.</p>
 ]]></description>
-            <enclosure url="https://api.jpthecat.com/storage/v1/object/public/releases/JPtheCat-1.154.dmg" length="18032337" type="application/octet-stream" sparkle:edSignature="vgftT5iAZ3JUxfnliYuR8rKYQ3hujO5u5kzdCKyAt+rsWSKtVuW7PXoJCQVgYeXx7Q8y4xn3KnOoYPhQ6MTWBA=="></enclosure>
+            <enclosure url="https://api.jpthecat.com/storage/v1/object/public/releases/JPtheCat-1.155.dmg" length="18064592" type="application/octet-stream" sparkle:edSignature="rnYkOqmMhP6c5i8k1v3l90O8tzHvnGcseWbNHDZHb7eLbmhNhzvzPRYHfrlVxtBYi/YFTjosEJWPr880TsphCg=="></enclosure>
             <sparkle:deltas>
-                <enclosure url="https://api.jpthecat.com/storage/v1/object/public/releases/JPtheCat287-286.delta" sparkle:deltaFrom="286" length="466318" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="KjLg07FGRA9rBurpHLQtzb/lMxG4l1IbuIABJAFofg2CJaEA3idRBd8e91nMvNUV3U8dfWctkiYOLJaDO5MrCw=="></enclosure>
-                <enclosure url="https://api.jpthecat.com/storage/v1/object/public/releases/JPtheCat287-285.delta" sparkle:deltaFrom="285" length="472510" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="TzYkLR1LmWISMTFuvftsUnmtosj3op/sMH06YMuUx1qytwMUcrmYgau7PRh/RfwhMi/35vgRsGoF7AcxK8R2CA=="></enclosure>
-                <enclosure url="https://api.jpthecat.com/storage/v1/object/public/releases/JPtheCat287-284.delta" sparkle:deltaFrom="284" length="517930" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="a/EYFon4XzB84y8vag/q9kmy7yuGqlvLQWMcz2/bYUWH33O0kflNSeR0aJep1Rt0U/eiNw3eElMYYsW9Hx/uDA=="></enclosure>
-                <enclosure url="https://api.jpthecat.com/storage/v1/object/public/releases/JPtheCat287-283.delta" sparkle:deltaFrom="283" length="544890" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="odt/NCdzGl2pOy5Lh7iaPWhl+qwX+9uV+HoizH+6lH21sqce6YXnkn5kM9czbmb2mNkuIaKlqxcfMQQ+XkI1CA=="></enclosure>
-                <enclosure url="https://api.jpthecat.com/storage/v1/object/public/releases/JPtheCat287-282.delta" sparkle:deltaFrom="282" length="548306" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="bpjpF67ECv5/cRvYS0ecSdEWG72fUV3qTC3meJIDCBLmkiIAS5yohcnPbfv3LZTMzEk6unW+WJejMJST4VtMAQ=="></enclosure>
+                <enclosure url="https://api.jpthecat.com/storage/v1/object/public/releases/JPtheCat288-287.delta" sparkle:deltaFrom="287" length="483718" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="6H4NLbWkVK1ZrPCwNZMLnDVDBx/ToMX+jXumSffn2El1mzl/ojlzTgpF/v6AlfeFkAMnQ8pUWg0spnhSHBc2AQ=="></enclosure>
+                <enclosure url="https://api.jpthecat.com/storage/v1/object/public/releases/JPtheCat288-286.delta" sparkle:deltaFrom="286" length="532678" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="xunP4sLSa3WMDYhyK59clDEZOBmp4zUI+B5plWBNk9ZoOLZU539iyIyBpu9xb3ZINlmckWUqlsz8QwKhOgomDA=="></enclosure>
+                <enclosure url="https://api.jpthecat.com/storage/v1/object/public/releases/JPtheCat288-285.delta" sparkle:deltaFrom="285" length="529802" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="dTR2Vj2SmZISoioY2HMhYR2lkISGjdMXquO62aQo2ljpBRyvE/Sr1DXz78oZy19WJe2MN+rSFVnvIGZh2Bj8BA=="></enclosure>
+                <enclosure url="https://api.jpthecat.com/storage/v1/object/public/releases/JPtheCat288-284.delta" sparkle:deltaFrom="284" length="576754" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="vTl0LuCZlwlnKBUNxE0C+jhfQsKJmI1xJ1StV6bAdk4j8QAtxCqQHGBfdNXzJGOqgdyezq49wR67MSuVhnqHAA=="></enclosure>
+                <enclosure url="https://api.jpthecat.com/storage/v1/object/public/releases/JPtheCat288-283.delta" sparkle:deltaFrom="283" length="595094" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="60FZ0VJiE3DyS8SFmJzfW+1xdSAS+/SY9NCdJUX34SnpqhAbL7IsV553Ht95ApU0JTtnZFTRfcehEr2MVlkkDg=="></enclosure>
             </sparkle:deltas>
         </item>
     </channel>
 </rss><!-- sparkle-signatures:
-edSignature: 13vCSFI1GBaeBPXjlD/qxobaBooTAdYfn3JYlJozRzgWnz9jlCpFHWKl6dL52lGxRWJ15PwDyGpbXYrs2IlDAw==
-length: 3985
+edSignature: vEpwq6BLiInU5wZEeyLQSc1QSzD+4j/dIZmoaWSpcAREvssmWRQq2fdUSqpgg2jeRSONJB7xLExnDhrUV4wBBw==
+length: 3917
 -->
