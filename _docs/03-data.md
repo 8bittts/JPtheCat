@@ -17,18 +17,29 @@ This doc owns the source formats and the provenance of each rate, never the rate
 - **Not usage sources:** `~/.claude/stats-cache.json` (token rollups, `costUSD` always 0) and `history.jsonl` (prompt text).
 - **No plan tier:** no non-privileged local source carries one; the Keychain item is off-limits (`PlanTierKeychainReadTests`).
 
-**Official windows** exist only on the statusline command's stdin: `rate_limits.five_hour` and `rate_limits.seven_day`, each `{used_percentage, resets_at}` with `resets_at` in epoch seconds.
+**Official windows** exist only on the statusline command's stdin: `rate_limits.five_hour` and `rate_limits.seven_day`, each `{used_percentage, resets_at}` with `resets_at` in epoch seconds, plus the per-model rows in the next section.
 They appear only for Pro/Max after the first response in a session, each window can be absent, and nothing persists them; JP's opt-in capture tees them into an app-owned file.
-Claude Code 2.1.318 sends a weekly-only payload, so the capture writes whenever any `five_hour` or `seven_day*` window is present and skips a null or gateway-only feed.
+Claude Code 2.1.318 sends a weekly-only payload, so the capture writes whenever any `five_hour`, `seven_day*`, or `model_scoped` window is present and skips a null or gateway-only feed.
 To re-verify the payload without editing `~/.claude/settings.json`, run one short `claude --settings <file> --model haiku` session whose `statusLine` command appends stdin to a scratch file.
 The TUI needs a real terminal: `script` fails without one, so drive it from a Python `pty.fork()`.
 
 ### Per-model weekly windows
 
-Claude Code's `/usage` panel draws per-model weekly bars ("Fable" from `seven_day_opus`, plus `seven_day_sonnet` and others), but the statusline payload carries only `five_hour` and `seven_day` (re-verified on Claude Code 2.1.318, whose payload carried only `seven_day`), and no file under `~/.claude` persists the others; `~/.claude.json` `cachedUsageUtilization` refreshes only when `/usage` runs, so it is not a live source.
-In 2.1.318 the Fable cap is the scoped `seven_day_overage_included` window, which only `/usage` shows.
-The capture forwards every `seven_day*` key and `ClaudeRateLimitStore.modelScopedWindows` decodes any it sees, so a future field renders with no code change; empty means "not reported", never 0%.
-Model-scoped bars stay in provider detail only (guard: `ModelScopedWindowScopeTests`).
+Claude Code 2.1.322 sends per-model weekly windows on the statusline as `rate_limits.model_scoped`.
+Each row is `{display_name, utilization, resets_at}`.
+`display_name` is the server label, for example `Fable`.
+`utilization` is already a 0–100 percent, the same scale as `used_percentage`.
+It is not the fractional utilization that the statusline scales into `five_hour` and `seven_day`.
+`resets_at` is ISO-8601.
+`seven_day` stays the all-models weekly window.
+The capture forwards `model_scoped` and every `seven_day*` key.
+A later payload that omits `model_scoped` keeps the rows already in the file.
+An explicit empty array clears them.
+An absent key on a first reading means "not reported", never 0%.
+A legacy `seven_day_opus` or `seven_day_sonnet` object still decodes.
+When its label matches a `model_scoped` row, the server row wins.
+`~/.claude.json` `cachedUsageUtilization` refreshes only when Claude Code fetches usage, so it is not a second source.
+Model-scoped bars stay in provider detail only, labeled with the server name under an All models bar (guard: `ModelScopedWindowScopeTests`).
 
 ## Codex
 

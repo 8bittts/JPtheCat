@@ -1,8 +1,8 @@
 import Foundation
 import XCTest
 
-/// Per-model weekly windows (Claude's `seven_day_opus` — the bar its `/usage` panel labels "Fable" —
-/// and `seven_day_sonnet`) are deliberately scoped to PROVIDER DETAIL only.
+/// Per-model weekly windows (Claude Code's `model_scoped` rows, such as the server label "Fable",
+/// and a legacy `seven_day_sonnet`) are deliberately scoped to PROVIDER DETAIL only.
 ///
 /// The menu bar, the widget, and the 80%/95% attention border all stay on the PLAN-WIDE window a user
 /// actually budgets by. A per-model bar is a narrower cap that is routinely at 100% while the plan is

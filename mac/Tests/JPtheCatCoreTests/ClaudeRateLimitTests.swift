@@ -27,9 +27,8 @@ final class ClaudeRateLimitTests: XCTestCase {
 
 	// MARK: Per-model weekly windows (Claude's "Fable" / "Sonnet" bars)
 
-	/// Today's REAL statusline payload carries exactly `five_hour` + `seven_day` (verified against a
-	/// live capture on Claude Code 2.1.228). No per-model window is reported, so JP must surface none —
-	/// an absent window means "not reported", never a synthesized 0% or a token-derived estimate.
+	/// A plan-only payload reports no per-model window. An absent `model_scoped` means "not reported",
+	/// never a synthesized 0% or a token-derived estimate.
 	func testTodaysRealPayloadReportsNoPerModelWindow() {
 		let capturedAt = 1_783_000_000.0
 		let json = """
@@ -63,6 +62,56 @@ final class ClaudeRateLimitTests: XCTestCase {
 			accuracy: 0.001)
 		// The plan-wide weekly window stays exactly what it was — a per-model bar never replaces it.
 		XCTAssertEqual(snap?.secondary?.usedPercent ?? -1, 87, accuracy: 0.001)
+	}
+
+	/// Claude Code 2.1.322 names the Fable bar in `model_scoped`. `utilization` is already 0–100:
+	/// 1 stays 1%, and 96 stays 96%. A null utilization is skipped. The ISO reset is kept.
+	func testDecodesModelScopedFableUtilizationAsAPercent() {
+		let capturedAt = 1_794_413_343.0
+		let json = """
+			{"capturedAt":\(capturedAt),"seven_day":{"used_percentage":71,"resets_at":1794675600},
+			 "model_scoped":[
+			   {"display_name":"Fable","utilization":96,"resets_at":"2026-11-14T17:00:00.368647+00:00"},
+			   {"display_name":"Sonnet","utilization":1,"resets_at":"2026-11-14T17:00:00Z"},
+			   {"display_name":"Haiku","utilization":null,"resets_at":"2026-11-14T17:00:00Z"},
+			   {"utilization":40,"resets_at":"2026-11-14T17:00:00Z"}]}
+			""".data(using: .utf8)!
+		let snap = ClaudeRateLimitStore.decode(json, now: Date(timeIntervalSince1970: capturedAt))
+		XCTAssertEqual(snap?.secondary?.usedPercent ?? -1, 71, accuracy: 0.001)
+		XCTAssertEqual(snap?.modelWindows.map(\.label), ["Fable", "Sonnet"])
+		XCTAssertEqual(snap?.modelWindows.map(\.window.usedPercent) ?? [], [96.0, 1.0])
+		XCTAssertEqual(snap?.modelWindows.first?.displayName, "Fable")
+		XCTAssertEqual(
+			snap?.modelWindows.first?.window.resetsAt?.timeIntervalSince1970 ?? 0, 1_794_675_600.368647,
+			accuracy: 0.001)
+	}
+
+	/// The server-named Fable row wins over a legacy `seven_day_opus` row that would also say "Fable".
+	/// A different legacy family still renders.
+	func testNamedModelWindowReplacesTheLegacyKeyWithTheSameLabel() {
+		let capturedAt = 1_794_413_343.0
+		let json = """
+			{"capturedAt":\(capturedAt),"seven_day":{"used_percentage":71,"resets_at":1794675600},
+			 "seven_day_opus":{"used_percentage":100,"resets_at":1794675600},
+			 "seven_day_sonnet":{"used_percentage":12,"resets_at":1794675600},
+			 "model_scoped":[{"display_name":"Fable","utilization":96,"resets_at":"2026-11-14T17:00:00Z"}]}
+			""".data(using: .utf8)!
+		let snap = ClaudeRateLimitStore.decode(json, now: Date(timeIntervalSince1970: capturedAt))
+		XCTAssertEqual(snap?.modelWindows.map(\.label), ["Fable", "Sonnet"])
+		XCTAssertEqual(snap?.modelWindows.first?.window.usedPercent ?? -1, 96, accuracy: 0.001)
+		XCTAssertEqual(snap?.modelWindows.last?.window.usedPercent ?? -1, 12, accuracy: 0.001)
+	}
+
+	/// An empty `model_scoped` array is "none reported", not a zero-percent bar.
+	func testEmptyModelScopedArrayReportsNoModelWindow() {
+		let capturedAt = 1_794_413_343.0
+		let json = """
+			{"capturedAt":\(capturedAt),"seven_day":{"used_percentage":71,"resets_at":1794675600},
+			 "model_scoped":[]}
+			""".data(using: .utf8)!
+		let snap = ClaudeRateLimitStore.decode(json, now: Date(timeIntervalSince1970: capturedAt))
+		XCTAssertEqual(snap?.secondary?.usedPercent ?? -1, 71, accuracy: 0.001)
+		XCTAssertEqual(snap?.modelWindows.count, 0)
 	}
 
 	/// An unrecognized future family must still render honestly from its own key rather than vanishing

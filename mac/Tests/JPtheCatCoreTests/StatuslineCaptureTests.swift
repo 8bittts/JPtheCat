@@ -30,13 +30,14 @@ final class StatuslineCaptureTests: XCTestCase {
 		XCTAssertFalse(StatuslineCapture.isInstalled(inScript: "no markers here"))
 	}
 
-	/// The block must forward EVERY `seven_day*` window, not just the plan-wide one — that is what lets
-	/// a per-model bar (Claude's "Fable") appear on its own if Anthropic adds it to the statusline feed.
-	/// It must also keep writing atomically and stay a pure side effect (no stdout).
+	/// The block must forward every `seven_day*` window and `model_scoped` (Fable), and keep writing
+	/// atomically as a pure side effect (no stdout).
 	func testCaptureBlockForwardsEveryWeeklyWindow() {
 		let block = StatuslineCapture.captureBlock(varName: "input")
 		XCTAssertTrue(block.contains(#"startswith("seven_day")"#))
-		XCTAssertTrue(block.contains("claude-rate-limits.json.tmp"))
+		XCTAssertTrue(block.contains("model_scoped"))
+		XCTAssertTrue(block.contains("claude-rate-limits.json"))
+		XCTAssertTrue(block.contains("__jpc_file.tmp"))
 		XCTAssertTrue(block.contains("mv -f"))
 	}
 
@@ -167,6 +168,50 @@ final class StatuslineCaptureTests: XCTestCase {
 		XCTAssertEqual(snapshot.modelWindows.map(\.label), ["Fable"])
 	}
 
+	/// Claude Code 2.1.322 sends Fable as `model_scoped`, with a 0–100 `utilization` and an ISO reset.
+	/// Extra fields on that row, and `spend_limit`, must not land in the file.
+	func testBlockWritesModelScopedFableBesideAllModels() throws {
+		let payload = #"{"rate_limits":{"seven_day":{"used_percentage":71,"resets_at":1794675600},"model_scoped":[{"display_name":"Fable","utilization":96,"resets_at":"2026-11-14T17:00:00.368647+00:00","note":"drop me"}],"spend_limit":{"used_percentage":5,"resets_at":1}}}"#
+		let home = try runCaptureBlock(payload: payload)
+		defer { try? FileManager.default.removeItem(at: home) }
+
+		let data = try Data(contentsOf: capturedFile(home: home))
+		let root = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+		XCTAssertEqual(Set(root.keys), ["capturedAt", "seven_day", "model_scoped"])
+		let rows = try XCTUnwrap(root["model_scoped"] as? [[String: Any]])
+		XCTAssertEqual(Set(rows[0].keys), ["display_name", "utilization", "resets_at"])
+		let snapshot = try XCTUnwrap(ClaudeRateLimitStore.decode(data, now: Date(timeIntervalSince1970: 1_794_413_343)))
+		XCTAssertEqual(snapshot.secondary?.usedPercent, 71)
+		XCTAssertEqual(snapshot.modelWindows.map(\.label), ["Fable"])
+		XCTAssertEqual(snapshot.modelWindows.first?.window.usedPercent ?? -1, 96, accuracy: 0.001)
+		XCTAssertEqual(
+			snapshot.modelWindows.first?.window.resetsAt?.timeIntervalSince1970 ?? 0, 1_794_675_600.368647,
+			accuracy: 0.001)
+	}
+
+	/// A later payload that only refreshes All models must not erase the Fable row already on disk.
+	/// An explicit empty `model_scoped` array does clear it.
+	func testLaterPayloadKeepsFableUntilAnEmptyModelScopedArrayClearsIt() throws {
+		let withFable = #"{"rate_limits":{"seven_day":{"used_percentage":71,"resets_at":1794675600},"model_scoped":[{"display_name":"Fable","utilization":96,"resets_at":"2026-11-14T17:00:00Z"}]}}"#
+		let home = try runCaptureBlock(payload: withFable)
+		defer { try? FileManager.default.removeItem(at: home) }
+
+		let weeklyOnly = #"{"rate_limits":{"seven_day":{"used_percentage":72,"resets_at":1794675600}}}"#
+		_ = try runCaptureBlock(payload: weeklyOnly, home: home)
+		let kept = try Data(contentsOf: capturedFile(home: home))
+		let keptSnap = try XCTUnwrap(ClaudeRateLimitStore.decode(kept, now: Date(timeIntervalSince1970: 1_794_413_343)))
+		XCTAssertEqual(keptSnap.secondary?.usedPercent, 72)
+		XCTAssertEqual(keptSnap.modelWindows.map(\.label), ["Fable"])
+		XCTAssertEqual(keptSnap.modelWindows.first?.window.usedPercent ?? -1, 96, accuracy: 0.001)
+
+		let cleared = #"{"rate_limits":{"seven_day":{"used_percentage":73,"resets_at":1794675600},"model_scoped":[]}}"#
+		_ = try runCaptureBlock(payload: cleared, home: home)
+		let gone = try Data(contentsOf: capturedFile(home: home))
+		let goneSnap = try XCTUnwrap(ClaudeRateLimitStore.decode(gone, now: Date(timeIntervalSince1970: 1_794_413_343)))
+		XCTAssertEqual(goneSnap.secondary?.usedPercent, 73)
+		XCTAssertEqual(goneSnap.modelWindows.count, 0)
+	}
+
 	/// No window means no write: a null feed (before the first response) or a gateway-only spend limit
 	/// must never replace the last real reading with an empty one.
 	func testBlockWritesNothingWithoutAnOfficialWindow() throws {
@@ -183,15 +228,20 @@ final class StatuslineCaptureTests: XCTestCase {
 
 	/// Executes `input=$(cat)` plus the installed block with a throwaway `HOME`; never touches the real
 	/// capture file. Fails closed when jq is missing, because the shipped block depends on it.
-	private func runCaptureBlock(payload: String) throws -> URL {
+	private func runCaptureBlock(payload: String, home existing: URL? = nil) throws -> URL {
 		let jq = URL(fileURLWithPath: "/usr/bin/jq")
 		guard FileManager.default.isExecutableFile(atPath: jq.path) else {
 			XCTFail("/usr/bin/jq is required to execute the capture block")
 			throw CocoaError(.fileNoSuchFile)
 		}
-		let home = URL(fileURLWithPath: NSTemporaryDirectory())
-			.appendingPathComponent("jpc-statusline-\(UUID().uuidString)", isDirectory: true)
-		try FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)
+		let home: URL
+		if let existing {
+			home = existing
+		} else {
+			home = URL(fileURLWithPath: NSTemporaryDirectory())
+				.appendingPathComponent("jpc-statusline-\(UUID().uuidString)", isDirectory: true)
+			try FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)
+		}
 		let process = Process()
 		process.executableURL = URL(fileURLWithPath: "/bin/bash")
 		process.arguments = ["-c", "input=$(cat)\n" + StatuslineCapture.captureBlock(varName: "input")]

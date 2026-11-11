@@ -122,7 +122,11 @@ public enum StatuslineCapture {
 	/// optional, and 2.1.318 sends a weekly-only payload; revision 2 wrote only when `five_hour` was
 	/// present, so the file froze at its last 5-hour-era reading while the real weekly percentage moved
 	/// on (8% shown against a live 75%).
-	public static let blockRevision = 3
+	///
+	/// Revision 4: also forwards `rate_limits.model_scoped`. Claude Code 2.1.322 puts the Fable weekly
+	/// bar there. Revision 3 kept only `five_hour` and `seven_day*`, so the file showed All models and
+	/// dropped Fable.
+	public static let blockRevision = 4
 
 	private static let revisionMarker = "# jpthecat-capture-revision:"
 
@@ -145,30 +149,41 @@ public enum StatuslineCapture {
 		return nil
 	}
 
-	/// jq test: true when the payload carries at least one `five_hour` or `seven_day*` window with a
-	/// numeric `used_percentage`. A null `rate_limits` (before the first response) or a gateway-only
-	/// `spend_limit` writes nothing, so the last real reading is never overwritten by an empty one.
+	/// jq test: true when the payload carries a numeric plan window or a numeric `model_scoped`
+	/// utilization. A null `rate_limits` (before the first response) or a gateway-only `spend_limit`
+	/// writes nothing, so the last real reading is never overwritten by an empty one.
 	static let gateProgram =
-		#"[.rate_limits | objects | to_entries[] | select(.key == "five_hour" or (.key | startswith("seven_day"))) | .value.used_percentage | numbers] | length > 0"#
+		#"([.rate_limits | objects | to_entries[] | select(.key == "five_hour" or (.key | startswith("seven_day"))) | .value.used_percentage | numbers] | length > 0) or ([.rate_limits.model_scoped // [] | .[]? | .utilization | numbers] | length > 0)"#
 
-	/// jq writer: the capture time plus every present `five_hour` / `seven_day*` window, verbatim.
+	/// jq writer: the capture time, every present `five_hour` / `seven_day*` window, and `model_scoped`
+	/// reduced to its label, percent, and reset. Other rate-limit keys (spend, credits) stay out of the file.
 	static let writeProgram =
-		#"{capturedAt:(now|floor)} + (.rate_limits | with_entries(select(.key == "five_hour" or (.key | startswith("seven_day")))))"#
+		#"{capturedAt:(now|floor)} + (.rate_limits | with_entries(if .key == "model_scoped" then .value = [.value[]? | {display_name, utilization, resets_at}] else . end | select(.key == "five_hour" or (.key | startswith("seven_day")) or .key == "model_scoped")))"#
 
 	public static func captureBlock(varName: String) -> String {
 		"""
 		\(beginMarker) (added by JPtheCat — safe to delete this block to remove)
 		\(revisionMarker) \(blockRevision)
-		# Writes Claude's OFFICIAL rate_limits (5h + weekly, plus any per-model weekly windows) to a file
-		# the JPtheCat app reads. Either window may be absent, so it writes whenever ANY window is present.
-		# `with_entries` forwards every `seven_day*` window Claude reports, so a per-model bar (e.g. Fable)
-		# appears automatically if and when Claude Code adds one to this feed.
+		# Writes Claude's OFFICIAL rate_limits (5h + weekly, plus model_scoped bars such as Fable) to a file
+		# the JPtheCat app reads. A window may be absent, so it writes whenever ANY official window is present.
+		# `model_scoped` is Claude Code's per-model weekly array. The plan-wide `seven_day` bar stays All models.
 		if echo "$\(varName)" | jq -e '\(gateProgram)' >/dev/null 2>&1; then
 		  __jpc_dir="$HOME/Library/Application Support/JPtheCat"
 		  mkdir -p "$__jpc_dir" 2>/dev/null
-		  echo "$\(varName)" | jq -c '\(writeProgram)' \
-		    > "$__jpc_dir/claude-rate-limits.json.tmp" 2>/dev/null \
-		    && mv -f "$__jpc_dir/claude-rate-limits.json.tmp" "$__jpc_dir/claude-rate-limits.json" 2>/dev/null
+		  __jpc_file="$__jpc_dir/claude-rate-limits.json"
+		  __jpc_next=$(echo "$\(varName)" | jq -c '\(writeProgram)' 2>/dev/null) || __jpc_next=""
+		  # A later statusline payload often repeats seven_day and omits model_scoped. Keep the Fable
+		  # row already on disk. An explicit empty array still clears it: that means "none reported".
+		  if [ -n "$__jpc_next" ] && [ -f "$__jpc_file" ] && ! echo "$__jpc_next" | jq -e 'has("model_scoped")' >/dev/null 2>&1; then
+		    __jpc_kept=$(jq -c 'if (.model_scoped | type) == "array" then .model_scoped else empty end' "$__jpc_file" 2>/dev/null) || __jpc_kept=""
+		    if [ -n "$__jpc_kept" ]; then
+		      __jpc_next=$(echo "$__jpc_next" | jq -c --argjson kept "$__jpc_kept" '.model_scoped = $kept' 2>/dev/null) || __jpc_next=""
+		    fi
+		  fi
+		  if [ -n "$__jpc_next" ]; then
+		    printf '%s\n' "$__jpc_next" > "$__jpc_file.tmp" 2>/dev/null \
+		      && mv -f "$__jpc_file.tmp" "$__jpc_file" 2>/dev/null
+		  fi
 		fi
 		\(endMarker)
 		"""

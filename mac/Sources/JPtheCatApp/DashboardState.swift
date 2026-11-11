@@ -438,6 +438,13 @@ extension DashboardViewModel.ProviderRow {
 		return "\(prefix)\(base) window used"
 	}
 
+	/// Claude's plan-wide weekly bar is "All models" once a model bar (Fable, …) is on screen.
+	/// Without that pair the duration label stays, and every other provider keeps its own wording.
+	func weeklyGaugeLabel() -> String {
+		if id == "claude", !modelWindows.isEmpty { return "All models" }
+		return detailWindowLabel(windowMinutesWeekly, fallback: "7-day")
+	}
+
 	var detailShowsPrimaryWindow: Bool { !isOfficialPlanOnly }
 	var detailShowsWeeklyWindow: Bool { !isOfficialPlanOnly || usedPct != nil }
 	var primaryPlanPercent: Double? { selectorQuota()?.percent ?? selectorPlanMeter()?.usedPercent }

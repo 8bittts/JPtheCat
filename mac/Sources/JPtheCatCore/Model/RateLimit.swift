@@ -46,35 +46,41 @@ public struct RateLimitWindow: Sendable, Equatable {
 	}
 }
 
-/// A weekly window scoped to ONE model family rather than the whole plan — Claude Code's
-/// `rate_limits.seven_day_opus` / `seven_day_sonnet`, which sit alongside the all-models `seven_day`
-/// window (the `/usage` panel draws them as extra bars under "Weekly limits").
+/// A weekly window scoped to ONE model family rather than the whole plan.
+/// Claude Code 2.1.322 reports these as `rate_limits.model_scoped` rows beside the all-models
+/// `seven_day` window. Older captures used `seven_day_opus` and `seven_day_sonnet`.
 ///
-/// `key` is the provider's OWN field name, carried verbatim so the label is never invented: an
-/// unrecognized future key still renders from its own suffix instead of silently disappearing.
+/// `key` is the provider's own field name. A `model_scoped` row also carries the server
+/// `display_name`. A legacy key with no name still humanizes its suffix rather than disappearing.
 public struct ModelScopedRateLimitWindow: Sendable, Equatable, Identifiable {
-	/// The provider's raw field name, e.g. `seven_day_opus`.
+	/// The provider's raw field name, e.g. `seven_day_opus` or `model_scoped:Fable`.
 	public let key: String
 	public let window: RateLimitWindow
+	/// Server-supplied label from `rate_limits.model_scoped[].display_name`. Nil for a legacy
+	/// `seven_day_*` key, which still maps through `labels`.
+	public let displayName: String?
 	public var id: String { key }
 
-	public init(key: String, window: RateLimitWindow) {
+	public init(key: String, window: RateLimitWindow, displayName: String? = nil) {
 		self.key = key
 		self.window = window
+		self.displayName = displayName
 	}
 
-	/// Display labels for the model-scoped keys Claude Code emits. `seven_day_opus` is the premium-model
-	/// weekly window; Claude Code 2.1.x renders it to the user as the **Fable** bar (the field name kept
-	/// its legacy `opus` spelling after Fable 5 took that slot), which is why the label is mapped rather
-	/// than read off the key. Anything unrecognized humanizes its own suffix — never a guessed model.
+	/// Display labels for the legacy `seven_day_*` keys. `seven_day_opus` kept its old spelling after
+	/// Fable took that slot. Claude Code 2.1.322 names the live row itself via `display_name`, so this
+	/// map is only the fallback. Anything unrecognized humanizes its own suffix — never a guessed model.
 	private static let labels: [String: String] = [
 		"seven_day_opus": "Fable",
 		"seven_day_sonnet": "Sonnet",
 		"seven_day_overage_included": "Weekly incl. credits",
 	]
 
-	/// e.g. "Fable"; an unknown `seven_day_<x>` becomes "X" rather than vanishing or being mislabeled.
+	/// e.g. "Fable". A server `display_name` wins; an unknown `seven_day_<x>` becomes "X".
 	public var label: String {
+		if let displayName = displayName?.trimmingCharacters(in: .whitespacesAndNewlines), !displayName.isEmpty {
+			return displayName
+		}
 		if let known = Self.labels[key] { return known }
 		let suffix = key.hasPrefix("seven_day_") ? String(key.dropFirst("seven_day_".count)) : key
 		let words = suffix.split(separator: "_").map { $0.prefix(1).uppercased() + $0.dropFirst() }
@@ -82,7 +88,9 @@ public struct ModelScopedRateLimitWindow: Sendable, Equatable, Identifiable {
 	}
 
 	public func current(at now: Date = Date()) -> ModelScopedRateLimitWindow? {
-		window.current(at: now).map { ModelScopedRateLimitWindow(key: key, window: $0) }
+		window.current(at: now).map {
+			ModelScopedRateLimitWindow(key: key, window: $0, displayName: displayName)
+		}
 	}
 }
 
@@ -91,9 +99,9 @@ public struct ModelScopedRateLimitWindow: Sendable, Equatable, Identifiable {
 public struct RateLimitSnapshot: Sendable, Equatable {
 	public let primary: RateLimitWindow?
 	public let secondary: RateLimitWindow?
-	/// Extra per-model-family weekly windows, when the provider reports them (Claude only, and only
-	/// once its statusline feed carries them). Empty is the normal case and means "not reported" —
-	/// never "0% used". Ordered as the provider emitted them.
+	/// Extra per-model weekly windows, when the provider reports them (Claude's `model_scoped` rows,
+	/// or a legacy `seven_day_*` key). Empty means "not reported", never "0% used". Named rows keep
+	/// server order; legacy keys follow, sorted.
 	public let modelWindows: [ModelScopedRateLimitWindow]
 	/// e.g. "pro". Signals that dollar figures for this provider are notional list-price, not spend.
 	public let planType: String?

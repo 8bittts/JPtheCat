@@ -91,11 +91,6 @@ Current tiers live in root `AGENTS.md`; only open triggers belong here.
 - **Gemini:** re-check when Antigravity exposes a usable local usage signal.
 - **Copilot to tier 4:** needs real model ids, trustworthy dollar accounting, and an honest quota story; quota is not a local file today.
 
-### Claude per-model weekly meter (wired, waiting on upstream)
-
-Capture, decode, and the provider-detail gauge are shipped and render nothing until Claude Code's statusline carries a `seven_day_<model>` key ([03-data.md](03-data.md#per-model-weekly-windows)).
-When it does, verify only the label map in `ModelScopedRateLimitWindow.labels` (`seven_day_opus → "Fable"` is inferred from the `/usage` UI).
-
 ### Copilot live limits (retired — revive only on the trigger)
 
 The honest Copilot story is opt-in OTel tokens plus summed `github.copilot.nano_aiu`, non-aggregable, with no menu-bar percentage.

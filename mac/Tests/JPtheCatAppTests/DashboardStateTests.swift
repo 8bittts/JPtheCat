@@ -794,6 +794,27 @@ final class DashboardStateTests: XCTestCase {
 		XCTAssertEqual(automation.rateLimits["opencodego"]?.primary5h?.official, false)
 	}
 
+	func testClaudeWeeklyGaugeReadsAllModelsOnlyBesideAModelWindow() {
+		var claude = providerRow(
+			id: "claude", name: "Claude Code", today: 1, window: 2, series: [1],
+			weeklyUsedPct: 71, usageOfficial: true)
+		XCTAssertEqual(claude.weeklyGaugeLabel(), "7-day window used")
+		claude.modelWindows = [
+			ModelScopedRateLimitWindow(
+				key: "model_scoped:Fable",
+				window: RateLimitWindow(usedPercent: 96, windowMinutes: 10080, resetsAt: .distantFuture),
+				displayName: "Fable"),
+		]
+		XCTAssertEqual(claude.weeklyGaugeLabel(), "All models")
+		XCTAssertEqual(claude.modelWindows[0].label, "Fable")
+
+		var codex = providerRow(
+			id: "codex", name: "Codex", today: 1, window: 2, series: [1],
+			weeklyUsedPct: 40, usageOfficial: true)
+		codex.modelWindows = claude.modelWindows
+		XCTAssertEqual(codex.weeklyGaugeLabel(), "7-day window used")
+	}
+
 	private func providerRow(
 		id: String,
 		name: String,

@@ -63,6 +63,7 @@ A layout never changes accounting, row order, badges, or which information appea
 In two columns, the selector uses two equal 366pt columns, a 12pt gap, and 2pt row spacing; All providers and the selected detail span the full card.
 Provider detail places 5-hour and 7-day gauges in two columns, each reset attached to its gauge; a monthly window spans the width above that pair, and a single available short or weekly window spans the width with no empty column.
 Reported model-specific limits follow in descending usage; one reported model limit also spans the width.
+When Claude reports a model window, the weekly gauge reads `All models` and each model gauge uses the server label, such as `Fable`.
 Model tiles fill two columns by descending total tokens (`ProviderDetailLayout.modelsByUsage`), with name ties and no top-N cap; the meter compares tokens with tokens even when priced and unpriced models share a provider.
 Tiles group by `ModelIdentity.presentationID`, so a gateway route, snapshot date, or `[1m]` never splits one model; a free tier keeps its own tile with a `free` label.
 A model without an effort tier shows no badge, and its empty 42pt slot keeps meter length equal.

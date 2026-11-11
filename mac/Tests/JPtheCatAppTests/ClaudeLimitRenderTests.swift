@@ -56,9 +56,7 @@ final class ClaudeLimitRenderTests: XCTestCase {
 		print("Wrote Claude limit render to \(output.path)")
 	}
 
-	/// The per-model weekly bars ("Fable" / "Sonnet") stacked under the plan-wide gauges. This cannot be
-	/// captured from a live run — Claude's statusline feed does not carry these windows today — so the
-	/// harness is the only way to see the surface, using the shape a real capture WOULD decode into.
+	/// All models and Fable, the two weekly bars Claude's usage page shows side by side.
 	@MainActor
 	func testRenderPerModelWeeklyWindows() throws {
 		try XCTSkipUnless(
@@ -78,8 +76,8 @@ final class ClaudeLimitRenderTests: XCTestCase {
 			weekEvents: 2,
 			series: [150, 205.38],
 			notional: false,
-			usedPct: 42,
-			weeklyUsedPct: 87,
+			usedPct: nil,
+			weeklyUsedPct: 71,
 			usageOfficial: true,
 			planLabel: nil,
 			unpricedModels: [],
@@ -91,16 +89,14 @@ final class ClaudeLimitRenderTests: XCTestCase {
 			windowMinutesWeekly: 10080)
 		row.modelWindows = [
 			ModelScopedRateLimitWindow(
-				key: "seven_day_opus",
-				window: RateLimitWindow(
-					usedPercent: 100, windowMinutes: 10080, resetsAt: weekReset.addingTimeInterval(-60))),
-			ModelScopedRateLimitWindow(
-				key: "seven_day_sonnet",
-				window: RateLimitWindow(usedPercent: 12, windowMinutes: 10080, resetsAt: weekReset)),
+				key: "model_scoped:Fable",
+				window: RateLimitWindow(usedPercent: 96, windowMinutes: 10080, resetsAt: weekReset),
+				displayName: "Fable"),
 		]
 
 		let content = ProviderDetail(row: row, days: 7)
-			.frame(width: DashboardLayout.twoColumns.width, alignment: .topLeading)
+			.environment(\.dashboardLayout, .oneColumn)
+			.frame(width: DashboardLayout.oneColumn.width, alignment: .topLeading)
 			.background(JP.paper)
 		let renderer = ImageRenderer(content: content)
 		renderer.scale = 2

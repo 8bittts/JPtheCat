@@ -118,27 +118,72 @@ public enum ClaudeRateLimitStore {
 			modelWindows: modelWindows)
 	}
 
-	/// Per-model-family weekly windows (`seven_day_opus` → the "Fable" bar, `seven_day_sonnet`, …).
+	/// Per-model weekly windows beside the all-models `seven_day` bar.
 	///
-	/// **These are captured opportunistically and are normally ABSENT.** Claude Code's own statusline
-	/// schema documents only `five_hour` and `seven_day`; the model-scoped windows exist inside the
-	/// binary and drive the `/usage` panel, but as of Claude Code 2.1.318 they are NOT part of the
-	/// statusline payload (verified against a live capture — the object carried only `seven_day`; the
-	/// Fable cap lives in Claude Code's `seven_day_overage_included` scoped window, which only `/usage`
-	/// shows). So JP shows no per-model bar today, which is the honest result: an absent window
-	/// means "not reported", never 0%. If Anthropic adds the field, the capture block already forwards
-	/// it and this decoder lights the gauge up with a real official number — no estimate, ever.
+	/// Claude Code 2.1.322 sends them as `model_scoped`: an array of
+	/// `{display_name, utilization, resets_at}`. `display_name` is the label Claude shows
+	/// ("Fable"). `utilization` is already a 0–100 percent — the same scale as `used_percentage` —
+	/// not the fractional utilization the statusline scales into `five_hour` / `seven_day`.
+	/// `resets_at` is ISO-8601. An empty array means the endpoint answered and listed none. An absent
+	/// key means the feed did not report one. Either is "not reported", never 0%.
 	///
-	/// Any `seven_day_*` key is accepted, not just the two known ones, so a future family needs no code
-	/// change; `ModelScopedRateLimitWindow.label` humanizes an unrecognized suffix. `seven_day` itself
-	/// is excluded (it is the plan-wide window, already the snapshot's `secondary`).
+	/// Legacy `seven_day_*` objects (`seven_day_opus`, `seven_day_sonnet`) still decode. A legacy key
+	/// whose label matches a `model_scoped` row is dropped so one model is not drawn twice. `seven_day`
+	/// itself stays the plan-wide window (`secondary`), never a model row.
 	static func modelScopedWindows(in root: [String: Any]) -> [ModelScopedRateLimitWindow] {
-		root.keys
+		let named = namedModelWindows(in: root)
+		let namedLabels = Set(named.map { $0.label.lowercased() })
+		let legacy = root.keys
 			.filter { $0.hasPrefix("seven_day_") }
 			.sorted()
-			.compactMap { key in
-				RateLimitWindow(json: root[key], windowMinutes: 10080)
-					.map { ModelScopedRateLimitWindow(key: key, window: $0) }
+			.compactMap { key -> ModelScopedRateLimitWindow? in
+				guard let window = RateLimitWindow(json: root[key], windowMinutes: 10080) else { return nil }
+				let scoped = ModelScopedRateLimitWindow(key: key, window: window)
+				guard !namedLabels.contains(scoped.label.lowercased()) else { return nil }
+				return scoped
 			}
+		return named + legacy
+	}
+
+	/// Server order. A repeated `display_name` keeps the first row.
+	private static func namedModelWindows(in root: [String: Any]) -> [ModelScopedRateLimitWindow] {
+		guard let rows = root["model_scoped"] as? [Any] else { return [] }
+		var seen = Set<String>()
+		var windows: [ModelScopedRateLimitWindow] = []
+		for row in rows {
+			guard let window = modelScopedWindow(from: row) else { continue }
+			guard seen.insert(window.label.lowercased()).inserted else { continue }
+			windows.append(window)
+		}
+		return windows
+	}
+
+	/// One `model_scoped` element. A missing name or a non-numeric utilization is skipped, never
+	/// turned into a zero-percent bar.
+	private static func modelScopedWindow(from raw: Any) -> ModelScopedRateLimitWindow? {
+		guard let object = raw as? [String: Any] else { return nil }
+		let rawName = (object["display_name"] as? String) ?? (object["displayName"] as? String)
+		guard let name = rawName?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty else {
+			return nil
+		}
+		guard let used = JSONNumber.double(object["utilization"]) ?? JSONNumber.double(object["used_percentage"])
+		else { return nil }
+		let window = RateLimitWindow(
+			usedPercent: min(100, max(0, used)), windowMinutes: 10080, resetsAt: resetDate(object["resets_at"]))
+		return ModelScopedRateLimitWindow(key: "model_scoped:\(name)", window: window, displayName: name)
+	}
+
+	/// `model_scoped.resets_at` is ISO-8601. Legacy `seven_day_*` windows still use epoch seconds,
+	/// and `RateLimitWindow.init(json:)` handles those. A missing or unreadable reset stays nil, which
+	/// leaves the percentage on screen rather than inventing an expiry.
+	private static func resetDate(_ raw: Any?) -> Date? {
+		if let epoch = JSONNumber.double(raw) { return Date(timeIntervalSince1970: epoch) }
+		guard let string = raw as? String else { return nil }
+		if let date = ISOTimestamp.fractional.date(from: string) ?? ISOTimestamp.plain.date(from: string) {
+			return date
+		}
+		let zulu = string.replacingOccurrences(of: "+00:00", with: "Z")
+		guard zulu != string else { return nil }
+		return ISOTimestamp.fractional.date(from: zulu) ?? ISOTimestamp.plain.date(from: zulu)
 	}
 }

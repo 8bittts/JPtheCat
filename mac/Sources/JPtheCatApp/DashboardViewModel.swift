@@ -145,10 +145,9 @@ final class DashboardViewModel {
 		var monthlyUsedPct: Double? = nil
 		var monthlyWindowMinutes: Int? = nil
 		/// Extra OFFICIAL per-model weekly windows the provider reported alongside the plan-wide one
-		/// (Claude's `seven_day_opus` = the "Fable" bar, `seven_day_sonnet`). Empty for every provider
-		/// today because Claude's statusline feed does not carry them yet — empty means "not reported",
-		/// never 0%. Shown in provider detail only; deliberately kept OUT of the menu bar, widget, and
-		/// the 80/95% attention border, which stay on the plan-wide window a user actually budgets by.
+		/// (Claude's `model_scoped` row labeled "Fable", or a legacy `seven_day_sonnet`). Empty means
+		/// "not reported", never 0%. Shown in provider detail only, under the All models bar. Kept OUT
+		/// of the menu bar, widget, and the 80/95% attention border, which stay on the plan-wide window.
 		var modelWindows: [ModelScopedRateLimitWindow] = []
 		var codexCredits: CodexCreditBalance? = nil
 		var creditsCapturedAt: Date? = nil

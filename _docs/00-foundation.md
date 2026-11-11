@@ -235,6 +235,12 @@ The statusline block wrote only when `five_hour` was present; Claude Code 2.1.31
 Revision 3 writes whenever any official window is present, migrates at launch rather than only when Live Data opens, and never downgrades a newer block.
 Guards: `StatuslineCaptureTests.testBlockWritesAWeeklyOnlyPayloadThatDecodesToTheWeeklyWindow`, `testMigrationOnlyMovesForward`.
 
+**The capture must forward `model_scoped`.**
+Revision 3 kept only `five_hour` and `seven_day*`, so Claude Code 2.1.322's Fable bar never reached the file and the detail showed All models alone.
+Revision 4 writes `model_scoped` (`display_name`, `utilization` already 0–100, ISO `resets_at`) and keeps a previous row when a later payload omits the key.
+An empty array still clears it.
+Guards: `StatuslineCaptureTests.testBlockWritesModelScopedFableBesideAllModels`, `testLaterPayloadKeepsFableUntilAnEmptyModelScopedArrayClearsIt`.
+
 **A frozen Claude reading must not contradict the limit notice.**
 Claude's statusline stops after a session-limit refusal, freezing the last official value below 100%.
 When the high-and-stale heuristic says "likely exhausted", the gauge shows an explicitly estimated 100% and names the frozen reading; it once showed 86% beside a confirmed refusal.

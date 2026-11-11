@@ -301,7 +301,7 @@ struct ProviderDetail: View {
 					}
 					if row.detailShowsWeeklyWindow, let weekly = row.weeklyUsedPct {
 						VStack(alignment: .leading, spacing: 8) {
-							gauge(windowLabel(row.windowMinutesWeekly, fallback: "7-day"), pct: weekly,
+							gauge(row.weeklyGaugeLabel(), pct: weekly,
 								official: row.usageOfficial, badgeWord: isGatewayRow ? "measured" : nil)
 							resetLine(row.resetsAtWeekly)
 						}
@@ -315,8 +315,7 @@ struct ProviderDetail: View {
 				DashboardDetailGrid(columnCount: row.modelWindows.count == 1 ? 1 : 2) {
 					ForEach(ProviderDetailLayout.windowsByUsage(row.modelWindows)) { scoped in
 						VStack(alignment: .leading, spacing: 8) {
-							gauge("\(scoped.label) · 7-day window used",
-								pct: scoped.window.usedPercent, official: true)
+							gauge(scoped.label, pct: scoped.window.usedPercent, official: true)
 							resetLine(scoped.window.resetsAt)
 						}
 					}
