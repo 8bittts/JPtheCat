@@ -8,6 +8,7 @@ Paths below are relative to this directory.
 ## Release & Distribution
 
 `scripts/build-dmg.sh` builds and notarizes the drag-to-Applications DMG (layout verified by `scripts/verify-dmg-layout.sh`); `scripts/release-jpthecat.sh` floors every new `CFBundleVersion` above the latest published `<sparkle:version>`; `scripts/release-dmg-qa.sh` verifies the live DMG without touching the installed app.
+App, core and widget code logs through `os.Logger` (`Log.usage`, `Log.updater` and `Log.api` in `Sources/JPtheCatApp/Log.swift`), never `NSLog` or `print`; only the CLI prints. Guard: `UnifiedLoggingGuardTests`.
 Never hand-edit a signed or stable release artifact to make a test green — fix the generator or re-run the release path, and never create a changelog file (git history is the changelog).
 
 Production app and core code must not call SwiftPM's generated `Bundle.module`; `scripts/build-dmg.sh` stages `JPtheCat_*.bundle` under `Contents/Resources` and code resolves through `JPResourceBundle`/`AppResources` (tests may still use `Bundle.module` for fixtures).

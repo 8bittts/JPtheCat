@@ -1,5 +1,6 @@
 import Foundation
 import JPtheCatCore
+import OSLog
 import WidgetKit
 
 /// Thread-safe cache for `UsageIndex.multiWindowSummaries` results, keyed on the index's own
@@ -151,7 +152,7 @@ enum DashboardWidgetPublisher {
 			WidgetCenter.shared.reloadTimelines(ofKind: JPWidgetContract.kind)
 			warnIfAppGroupUnavailable()
 		} catch {
-			NSLog("JPtheCat widget snapshot write failed: \(String(describing: error))")
+			Log.usage.error("Widget snapshot write failed: \(String(describing: error), privacy: .public)")
 		}
 	}
 
@@ -163,9 +164,8 @@ enum DashboardWidgetPublisher {
 		guard Bundle.main.bundleIdentifier == "com.8bittts.jpthecat",
 			!WidgetSnapshotStore.resolvedRootIsAppGroup()
 		else { return }
-    NSLog(
-      "JPtheCat widget: App Group container unavailable — snapshot written to the Application "
-        + "Support fallback the sandboxed widget cannot read. Check the app-groups entitlement."
+    Log.usage.error(
+      "Widget: App Group container unavailable — snapshot written to the Application Support fallback the sandboxed widget cannot read. Check the app-groups entitlement."
     )
 	}
 
@@ -428,8 +428,8 @@ enum DashboardWidgetPublisher {
 			try LocalAutomationSnapshotStore().write(snapshot)
 			lastAutomationPublished = snapshot
 		} catch {
-      NSLog(
-        "JPtheCat local automation snapshot write failed: \(String(describing: error))"
+      Log.usage.error(
+        "Local automation snapshot write failed: \(String(describing: error), privacy: .public)"
       )
 		}
 	}

@@ -1,5 +1,6 @@
 import AppKit
 import JPtheCatCore
+import OSLog
 import SwiftUI
 
 /// The menu-bar status item. The title, dashboard window, and compact menu are all derived from the same
@@ -424,13 +425,13 @@ final class StatusBarController {
       // Each step is independently caught: a failure in one must not skip the others, and none of
       // them is worth surfacing to the user — the app works fine on the old shape, just larger.
       do { try index.migrateScanIndexIfNeeded() } catch {
-        NSLog("JPtheCat scan-index migration failed: \(String(describing: error))")
+        Log.usage.error("Scan-index migration failed: \(String(describing: error), privacy: .public)")
       }
       do { try index.migrateSourcePathIndexIfNeeded() } catch {
-        NSLog("JPtheCat source-path index migration failed: \(String(describing: error))")
+        Log.usage.error("Source-path index migration failed: \(String(describing: error), privacy: .public)")
       }
       do { try index.dropUnusedTimestampIndexIfNeeded() } catch {
-        NSLog("JPtheCat timestamp-index drop failed: \(String(describing: error))")
+        Log.usage.error("Timestamp-index drop failed: \(String(describing: error), privacy: .public)")
       }
       // Compaction runs LAST, so it reclaims the pages the migrations just freed. Gated on a
       // persisted date as well as the freelist share, so it can never run on consecutive launches —
@@ -442,7 +443,7 @@ final class StatusBarController {
           await MainActor.run { SettingsStore.shared.lastIndexCompaction = Date() }
         }
       } catch {
-        NSLog("JPtheCat index compaction failed: \(String(describing: error))")
+        Log.usage.error("Index compaction failed: \(String(describing: error), privacy: .public)")
       }
     }
   }
