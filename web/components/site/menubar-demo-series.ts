@@ -115,7 +115,7 @@ export const PROVIDERS: Record<ProviderKey, Provider> = {
 		usageLinkLabel: "View official usage in Codex",
 		credits: { balance: 1250.5, reported: "Sample reading" },
 		color: "var(--color-p-codex)",
-		// Codex charcoal vanishes on the dark card; the data-viz tint lifts to a legible grey.
+		// Codex charcoal vanishes on the dark card; the data-viz tint lifts to a legible gray.
 		viz: { light: "#2f2f33", dark: "#a6aab4" },
 		icon: "/provider-icons/codex.svg",
 		notional: true,
@@ -149,12 +149,14 @@ export const PROVIDERS: Record<ProviderKey, Provider> = {
 	grok: {
 		name: "Grok",
 		usageURL: "https://grok.com/?_s=usage",
-		usageLinkLabel: "View official Cursor or Grok plan usage.",
+		usageLinkLabel: "View official Cursor, Grok, or Grok Bot plan usage.",
 		usageLinkRuns: [
 			{ text: "View official " },
 			{ text: "Cursor", url: "https://cursor.com/dashboard/spending" },
-			{ text: " or " },
+			{ text: ", " },
 			{ text: "Grok", url: "https://grok.com/?_s=usage" },
+			{ text: ", or " },
+			{ text: "Grok Bot", url: "https://grok.com/dashboard" },
 			{ text: " plan usage." },
 		],
 		color: "var(--color-p-grok)",

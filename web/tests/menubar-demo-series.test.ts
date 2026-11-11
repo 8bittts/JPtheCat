@@ -144,6 +144,7 @@ describe("homepage menubar demo series", () => {
 		expect(PROVIDERS.grok.usageLinkRuns?.map((run) => run.url).filter(Boolean)).toEqual([
 			"https://cursor.com/dashboard/spending",
 			"https://grok.com/?_s=usage",
+			"https://grok.com/dashboard",
 		]);
 		expect(PROVIDERS.openCodeGo.usageLinkRuns?.map((run) => run.text).join("")).toBe(
 			"View official Zen or Go usage.",

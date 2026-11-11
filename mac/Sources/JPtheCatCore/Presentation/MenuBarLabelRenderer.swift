@@ -34,6 +34,8 @@ public struct MenuBarProviderLimitSummary: Equatable, Sendable {
 	/// Actual tokens observed today for a provider with no official quota window.
 	/// This is the truthful menu-bar fallback for estimate-only providers.
 	public let estimatedTokenCount: Int?
+	/// Other official pools on the same row. Tooltip only. They do not rotate or drive the border.
+	public let additionalLines: [String]
 
 	public init(
 		id: String = "",
@@ -45,7 +47,8 @@ public struct MenuBarProviderLimitSummary: Equatable, Sendable {
 		isOfficial: Bool,
 		planLabel: String?,
 		estimatedUsedPct: Double? = nil,
-		estimatedTokenCount: Int? = nil
+		estimatedTokenCount: Int? = nil,
+		additionalLines: [String] = []
 	) {
 		self.id = id
 		self.name = name
@@ -57,6 +60,7 @@ public struct MenuBarProviderLimitSummary: Equatable, Sendable {
 		self.planLabel = planLabel
 		self.estimatedUsedPct = estimatedUsedPct
 		self.estimatedTokenCount = estimatedTokenCount
+		self.additionalLines = additionalLines
 	}
 }
 
@@ -625,7 +629,11 @@ public enum MenuBarLabelRenderer {
 		if let plan = limit.planLabel?.trimmingCharacters(in: .whitespacesAndNewlines), !plan.isEmpty {
 			meta.append(plan)
 		}
-		return "\(limit.name): \(parts.joined(separator: " · ")) (\(meta.joined(separator: " · ")))"
+		var line = "\(limit.name): \(parts.joined(separator: " · ")) (\(meta.joined(separator: " · ")))"
+		if !limit.additionalLines.isEmpty {
+			line += "\n" + limit.additionalLines.joined(separator: "\n")
+		}
+		return line
 	}
 
 	private static func roundedPercent(_ value: Double) -> String {

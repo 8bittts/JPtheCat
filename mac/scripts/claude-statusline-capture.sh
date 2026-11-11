@@ -21,7 +21,7 @@
 #
 # The JPtheCat menu-bar app reads the written file
 # (`~/Library/Application Support/JPtheCat/claude-rate-limits.json`) via `ClaudeRateLimitStore` and
-# shows your TRUE official 5-hour + weekly percentages and reset times (labelled "official").
+# shows your TRUE official 5-hour + weekly percentages and reset times (labeled "official").
 
 # BEGIN JPTHECAT-RATE-LIMIT-CAPTURE
 # jpthecat-capture-revision: 3

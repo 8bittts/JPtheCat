@@ -4,7 +4,7 @@
 // loop. In this repo's dev/CI environment the reliable automation stack is:
 //   1. `screencapture` (full / -R region / -l window-id) — pixel-perfect window capture.
 //   2. CGWindowList — locate JP windows + their on-screen bounds.
-//   3. Accessibility (AXUIElement) — READ every labelled control and its frame, and PRESS/toggle any
+//   3. Accessibility (AXUIElement) — READ every labeled control and its frame, and PRESS/toggle any
 //      of them via kAXPressAction (no screen coordinates, no window z-order fights).
 //
 // Raw synthetic CGEvent mouse clicks are NOT reliable here (they don't route to a non-frontmost
@@ -16,7 +16,7 @@
 //
 // Subcommands:
 //   windows                 list JP the Cat on-screen windows (win id, bounds)
-//   tree                    dump every labelled AX control (role + description) across all windows
+//   tree                    dump every labeled AX control (role + description) across all windows
 //   frame <description>     print screen frame + center of the control(s) with that exact AX description
 //   press <description>     AXPress the control with that exact AX description (opens tray, toggles a
 //                           checkbox, clicks a footer icon, …) and print the result code

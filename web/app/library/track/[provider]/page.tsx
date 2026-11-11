@@ -21,7 +21,7 @@ const route = createLibraryLeafRoute({
 		resolved.live
 			? {
 					heading: `Track ${resolved.name} with JP the Cat`,
-					sub: "Local usage with every dollar and limit labelled by its real or notional basis.",
+					sub: "Local usage with every dollar and limit labeled by its real or notional basis.",
 				}
 			: undefined,
 });

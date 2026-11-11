@@ -444,7 +444,7 @@ public final class UsageIndex: @unchecked Sendable {
 	}
 
 	/// `VACUUM` materializes a complete second copy before swapping, so anything less than ~2× the
-	/// current file size free is a skip. Unknown capacity is also a skip — never guess in favour of
+	/// current file size free is a skip. Unknown capacity is also a skip — never guess in favor of
 	/// running a whole-file rewrite.
 	private static func hasRoomToVacuum(fileBytes: Int, at path: String) -> Bool {
 		let values = try? URL(fileURLWithPath: path).resourceValues(

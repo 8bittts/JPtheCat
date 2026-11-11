@@ -102,25 +102,48 @@ public enum GrokPlanUsageStore {
 			?? GrokBotPlanUsageStore.lastFetchedAt(appSupport: appSupport)
 	}
 
-	/// One display priority shared by CLI/automation/analytics: API weekly, hook weekly, then
-	/// billing-cycle. A fallback monthly pool never masquerades as weekly headroom.
+	/// The row's official weekly. A current Grok subscription hook (X Premium+ / SuperGrok) is a
+	/// different plan from Grok Bot's sand weekly, so the hook wins when it is current. Sand weekly
+	/// is that official weekly only when no hook weekly exists. Cursor billing-cycle never becomes it.
+	public static func officialSnapshot(plan: CursorPlanUsage?, hook: RateLimitSnapshot?, now: Date = Date()) -> RateLimitSnapshot? {
+		if let hook = hook?.current(at: now), hook.secondary?.windowMinutes == 10080 { return hook }
+		if let plan = plan?.current(at: now),
+			let weekly = plan.meters.first(where: { $0.key == CursorPlanMeter.grokBotKey }) {
+			return RateLimitSnapshot(primary: nil, secondary: RateLimitWindow(usedPercent: weekly.usedPercent,
+				windowMinutes: 10080, resetsAt: weekly.resetsAt), planType: plan.planLabel, capturedAt: plan.fetchedAt)
+		}
+		return hook?.current(at: now)
+	}
+
+	/// One display priority shared by CLI/automation/analytics. A billing-cycle pool never
+	/// masquerades as weekly headroom.
 	public static func primaryMeter(plan: CursorPlanUsage?, fallback: RateLimitSnapshot? = nil,
 		now: Date = Date()) -> CursorPlanMeter? {
 		let plan = plan?.current(at: now)
-		if let weekly = plan?.meters.first(where: { $0.key == CursorPlanMeter.grokBotKey }) { return weekly }
-		if let weekly = fallback?.current(at: now)?.secondary, weekly.windowMinutes == 10080 {
-			return CursorPlanMeter(key: CursorPlanMeter.grokBotKey, label: "Weekly included usage",
+		if let snapshot = officialSnapshot(plan: plan, hook: fallback, now: now),
+			let weekly = snapshot.secondary, weekly.windowMinutes == 10080 {
+			if let sand = plan?.meters.first(where: { $0.key == CursorPlanMeter.grokBotKey }),
+				sameReading(sand.usedPercent, weekly.usedPercent, sand.resetsAt, weekly.resetsAt) {
+				return sand
+			}
+			return CursorPlanMeter(key: CursorPlanMeter.grokBotKey, label: snapshot.planType ?? "Weekly included usage",
 				usedPercent: weekly.usedPercent, resetsAt: weekly.resetsAt)
 		}
 		return plan?.primaryMeter
 	}
 
 	public static func rateLimits(now: Date = Date(), fallback: RateLimitSnapshot? = nil) -> RateLimitSnapshot? {
-		guard let plan = load(now: now), let weekly = plan.meters.first(where: { $0.key == CursorPlanMeter.grokBotKey }) else {
-			return fallback?.current(at: now)
+		officialSnapshot(plan: load(now: now), hook: fallback, now: now)
+	}
+
+	/// True when two official readings are the same pool, not two plans that happen to share a key.
+	public static func sameReading(_ left: Double, _ right: Double, _ leftReset: Date?, _ rightReset: Date?) -> Bool {
+		guard abs(left - right) < 0.05 else { return false }
+		switch (leftReset, rightReset) {
+		case (nil, nil): return true
+		case let (left?, right?): return abs(left.timeIntervalSince(right)) < 1
+		default: return false
 		}
-		return RateLimitSnapshot(primary: nil, secondary: RateLimitWindow(usedPercent: weekly.usedPercent,
-			windowMinutes: 10080, resetsAt: weekly.resetsAt), planType: plan.planLabel, capturedAt: plan.fetchedAt)
 	}
 
 	public static func legacyUsage(cursor: CursorPlanUsage?, bot: GrokBotPlanUsage?) -> CursorPlanUsage? {

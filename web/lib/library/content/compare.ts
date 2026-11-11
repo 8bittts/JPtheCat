@@ -61,7 +61,7 @@ function compareTools(pair: ComparePair): { tools: CompetitorEntry[]; table: Com
  * description. This is the same claim in snippet length — it keeps the notional label, which is the
  * part that must never be dropped, and drops only the parenthetical provider spellings.
  */
-const JP_SNIPPET_SHOWS = "real Claude $ plus labelled notional figures";
+const JP_SNIPPET_SHOWS = "real Claude $ plus labeled notional figures";
 
 function toolSnippetFact(tool: CompetitorEntry): string {
 	const shows = tool.slug === JP_COMPETITOR_ROW.slug ? JP_SNIPPET_SHOWS : tool.dataType;

@@ -38,7 +38,7 @@ export function DownloadCta({ children, href, source, ...props }: DownloadCtaPro
 
 	function handleDownloadClick(event: MouseEvent<HTMLAnchorElement>) {
 		trackProductEvent(clickEvent, { href, source, channel });
-		// A modified click (open-in-new-tab / save-as) keeps the browser's native behaviour.
+		// A modified click (open-in-new-tab / save-as) keeps the browser's native behavior.
 		if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
 			return;
 		}

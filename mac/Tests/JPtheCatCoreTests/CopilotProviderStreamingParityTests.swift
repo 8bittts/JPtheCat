@@ -5,7 +5,7 @@ import XCTest
 
 /// [CRITICAL] `CopilotOTelParser` stopped materializing every decoded record into a `[[String: Any]]`
 /// before classifying, and now folds trace contexts in and keeps only classify-accepted records during
-/// a SINGLE streaming pass. That is a memory fix, so it must be behaviour-IDENTICAL rather than an
+/// a SINGLE streaming pass. That is a memory fix, so it must be behavior-IDENTICAL rather than an
 /// approximation: `collectTraceContexts` is first-writer-wins for `model` and strict-greater for
 /// session priority, and `candidate(...)`'s dedup-key fallbacks embed the record's index in the WHOLE
 /// file — all three are preserved only if the streaming pass accumulates in the same file order over

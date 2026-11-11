@@ -279,7 +279,7 @@ enum CopilotOTelParser {
 	/// throws away — see `CopilotProvider`'s cache doc. Keeping only the ~169 survivors plus the
 	/// context map holds the same information for well under 1% of the footprint.
 	///
-	/// [CRITICAL] This must stay behaviour-IDENTICAL to the materialize-everything shape, not an
+	/// [CRITICAL] This must stay behavior-IDENTICAL to the materialize-everything shape, not an
 	/// approximation. Two things make it so and must not be weakened: contexts are folded from every
 	/// record in file order (`absorbTraceContext`'s first-writer-wins model and strict-greater session
 	/// priority both depend on it), and the retained `index` is the record's position in the WHOLE

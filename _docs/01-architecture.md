@@ -77,7 +77,7 @@ The rules that keep this correct are in `mac/AGENTS.md`; the incidents are in [0
 `RateLimitWindow` carries the provider's own `usedPercent`, `windowMinutes`, and `resetsAt`; `RateLimitSnapshot` carries primary and secondary windows, `planType`, `capturedAt`, and any model-scoped windows.
 `current(at:)` is the Core boundary: a window exists only while `resetsAt > now`, and `capturedAt` is diagnostics only.
 There is no window reconstruction and no plan-ceiling table; JP shows an official window, a measured gateway window, or no gauge.
-Sources: Codex rollout `rate_limits` (automatic), Claude statusline capture and Grok capture (opt-in), OpenCode Go measured caps, unified Grok plan usage (one opt-in API task/store for Cursor and Grok Bot; weekly API before hook fallback).
+Sources: Codex rollout `rate_limits` (automatic), Claude statusline capture and Grok capture (opt-in), OpenCode Go measured caps, unified Grok plan usage (one opt-in API task/store for Cursor and Grok Bot; a current Grok subscription hook weekly before the Grok Bot sand weekly).
 Source-scoped Grok / Cursor warehouse keys are retained, while reporting projects them into one Grok provider without rewriting persisted events.
 
 ## 8. Persistence

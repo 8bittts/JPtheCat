@@ -49,7 +49,7 @@ for (let i = 0; i < 90; i += 1) {
 	FLAKES.push({ key: `f-${cx}-${cy}`, cx, cy, r: (1.6 + ((i * 7) % 5) * 0.7).toFixed(1) });
 }
 
-// Sun rays around JP (relative to the sun centre).
+// Sun rays around JP (relative to the sun center).
 const SUN_RAYS: { key: string; x1: string; y1: string; x2: string; y2: string; w: string }[] = [];
 for (let i = 0; i < 16; i += 1) {
 	const a = (i / 16) * Math.PI * 2;

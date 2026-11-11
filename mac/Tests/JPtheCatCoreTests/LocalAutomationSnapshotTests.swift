@@ -162,7 +162,7 @@ final class LocalAutomationSnapshotTests: XCTestCase {
 	}
 
 	/// [Regression guard] The builder derives every provider's basis from `ProviderBasis`. A private
-	/// per-provider switch once labelled the OpenCode model-brand rows as REAL spend because they were
+	/// per-provider switch once labeled the OpenCode model-brand rows as REAL spend because they were
 	/// missing from it; Gemini keeps its audit-only notional carve-out.
 	func testBuilderDerivesBrandRowsAsNotionalAndGatewaysAsGateway() throws {
 		let index = try UsageIndex(path: tempDBPath())

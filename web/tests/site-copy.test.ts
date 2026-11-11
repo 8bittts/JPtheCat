@@ -462,7 +462,7 @@ describe("public launch copy", () => {
 	// `engine` is still null — at which point `engine?.stop()` is a silent no-op and the freshly
 	// created engine starts a rAF loop that renders a 2048x2048 shadow map every frame, forever, for a
 	// scene the visitor already scrolled past. The fix records visibility in a plain `visible` flag and
-	// gates `created.start()` on it. This CANNOT be caught behaviourally here: the Bun suite renders
+	// gates `created.start()` on it. This CANNOT be caught behaviorally here: the Bun suite renders
 	// with `renderToStaticMarkup`, which never runs `useEffect`, so a source pin is the only guard.
 	// Pin the whole gate expression, not just the identifier — deleting the condition while leaving
 	// `visible` declared must fail.

@@ -179,7 +179,7 @@ final class DashboardViewModel {
 		/// for every provider without a local AIU signal; shown in provider detail only.
 		var aiuWindow: Double? = nil
 		/// Unified opt-in official plan pools. Weekly quota is also projected into `weeklyUsedPct`;
-		/// distinct monthly pools stay separately labelled and percentages never enter dollar totals.
+		/// distinct monthly pools stay separately labeled and percentages never enter dollar totals.
 		var cursorPlan: CursorPlanUsage? = nil
 		var officialPlanExpected: Bool = false
 	}
@@ -650,22 +650,15 @@ final class DashboardViewModel {
 				summary: summary, days: days, calculator: calculator,
 				loadEvents: { (grokAvailable ? grok.loadEvents() : []) + (cursorAvailable ? cursor.loadEvents() : []) })
 			let hook = grok.latestRateLimits()
-			let weekly = unifiedPlan?.meters.first { $0.key == CursorPlanMeter.grokBotKey }
-			let snapshot: RateLimitSnapshot?
-			if let weekly, let plan = unifiedPlan {
-				snapshot = RateLimitSnapshot(primary: nil,
-					secondary: RateLimitWindow(usedPercent: weekly.usedPercent,
-						windowMinutes: 10080, resetsAt: weekly.resetsAt),
-					planType: plan.planLabel, capturedAt: plan.fetchedAt)
-			} else {
-				snapshot = hook
-			}
+			let snapshot = GrokPlanUsageStore.officialSnapshot(plan: unifiedPlan, hook: hook)
+			let hookWeekly = hook?.secondary?.windowMinutes == 10080
 			var row = Self.makeOfficialProviderRow(
 				id: "grok", name: "Grok", tintHex: JPAppColor.grokTintHex,
-				planLabel: unifiedPlan?.planLabel ?? snapshot?.planType, limitLikelyHit: false,
+				planLabel: hookWeekly ? hook?.planType : (unifiedPlan?.planLabel ?? snapshot?.planType),
+				limitLikelyHit: false,
 				rollup: inputs.rollup, indexSeries: summary?.dailyCostSeries ?? [],
 				events: inputs.events, days: days, snapshot: snapshot, calculator: calculator,
-				awaitingResetRefresh: weekly == nil && grok.latestRateLimitAwaitingReset(now: Date()),
+				awaitingResetRefresh: snapshot == nil && grok.latestRateLimitAwaitingReset(now: Date()),
 				indexTokenSeries: summary?.dailyTokenSeries ?? [])
 			row.cursorPlan = unifiedPlan
 			row.officialPlanExpected = grokPlanEnabled || unifiedPlan != nil

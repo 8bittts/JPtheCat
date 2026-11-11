@@ -13,7 +13,7 @@ export interface PlanEntry {
 	priceUsdMonthly: number;
 	multiplier: string;
 	windowMechanics: string;
-	/** Unofficial, model-dependent — always labelled as such in copy. */
+	/** Unofficial, model-dependent — always labeled as such in copy. */
 	messageEstimate: string;
 	lastVerified: string;
 	promo?: { note: string; expires: string };

@@ -116,7 +116,7 @@ struct OnboardingView: View {
 			OnboardingFeatureRow(
 				icon: "gauge.medium",
 				title: "Codex limits",
-				subtitle: "Official 5-hour and weekly used percentages stay labelled as used.")
+				subtitle: "Official 5-hour and weekly used percentages stay labeled as used.")
 			OnboardingFeatureRow(
 				icon: "lock.shield",
 				title: "Free and local",

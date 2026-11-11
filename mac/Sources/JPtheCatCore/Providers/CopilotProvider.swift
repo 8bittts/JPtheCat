@@ -22,7 +22,7 @@ private final class CopilotCandidateCache: @unchecked Sendable {
 	private let lock = NSLock()
 	private var entries: [String: Entry] = [:]
 	/// Counts real file traversals. The whole point of this cache is "one decode per changed file per
-	/// refresh", and that is only observable as a count — a behavioural test can't distinguish a cache
+	/// refresh", and that is only observable as a count — a behavioral test can't distinguish a cache
 	/// hit from a re-read, because a correct cache re-reads whenever the file actually changes.
 	/// `CopilotProviderTests.testLoadEventsAndAIUSamplesShareOneFileTraversal` reads this.
 	private(set) var traversalCount = 0

@@ -397,12 +397,12 @@ extension DashboardViewModel.ProviderRow {
 				&& (usageOfficial || cursorPlan != nil || officialPlanExpected))
 	}
 
-	/// Only secondary pools belong below a plan-only hero; weekly already occupies usageWindows
-	/// for a mixed local-activity row. Stable keys, not equal percentages, identify duplicate pools.
+	/// Secondary pools stay in the detail. The official weekly is omitted only when it is the same
+	/// reading already shown as `weeklyUsedPct`. A different plan's weekly stays visible.
 	func detailPlanMeters(now: Date = Date()) -> [CursorPlanMeter] {
 		let meters = cursorPlan?.current(at: now)?.meters ?? []
 		return meters.filter { meter in
-			if meter.key == CursorPlanMeter.grokBotKey && weeklyUsedPct != nil { return false }
+			if meter.key == CursorPlanMeter.grokBotKey, displaysSandAsOfficialWeekly(meter) { return false }
 			if heroShowsOfficialPlanUsage(), meter.key == selectorPlanMeter(now: now)?.key {
 				return false
 			}
@@ -410,7 +410,14 @@ extension DashboardViewModel.ProviderRow {
 		}
 	}
 
-	/// A shared-plan section already names the plan. Its individual pools name only the window.
+	/// Sand weekly owns the row only when its percent and reset match the official weekly.
+	private func displaysSandAsOfficialWeekly(_ meter: CursorPlanMeter) -> Bool {
+		guard let weeklyUsedPct else { return false }
+		return GrokPlanUsageStore.sameReading(weeklyUsedPct, meter.usedPercent, resetsAtWeekly, meter.resetsAt)
+	}
+
+	/// A section that already names the plan uses a pool-only label. A Grok subscription weekly
+	/// that is not the Grok Bot sand pool keeps its own plan name.
 	func detailWindowLabel(_ minutes: Int?, fallback: String) -> String {
 		let base: String
 		switch minutes {
@@ -418,9 +425,15 @@ extension DashboardViewModel.ProviderRow {
 		case 10080: base = "7-day"
 		default: base = fallback
 		}
-		if id == "grok", cursorPlan != nil {
-			return minutes == 10080 ? "Weekly included usage" : "\(base) window used"
+		if id == "grok", minutes == 10080 {
+			if let sand = cursorPlan?.meters.first(where: { $0.key == CursorPlanMeter.grokBotKey }),
+				displaysSandAsOfficialWeekly(sand) {
+				return "Weekly included usage"
+			}
+			if let planLabel, !planLabel.isEmpty { return "\(planLabel) · weekly" }
+			return "Weekly included usage"
 		}
+		if id == "grok", cursorPlan != nil { return "\(base) window used" }
 		let prefix = planLabel.map { "\($0.prefix(1).uppercased())\($0.dropFirst()) · " } ?? ""
 		return "\(prefix)\(base) window used"
 	}

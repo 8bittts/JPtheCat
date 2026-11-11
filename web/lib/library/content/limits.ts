@@ -27,20 +27,20 @@ const LIMIT_MECHANICS: Record<string, { lede: string; mechanics: ContentSection[
 			},
 			{
 				heading: "Cost is notional",
-				body: "Because Codex is a flat subscription, any dollar figure is notional list price — what the usage would cost at API rates, clearly labelled, never presented as metered spend.",
+				body: "Because Codex is a flat subscription, any dollar figure is notional list price — what the usage would cost at API rates, clearly labeled, never presented as metered spend.",
 			},
 		],
 	},
 	grok: {
-		lede: "Grok brings Grok Build, Cursor, and Grok Bot into one view. Opt-in official plan usage shows the shared weekly pool and any reported billing-cycle pools, never percentages invented from local tokens.",
+		lede: "Grok brings Grok Build, Cursor, and Grok Bot into one view. Each plan keeps its own official percentage. JP never invents one from local tokens.",
 		mechanics: [
 			{
-				heading: "Weekly and billing-cycle pools",
-				body: "The shared dashboard service reports a weekly included-usage pool when the plan has one, plus Cursor Models and Other Models billing-cycle pools when available. JP keeps each reported reset and shows each distinct pool once. Opt-in Grok Build hook capture supplies a weekly fallback, never an additional copy of the same pool.",
+				heading: "Three plans, one row",
+				body: "The Grok subscription weekly comes from the opt-in Grok Build hook. Grok Bot's weekly comes from the saved sign-in. Cursor Models and Other Models are the Cursor billing cycle. When more than one of these is current, each keeps its own name and reset. The same pool is never drawn twice.",
 			},
 			{
 				heading: "How JP reads it",
-				body: "Enable Grok plan usage in Live data to read official weekly and billing-cycle percentages from api2.cursor.sh with a saved Cursor or Grok Bot sign-in. One five-minute cadence covers both apps. The weekly API pool takes precedence; the optional Grok Build local hook is a fallback, never an extra weekly bar. A Cursor-only plan can show its billing-cycle meter without pretending it is weekly. Local priced activity is notional; unknown models show tokens, and percentages never enter dollar totals.",
+				body: "Enable Grok plan usage in Live data to read official weekly and billing-cycle percentages from api2.cursor.sh with a saved Cursor or Grok Bot sign-in. One five-minute cadence covers both apps. A current Grok subscription weekly owns the menu bar and widget. Grok Bot's weekly is used there only when that subscription reading is absent. A Cursor-only plan can show its billing-cycle meter without pretending it is weekly. Local priced activity is notional; unknown models show tokens, and percentages never enter dollar totals.",
 			},
 		],
 	},
@@ -53,7 +53,7 @@ const LIMIT_MECHANICS: Record<string, { lede: string; mechanics: ContentSection[
 			},
 			{
 				heading: "How JP reads it",
-				body: "JP prices the Go-routed turns OpenCode logs in ~/.local/share/opencode/opencode.db at Go's published rates and shows 5-hour, weekly, and monthly usage against each model's cap, labelled measured. OpenCode stores no reset time or remaining quota on your Mac, so JP shows no countdown, and a model it cannot price adds nothing rather than a false 0%. Go dollars stay out of combined totals because the same turns also count under their model's row.",
+				body: "JP prices the Go-routed turns OpenCode logs in ~/.local/share/opencode/opencode.db at Go's published rates and shows 5-hour, weekly, and monthly usage against each model's cap, labeled measured. OpenCode stores no reset time or remaining quota on your Mac, so JP shows no countdown, and a model it cannot price adds nothing rather than a false 0%. Go dollars stay out of combined totals because the same turns also count under their model's row.",
 			},
 		],
 	},
@@ -77,7 +77,7 @@ function resetAnswer(provider: Provider): string {
 		return `${provider.name} uses a monthly pool rather than a rolling window; see the plan pages for specifics.`;
 	}
 	if (provider.id === "grok") {
-		return "Grok shows each official pool’s reported reset: the weekly API boundary (or local hook fallback), and the billing-cycle end for monthly pools. A monthly-only plan is labelled billing-cycle, never weekly.";
+		return "Grok shows each plan's own reset. The Grok subscription weekly and Grok Bot's weekly each keep the reset their source reported. Cursor's billing cycle ends on the date Cursor reports. A billing-cycle meter is never labeled weekly.";
 	}
 	if (provider.id === "opencodego") {
 		return "OpenCode records no reset boundary on your Mac, so JP measures trailing 5-hour, 7-day, and 30-day windows and shows no countdown.";
@@ -88,10 +88,10 @@ function resetAnswer(provider: Provider): string {
 function tracksLimitsAnswer(provider: Provider): string {
 	if (provider.live) {
 		if (provider.id === "grok") {
-			return "Yes — Grok unifies Grok Build, Cursor, and Grok Bot. Enable Grok plan usage for official weekly and billing-cycle pools; opt-in local hook capture is the weekly fallback. No quota is derived from tokens.";
+			return "Yes — Grok unifies Grok Build, Cursor, and Grok Bot on one row. Each plan keeps its own official percentage. The Grok subscription weekly comes from the opt-in hook. Grok Bot and Cursor come from the saved sign-in. No quota is derived from tokens.";
 		}
 		if (provider.id === "opencodego") {
-			return "Yes — OpenCode Go is live today. JP shows measured 5-hour, weekly, and monthly usage against Go's published per-model caps, labelled measured rather than official.";
+			return "Yes — OpenCode Go is live today. JP shows measured 5-hour, weekly, and monthly usage against Go's published per-model caps, labeled measured rather than official.";
 		}
 		return `Yes — ${provider.name} is live today. Codex is automatic; Claude requires the opt-in statusline capture; Grok SuperGrok weekly requires the opt-in Grok hook capture.`;
 	}

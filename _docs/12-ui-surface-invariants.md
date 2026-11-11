@@ -201,7 +201,9 @@ See `03-data.md` for source precedence and monthly-only semantics.
 The plan-only reset countdown appears once, beneath the hero meter, never repeated in the top-right plan caption.
 The chart band names the actual primary window (`7-day` or `Billing-cycle`) with a sage `official` pill and no timeframe picker.
 A detail section that already names the plan uses pool-only labels such as `Weekly included usage`, never repeats the plan on each bar.
-Its header comes from `CursorPlanUsage.detailHeader(providerName:)`, which never prefixes the provider name onto a plan label that already starts with it (`Grok Bot Plan · included usage`, not `Grok Grok Bot Plan`; guard: `CursorPlanUsageTests.testDetailHeaderNeverRepeatsTheProviderName`).
+Cursor billing-cycle meters and the Grok Bot weekly each get their own header (`CursorPlanUsage.quotaGroups`).
+The Grok subscription weekly keeps its plan name on the official window when it is not the Grok Bot pool.
+`detailHeader(providerName:)` never prefixes the provider name onto a plan label that already starts with it (`Grok Bot Plan · included usage`, not `Grok Grok Bot Plan`; guard: `CursorPlanUsageTests.testDetailHeaderNeverRepeatsTheProviderName`).
 Selector-row trend sparklines use the 18pt sparkline height (`SelectorRowMeterMetrics.pulseFrameHeight`); the 5pt height is reserved for quota capsules only.
 Pills: sage for `real` and `official`; `local` and `gateway` use the row `vizTint` wash (`gateway` opens a gateway explainer).
 Priced gateway rows badge `gateway`; token-display gateways badge `local`.

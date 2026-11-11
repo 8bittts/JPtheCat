@@ -66,7 +66,7 @@ const GUIDE_CONTENT: Record<string, GuideBody> = {
 			},
 			{
 				heading: "Reading it live",
-				body: "JP the Cat reads that block automatically with zero setup and shows Codex's 5-hour and weekly used-percent, tagged `official`, next to a clearly-labelled notional cost. Because Codex is a subscription, any dollar figure is list-price, not metered spend.",
+				body: "JP the Cat reads that block automatically with zero setup and shows Codex's 5-hour and weekly used-percent, tagged `official`, next to a clearly-labeled notional cost. Because Codex is a subscription, any dollar figure is list-price, not metered spend.",
 			},
 		],
 		faq: [
@@ -290,7 +290,7 @@ const GUIDE_CONTENT: Record<string, GuideBody> = {
 			},
 			{
 				heading: "The notional list price",
-				body: "It can still be useful to know what your Codex usage would cost at OpenAI's API rates. JP the Cat computes that as a clearly-labelled notional figure — never presented as real spend, because on a subscription you did not pay per token.",
+				body: "It can still be useful to know what your Codex usage would cost at OpenAI's API rates. JP the Cat computes that as a clearly-labeled notional figure — never presented as real spend, because on a subscription you did not pay per token.",
 			},
 		],
 		faq: [
@@ -324,7 +324,7 @@ const GUIDE_CONTENT: Record<string, GuideBody> = {
 			{
 				question: "Why not just show one number?",
 				answer:
-					"Because mixing real spend with list-price estimates is how other trackers mislead. JP keeps them labelled and separate.",
+					"Because mixing real spend with list-price estimates is how other trackers mislead. JP keeps them labeled and separate.",
 			},
 		],
 		related: [

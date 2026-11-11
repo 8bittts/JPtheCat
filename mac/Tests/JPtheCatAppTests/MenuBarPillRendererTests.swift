@@ -120,7 +120,7 @@ final class MenuBarPillRendererTests: XCTestCase {
 	}
 
 	/// [Regression guard] The grid fills bottom→top, left→right per row (`r == 0` is the BOTTOM row).
-	/// An "on" cell is drawn at full ink alpha, an "off" cell at 0.18 — so alpha at the cell centre is
+	/// An "on" cell is drawn at full ink alpha, an "off" cell at 0.18 — so alpha at the cell center is
 	/// the signal, and it is appearance-independent (the ink is the adaptive `labelColor`).
 	func testLoadingGridFillsBottomUpAndLeftToRight() throws {
 		let onAlphaFloor: CGFloat = 0.5
@@ -166,13 +166,13 @@ final class MenuBarPillRendererTests: XCTestCase {
 				filled: 16, cols: 4, rows: 4, mark: nil, thickness: thickness)
 			let gridHeight: CGFloat = 11  // 4 cells * 2pt + 3 gaps * 1pt
 			let originY = (thickness - gridHeight) / 2
-			// Symmetric slack above and below by construction; assert the top and bottom cell centres
+			// Symmetric slack above and below by construction; assert the top and bottom cell centers
 			// are equidistant from the image edges.
 			let bottomCentre = originY + 1
 			let topCentre = originY + 3 * 3 + 1
 			XCTAssertEqual(
 				bottomCentre, thickness - topCentre, accuracy: 0.001,
-				"grid must be optically centred at thickness \(thickness)")
+				"grid must be optically centered at thickness \(thickness)")
 			XCTAssertEqual(image.size.height, thickness, accuracy: 0.001)
 		}
 	}
@@ -197,7 +197,7 @@ final class MenuBarPillRendererTests: XCTestCase {
 			measuredTextWidth: ceil(measuredWidth(of: text)), statusBarThickness: thickness)
 	}
 
-	/// Cell centre in the loading grid's POINT coordinates (bottom-left origin), for `thickness == 24`.
+	/// Cell center in the loading grid's POINT coordinates (bottom-left origin), for `thickness == 24`.
 	private func cellCentre(row: Int, col: Int) -> NSPoint {
 		let originX: CGFloat = 18 + 4
 		let originY: CGFloat = (24 - 11) / 2

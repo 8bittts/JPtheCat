@@ -108,7 +108,7 @@ public enum ClaudeRateLimitStore {
 		// Carry the capture time so the UI can tell a fresh reading from one frozen by a limit hit
 		// (Claude only refreshes the statusline when it answers).
 		// `planType` stays nil: the captured statusline JSON carries `rate_limits` but no tier, and
-		// Claude emits those windows for Pro as well as Max — so a hardcoded "max" mislabelled every
+		// Claude emits those windows for Pro as well as Max — so a hardcoded "max" mislabeled every
 		// Pro subscriber in `LocalAutomationSnapshot.plan_type` and the CLI's JSON. Never fabricate a
 		// tier; the only honest local source was another app's Keychain item and reading it prompts
 		// for the login password.

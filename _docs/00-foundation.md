@@ -183,6 +183,12 @@ The row matched only `spark` ids, so 243 Meta-direct Muse Wonder turns had no ow
 `cursor-agent --print` completes without emitting `stop`, so verify with an interactive turn, then `jpthecat-cli --cursor` and the staged row.
 The plan-usage fetch keeps a still-current Grok Bot meter when one best-effort call fails (`CursorPlanUsage.carryingOver`).
 
+**One Grok row hid three plans.**
+The sand weekly replaced the Grok Build hook, and Cursor's exhausted billing-cycle bars were titled with the Grok Bot plan name.
+A current hook weekly is the Grok subscription and owns the row's official weekly.
+Grok Bot's sand weekly and Cursor's billing-cycle meters stay visible under their own names.
+Guard: `GrokConsolidationTests.testSubscriptionWeeklyStaysDistinctFromGrokBotAndCursor`.
+
 #### OpenCode gateways
 
 `opencode.db` records the gateway on every message, and model-brand rows derive from the same rows, so Zen and Go are `ProviderBasis.gateway`: dollar-displayed, never summed.

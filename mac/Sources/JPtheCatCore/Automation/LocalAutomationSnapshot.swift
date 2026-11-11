@@ -11,7 +11,7 @@ public enum LocalAutomationCostBasis: String, Codable, Equatable, Sendable {
 	case officialPlan = "official_plan"
 
 	/// The snapshot vocabulary for Core's one cost-basis table. Every CLI/automation surface derives
-	/// its label from `ProviderBasis` through here; a hand-written per-provider switch once labelled
+	/// its label from `ProviderBasis` through here; a hand-written per-provider switch once labeled
 	/// the OpenCode model-brand rows as real spend.
 	public init(_ basis: ProviderBasis) {
 		switch basis {

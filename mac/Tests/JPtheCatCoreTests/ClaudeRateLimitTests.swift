@@ -102,7 +102,7 @@ final class ClaudeRateLimitTests: XCTestCase {
 	}
 
 	/// The capture carries no tier, and Claude emits these windows for Pro as well as Max, so a
-	/// decoded snapshot must not claim one. A hardcoded `"max"` here labelled every Pro subscriber
+	/// decoded snapshot must not claim one. A hardcoded `"max"` here labeled every Pro subscriber
 	/// "max" in `LocalAutomationSnapshot.plan_type` and the CLI's `plan_type` output.
 	func testDecodedSnapshotClaimsNoPlanTier() {
 		let capturedAt = 1_783_000_000.0

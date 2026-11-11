@@ -107,7 +107,7 @@ Add the row as a `ProviderOptInDescriptor`; never copy `ProviderOptInRow`.
 - Three synced copies of the white glyph: `mac/Sources/JPtheCatApp/Resources/provider-<id>.svg`, `mac/Sources/JPtheCatWidgetExtension/Resources/provider-<id>.svg`, and `web/public/provider-icons/<slug>.svg` with a line in `SOURCE-NOTES.md`.
 - Marks load through `NSImage` (`JPResourceBundle`/`WidgetAssets`), never `Image(name:bundle:)`.
 - Tints: `JPAppColor` (`JPAppDesignTokens.swift`), `--color-p-<id>` in `web/app/globals.css`, and `viz.light`/`viz.dark` in `menubar-demo-series.ts`; dark-mode lift comes only from `ProviderTintLegibility.legibleHex(...)`.
-- Related sources: Grok Build / Cursor / Grok Bot consolidate into one `.grok` row everywhere; legacy source IDs remain private warehouse keys and configuration aliases. Never add separate public rows or duplicate weekly pools for them.
+- Related sources: Grok Build / Cursor / Grok Bot consolidate into one `.grok` row everywhere; legacy source IDs remain private warehouse keys and configuration aliases. Never add separate public rows. A Grok subscription weekly and a Grok Bot weekly are different plans and both render. Do not draw the same pool twice.
 
 ## Step 10 — Homepage
 

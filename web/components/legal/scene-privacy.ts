@@ -22,7 +22,7 @@ export function buildPrivacyScene(): SceneModule {
 
 	const globeR = 2.35;
 	const baseHeight = 0.5;
-	const centerY = 2.85; // globe centre; the sphere spans y 0.5 .. 5.2
+	const centerY = 2.85; // globe center; the sphere spans y 0.5 .. 5.2
 	const baseTopY = 1.05; // the sphere emerges from the pedestal collar here
 	const snowLineY = 1.7; // where the snow surface sits inside the globe
 

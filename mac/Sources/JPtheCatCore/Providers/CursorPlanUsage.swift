@@ -80,6 +80,39 @@ public struct CursorPlanUsage: Sendable, Equatable, Codable {
 		return isTeam ? "\(planName) seat" : "\(planName) plan"
 	}
 
+	/// Cursor billing-cycle meters. Named from Cursor's plan, never from the Grok Bot plan label.
+	public var cursorQuotaTitle: String {
+		guard let planName, !planName.isEmpty else { return "Cursor included usage" }
+		return isTeam ? "Cursor · \(planName) seat" : "Cursor · \(planName) plan"
+	}
+
+	/// One header per product. Bars under a header keep Cursor's own pool labels.
+	public struct QuotaGroup: Identifiable, Equatable, Sendable {
+		public let title: String
+		public let meters: [CursorPlanMeter]
+		public var id: String { title }
+	}
+
+	public func quotaGroups(meters: [CursorPlanMeter]) -> [QuotaGroup] {
+		let cursorKeys: Set<String> = ["cursor_models", "other_models", "included_usage"]
+		var groups: [QuotaGroup] = []
+		let cursor = meters.filter { cursorKeys.contains($0.key) }
+		if !cursor.isEmpty { groups.append(QuotaGroup(title: cursorQuotaTitle, meters: cursor)) }
+		let bot = meters.filter { $0.key == CursorPlanMeter.grokBotKey }
+		if !bot.isEmpty { groups.append(QuotaGroup(title: detailHeader(providerName: "Grok Bot"), meters: bot)) }
+		let rest = meters.filter { !cursorKeys.contains($0.key) && $0.key != CursorPlanMeter.grokBotKey }
+		if !rest.isEmpty { groups.append(QuotaGroup(title: detailHeader(providerName: "Grok"), meters: rest)) }
+		return groups
+	}
+
+	/// Menu-bar tooltip lines for the pools that are not the row's single official weekly.
+	public func menuBarPoolLines(meters: [CursorPlanMeter]) -> [String] {
+		quotaGroups(meters: meters).map { group in
+			let parts = group.meters.map { "\($0.label) \(Int($0.usedPercent.rounded()))%" }
+			return "\(group.title): \(parts.joined(separator: " · "))"
+		}
+	}
+
 	/// Detail header. A plan label that already names the provider ("Grok Bot Plan") is not
 	/// prefixed again, so the header never reads "Grok Grok Bot Plan".
 	public func detailHeader(providerName: String) -> String {

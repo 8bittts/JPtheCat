@@ -4,7 +4,7 @@
 
 ## What it does
 - Reads Claude Code session logs on your Mac and computes real-dollar cost, priced to the cent, including the 5-minute vs 1-hour cache-write split most trackers get wrong.
-- Reads Codex rollout logs and shows available subscription-window used percentages, plus separately reported credits and their capture time. Codex is a subscription, so any dollar figure is a notional list-price estimate, clearly labelled — never real spend.
+- Reads Codex rollout logs and shows available subscription-window used percentages, plus separately reported credits and their capture time. Codex is a subscription, so any dollar figure is a notional list-price estimate, clearly labeled — never real spend.
 - One Grok row combines Grok Build session logs under `~/.grok/sessions` and opt-in local Cursor CLI stop-hook activity. Known model rates yield notional list-price cost, entirely unpriced activity shows tokens, and a plan-only account shows official usage percent rather than a dead $0.00 chart. Optional official plan usage uses one shared API fetch/cache for weekly and monthly pools.
 - Reads Muse Spark from OpenCode's local `opencode.db` on this Mac (assistant messages / sessions for `muse-spark*`) and shows notional Meta Model API list-price dollars — OpenCode sessions only, not your full Meta account dashboard; never real spend unless Meta bills those rates on that account.
 - Reads OpenCode Zen and OpenCode Go from the same local `opencode.db`, split by the gateway OpenCode recorded on each turn (Zen = pay-as-you-go, Go = the $10/month subscription). Go also shows 5-hour, weekly, and monthly usage-vs-cap meters measured from its published per-model dollar caps. Both are gateway views that can overlap model rows, so JP lists them but never adds them to the combined total.
@@ -26,9 +26,9 @@
 
 ## Library (programmatic reference)
 - The [/library](https://jpthecat.com/library) hub is a crawlable reference for what AI coding agents cost: per-model pricing, cost calculators, usage-limit explainers, subscription plans, tracker comparisons, alternatives, how-to guides, and a cost glossary. It is reachable from the sitemap, not the site navigation.
-- Honesty rule across the library: only Claude Code, Codex, Grok, Muse Spark, OpenCode Zen, and OpenCode Go are described as tracked today; the other providers in the 64-provider catalog are labelled by roadmap status and never presented as supported. Every non-Claude dollar figure is marked notional list price, never real spend.
+- Honesty rule across the library: only Claude Code, Codex, Grok, Muse Spark, OpenCode Zen, and OpenCode Go are described as tracked today; the other providers in the 64-provider catalog are labeled by roadmap status and never presented as supported. Every non-Claude dollar figure is marked notional list price, never real spend.
 - Model pricing pages use the same bundled per-token table the app prices real usage with (Claude, OpenAI/Codex, Gemini, xAI/Grok, Meta Muse Spark, DeepSeek, and OpenCode Zen/Go families). xAI rates mirror https://docs.x.ai/developers/pricing (cached-input is model-specific, not a flat 0.1×). Cache-write 5m/1h rates and context tiers apply only where a model publishes them.
-- Usage-limit pages cover Claude Code, Codex, unified Grok, OpenCode Go, and GitHub Copilot. OpenCode Go's page describes a measured reading against published per-model caps, never an official percentage. Grok's page describes API weekly included usage (with an optional Grok hook fallback) and monthly billing pools. Legacy Cursor/Grok Bot library URLs redirect permanently to Grok.
+- Usage-limit pages cover Claude Code, Codex, unified Grok, OpenCode Go, and GitHub Copilot. OpenCode Go's page describes a measured reading against published per-model caps, never an official percentage. Grok's page describes three named plans on one row: the Grok subscription weekly, Grok Bot's weekly, and Cursor's billing-cycle pools. Legacy Cursor/Grok Bot library URLs redirect permanently to Grok.
 
 ## Details
 - Platform: macOS 14 (Sonoma) or later, Apple Silicon.

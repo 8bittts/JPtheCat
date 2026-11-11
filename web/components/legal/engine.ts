@@ -83,7 +83,7 @@ export function createEngine(canvas: HTMLCanvasElement): Engine {
 	shadowCam.updateProjectionMatrix();
 	scene.add(key);
 
-	// Warm bounce fill from below-front keeps shadow sides from going grey.
+	// Warm bounce fill from below-front keeps shadow sides from going gray.
 	const fill = new THREE.DirectionalLight(new THREE.Color(PAL.honey), 0.5);
 	fill.position.set(5, 1.5, 6);
 	scene.add(fill);

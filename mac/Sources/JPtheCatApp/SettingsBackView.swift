@@ -787,7 +787,7 @@ extension SettingsBackView {
       case .unavailable: return "Grok live limits · unavailable"
       }
     },
-    // The API weekly pool from Grok plan usage wins over this hook capture (`_docs/03-data.md`).
+    // A current hook weekly is the Grok subscription. Grok Bot's sand weekly is a separate pool (`_docs/03-data.md`).
     subtitle: { state, captureIsFresh in
       switch state {
       case .active:
@@ -946,7 +946,7 @@ extension SettingsBackView {
     },
     // Pool priority is pinned in `_docs/03-data.md`: the official weekly pool drives `weeklyUsedPct`,
     // the gauge, menu bar and widget capsule; with no weekly pool the billing-cycle meter is shown and
-    // labelled as such, never as a 5-hour or weekly window.
+    // labeled as such, never as a 5-hour or weekly window.
     subtitle: { state, _ in
       switch state {
       case .active: return "Official weekly pool drives the gauge · billing-cycle meter if no weekly pool"

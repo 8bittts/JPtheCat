@@ -439,7 +439,7 @@ final class CodexProviderTests: XCTestCase {
 	/// Codex has been observed to emit a degenerate `window_minutes:0` rate-limit line (used_percent 0,
 	/// `secondary` null) for an entire session. When such a session is the NEWEST rollout, its snapshot
 	/// carries no recognized 300/10080 window, so selecting it and normalizing would blank the gauge. It
-	/// must instead be skipped in favour of an older rollout that still holds a current window — the gauge
+	/// must instead be skipped in favor of an older rollout that still holds a current window — the gauge
 	/// shows that older-but-current 5-hour/weekly, never a blank. Regression guard for atomic-snapshot
 	/// selection masking an older still-current window.
 	func testLatestRateLimitsSkipsDegenerateNewestSnapshotAndKeepsOlderCurrentWindow() throws {

@@ -56,11 +56,11 @@ struct ProviderDetail: View {
 	@ViewBuilder private var defaultProviderDetail: some View {
 		if let insight = signatureInsight { calloutView(insight) }
 		if !embedded, let note = row.sourceScopeNote { scopeNoteView(note) }
+		// Lead with the row's own official window, then each other product's pools under its own name.
+		if (row.detailShowsPrimaryWindow && row.usedPct != nil) || (row.detailShowsWeeklyWindow && row.weeklyUsedPct != nil) || row.monthlyUsedPct != nil || !row.modelWindows.isEmpty { usageWindows }
 		if let plan = row.cursorPlan, !row.isOfficialPlanOnly || !row.detailPlanMeters().isEmpty {
 			cursorPlanMeters(plan)
 		}
-		// Lead with reported or measured windows; retain each source's honest badge and reset.
-		if (row.detailShowsPrimaryWindow && row.usedPct != nil) || (row.detailShowsWeeklyWindow && row.weeklyUsedPct != nil) || row.monthlyUsedPct != nil || !row.modelWindows.isEmpty { usageWindows }
 		if row.awaitingResetRefresh { resetHintView }
 		if let credits = row.codexCredits { creditBalance(credits) }
 		// Official plan meters above already answer "what does my plan say"; the local token section
@@ -109,20 +109,22 @@ struct ProviderDetail: View {
 		.accessibilityElement(children: .combine)
 	}
 
-	/// Cursor's official plan meters, exactly as Cursor's own dashboard reports them: Cursor Models,
-	/// Other Models, and Grok Bot weekly, each with its own reset countdown. Badged `official`.
+	/// Cursor and Grok Bot official meters, each under its own plan name. Badged `official`.
+	/// The Grok subscription weekly stays in `usageWindows` when it is a different plan.
 	private func cursorPlanMeters(_ plan: CursorPlanUsage) -> some View {
-		let meters = row.detailPlanMeters()
-		return VStack(alignment: .leading, spacing: 8) {
-			Text(plan.detailHeader(providerName: row.name))
-				.font(JPAppFont.labelMedium)
-				.foregroundStyle(JP.inkSoft)
-			if !meters.isEmpty {
-				DashboardDetailGrid(columnCount: meters.count == 1 ? 1 : 2) {
-					ForEach(meters) { meter in
-						VStack(alignment: .leading, spacing: 8) {
-							gauge(meter.label, pct: meter.usedPercent, official: true)
-							resetLine(meter.resetsAt)
+		let groups = plan.quotaGroups(meters: row.detailPlanMeters())
+		return VStack(alignment: .leading, spacing: 11) {
+			ForEach(groups) { group in
+				VStack(alignment: .leading, spacing: 8) {
+					Text(group.title)
+						.font(JPAppFont.labelMedium)
+						.foregroundStyle(JP.inkSoft)
+					DashboardDetailGrid(columnCount: group.meters.count == 1 ? 1 : 2) {
+						ForEach(group.meters) { meter in
+							VStack(alignment: .leading, spacing: 8) {
+								gauge(meter.label, pct: meter.usedPercent, official: true)
+								resetLine(meter.resetsAt)
+							}
 						}
 					}
 				}

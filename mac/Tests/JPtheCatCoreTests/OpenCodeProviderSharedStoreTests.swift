@@ -43,7 +43,7 @@ final class OpenCodeProviderSharedStoreTests: XCTestCase {
 			OpenCodeStorePaths.logFile(root: root),
 			root.appendingPathComponent("log", isDirectory: true)
 				.appendingPathComponent("opencode.log"))
-		// A root that already points AT a file is honoured, which fixtures and the indexer both rely on.
+		// A root that already points AT a file is honored, which fixtures and the indexer both rely on.
 		let db = root.appendingPathComponent("x.db")
 		XCTAssertEqual(OpenCodeStorePaths.databaseFile(root: db), db)
 		let log = root.appendingPathComponent("x.log")

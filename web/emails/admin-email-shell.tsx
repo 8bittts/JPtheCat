@@ -29,7 +29,7 @@ import { emailColors, emailFonts, emailRadius } from "@/emails/email-styles";
 
 // "Owner Ledger" — the ONE shell for every owner/admin notice (download, billing,
 // lifecycle, support, growth digest). Spartan on purpose: a small logo row, an
-// issue block when something needs attention, a short heading, then labelled
+// issue block when something needs attention, a short heading, then labeled
 // sections of `Label: value` bullets. No hero, badges, buttons, or signature.
 // Templates build an `AdminEmailContent` (admin-email-content.ts) and pass it here.
 //

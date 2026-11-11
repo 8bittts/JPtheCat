@@ -32,14 +32,14 @@ export function providerTrackLead(provider: Provider): string {
  * windows are measured against published caps. */
 const LIVE_DETAIL: Record<string, string> = {
 	claude: "real dollar cost, computed locally from your Claude Code session logs",
-	codex: "official 5-hour and weekly usage plus a clearly-labelled notional cost",
+	codex: "official 5-hour and weekly usage plus a clearly-labeled notional cost",
 	grok: "one Grok view for Grok Build, optional Cursor stop-hook activity, and opt-in official Grok / Cursor / Grok Bot plan pools",
 	muse_spark:
-		"clearly-labelled notional list-price cost from OpenCode Muse Spark and Muse Wonder turns on this Mac — not your full Meta account dashboard",
+		"clearly-labeled notional list-price cost from OpenCode Muse Spark and Muse Wonder turns on this Mac — not your full Meta account dashboard",
 	opencode:
-		"clearly-labelled notional list-price cost for turns OpenCode routed through Zen on this Mac, kept out of combined totals",
+		"clearly-labeled notional list-price cost for turns OpenCode routed through Zen on this Mac, kept out of combined totals",
 	opencodego:
-		"clearly-labelled notional list-price cost for turns OpenCode routed through Go on this Mac, plus measured usage against Go's published per-model caps",
+		"clearly-labeled notional list-price cost for turns OpenCode routed through Go on this Mac, plus measured usage against Go's published per-model caps",
 };
 
 export function providerTrackBody(provider: Provider): string {
@@ -48,7 +48,7 @@ export function providerTrackBody(provider: Provider): string {
 			return "Grok combines local Grok Build logs with explicitly enabled Cursor CLI stop-hook activity as notional list-price cost. Unpriced models show tokens, not fabricated spend. The hook captures Cursor CLI turns and does not import Claude Code session logs. Optional official plan usage sends only a saved sign-in token to api2.cursor.sh; prompts, code, and transcripts stay on-device.";
 		if (provider.id === "opencode" || provider.id === "opencodego") {
 			const gateway = provider.id === "opencode" ? "Zen" : "Go";
-			return `JP reads the assistant turns OpenCode recorded as routed through ${gateway} in ~/.local/share/opencode/opencode.db and prices them at the published ${gateway} rates. The same turns also count under their model's own row, so ${provider.name} dollars are shown but never added to the combined total. Free-tier models stay unpriced and show as tokens.${provider.id === "opencodego" ? " Go publishes no remaining quota on your Mac, so its 5-hour, weekly, and monthly bars are labelled measured and carry no reset countdown." : ""}`;
+			return `JP reads the assistant turns OpenCode recorded as routed through ${gateway} in ~/.local/share/opencode/opencode.db and prices them at the published ${gateway} rates. The same turns also count under their model's own row, so ${provider.name} dollars are shown but never added to the combined total. Free-tier models stay unpriced and show as tokens.${provider.id === "opencodego" ? " Go publishes no remaining quota on your Mac, so its 5-hour, weekly, and monthly bars are labeled measured and carry no reset countdown." : ""}`;
 		}
 		if (provider.id === "muse_spark") {
 			return `${provider.name} is live when OpenCode on this Mac has logged Muse Spark or Muse Wonder assistant turns in ~/.local/share/opencode/opencode.db. JP prices those turns at Meta Model API list rates. Usage through other clients (Cursor Composer, direct API calls, other machines) appears on Meta's account dashboard but not here unless OpenCode logged it locally.`;

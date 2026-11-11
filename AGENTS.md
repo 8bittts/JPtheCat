@@ -90,8 +90,10 @@ Grok is the one public provider for Grok Build, Cursor, and Grok Bot.
 Raw source IDs remain distinct in the warehouse; reporting projects them into `.grok` without rewriting history.
 Local priced activity is aggregable **notional** list price; all-unpriced activity shows tokens.
 `GrokPlanUsageStore` / `GrokPlanUsageClient` own one opt-in, cache and five-minute attempt throttle.
-The API weekly pool wins over local hook capture; only that weekly pool feeds `weeklyUsedPct`, menu-bar headroom and widget quota capsules.
-Without weekly access, the API's Cursor Models (then combined included usage, then first reported pool) drives the selector and plan-only hero as a **billing-cycle** meter, never a fabricated weekly/5-hour window.
+A current Grok subscription hook weekly owns `weeklyUsedPct`, menu-bar headroom, and the widget capsule.
+Grok Bot's sand weekly stays a named pool and becomes that weekly only when no current hook weekly exists.
+Cursor billing-cycle meters stay labeled Cursor and never become the weekly window.
+Without either weekly, Cursor Models (then combined included usage, then the first reported pool) drives the selector and plan-only hero as a **billing-cycle** meter.
 Percentages never enter dollar totals.
 Guard: `GrokConsolidationTests`.
 A fully-unpriced provider needs TOKEN-based display, never a dead `$0.00` (`ProviderRow.isFullyUnpriced`, `tokenSeries`).
@@ -111,9 +113,12 @@ Incident: [_docs/00-foundation.md#keychain-and-identity](_docs/00-foundation.md#
 Codex writes `rate_limits` only while a CLI turn runs against that pool, so a weekly reading is routinely hours old while its 7-day boundary is still ahead; `capturedAt` is diagnostics, never a display gate.
 The same rule binds Claude's opt-in statusline capture (`ClaudeRateLimitStore`): capture age feeds only the `isActive` indicator, never the gauge.
 Both capture-age gates shipped once and were reverted: [_docs/00-foundation.md#rate-limit-window-freshness](_docs/00-foundation.md#rate-limit-window-freshness).
+Grok's hook file is the remaining age gate: `GrokRateLimitStore.maxAgeSeconds` drops a capture older than 12 hours, and an absent hook lets the sand weekly own the row.
+Sand and Cursor meters still follow only their own `resets_at`.
 
 Claude live limits require opt-in local statusline capture.
-Grok supports opt-in official plan API usage, with opt-in `GrokRateLimitCapture` as a weekly fallback.
+Grok plan usage and `GrokRateLimitCapture` are separate opt-ins.
+The hook weekly is the Grok subscription, not a fallback behind Grok Bot.
 Neither ever invents quota from local tokens.
 A local-hook opt-in alone is not consent to network sign-in access.
 Copilot's OTel `token_limit`/`current_tokens` attrs are the model CONTEXT WINDOW, not a spend quota; the one honest signal is summed per-request `github.copilot.nano_aiu` deltas, never the cumulative counter.

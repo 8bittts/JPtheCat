@@ -82,7 +82,7 @@ export const CALCULATORS: CalculatorEntry[] = [
 		modelId: "gpt-5.3-codex",
 		notional: true,
 		blurb:
-			"Notional API-list-price cost for GPT-5.3-Codex usage — labelled, not metered subscription spend.",
+			"Notional API-list-price cost for GPT-5.3-Codex usage — labeled, not metered subscription spend.",
 	},
 	{
 		slug: "gemini-3-pro-cost",

@@ -318,9 +318,7 @@ export function StickerHome() {
 						sizes="(max-width: 1248px) 100vw, 1152px"
 					/>
 				</div>
-				<p className="sb-hand sb-cap">
-					Advanced Analytics — every number labelled official or est.
-				</p>
+				<p className="sb-hand sb-cap">Advanced Analytics — every number labeled official or est.</p>
 			</section>
 
 			<section id="widget" className="sb-section sb-shell">

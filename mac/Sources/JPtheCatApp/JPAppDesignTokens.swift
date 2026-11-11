@@ -224,7 +224,7 @@ enum JPAppColor {
 	static let openCodeGoTintHex = "#3E7C8C"
 
 	/// The ONE `ProviderID` -> brand tint lookup (theme-independent, safe off-main). Every surface that
-	/// colours a provider row — dashboard, Advanced Analytics, settings marks — reads it here rather
+	/// colors a provider row — dashboard, Advanced Analytics, settings marks — reads it here rather
 	/// than carrying its own switch; the aggregate ginger is the fallback for anything untinted.
 	static func tintHex(for id: ProviderID) -> String {
 		switch id {

@@ -11,7 +11,7 @@
 #
 # Examples:
 #   mac/scripts/gui-verify.sh windows                        # list JP windows + bounds
-#   mac/scripts/gui-verify.sh tree                           # dump every labelled AX control
+#   mac/scripts/gui-verify.sh tree                           # dump every labeled AX control
 #   mac/scripts/gui-verify.sh press "Advanced Analytics"     # open/close the analytics tray
 #   mac/scripts/gui-verify.sh press "Codex, included in export"   # toggle a tray checkbox
 #   mac/scripts/gui-verify.sh frame "Advanced Analytics"     # exact screen frame + center

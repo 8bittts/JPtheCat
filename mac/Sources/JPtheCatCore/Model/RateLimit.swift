@@ -73,7 +73,7 @@ public struct ModelScopedRateLimitWindow: Sendable, Equatable, Identifiable {
 		"seven_day_overage_included": "Weekly incl. credits",
 	]
 
-	/// e.g. "Fable"; an unknown `seven_day_<x>` becomes "X" rather than vanishing or being mislabelled.
+	/// e.g. "Fable"; an unknown `seven_day_<x>` becomes "X" rather than vanishing or being mislabeled.
 	public var label: String {
 		if let known = Self.labels[key] { return known }
 		let suffix = key.hasPrefix("seven_day_") ? String(key.dropFirst("seven_day_".count)) : key

@@ -20,13 +20,14 @@ final class OfficialUsageLinkTests: XCTestCase {
 		}
 	}
 
-	func testGrokSentenceLinksCursorAndGrok() {
+	func testGrokSentenceLinksCursorGrokAndGrokBot() {
 		let sentence = OfficialUsageLink.sentence(for: "grok")
-		XCTAssertEqual(sentence?.plainText, "View official Cursor or Grok plan usage.")
-		XCTAssertEqual(sentence?.links.map(\.text), ["Cursor", "Grok"])
+		XCTAssertEqual(sentence?.plainText, "View official Cursor, Grok, or Grok Bot plan usage.")
+		XCTAssertEqual(sentence?.links.map(\.text), ["Cursor", "Grok", "Grok Bot"])
 		XCTAssertEqual(sentence?.links.map(\.url.absoluteString), [
 			"https://cursor.com/dashboard/spending",
 			"https://grok.com/?_s=usage",
+			"https://grok.com/dashboard",
 		])
 	}
 

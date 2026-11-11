@@ -1252,7 +1252,7 @@
 	.sb-marquee__track {
 		animation: none;
 	}
-	/* Keep state changes (bubble, hover colour) but drop the tilt/scale motion. */
+	/* Keep state changes (bubble, hover color) but drop the tilt/scale motion. */
 	*,
 	*::before,
 	*::after {

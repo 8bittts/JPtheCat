@@ -43,7 +43,7 @@ export function vendorLeaf(vendor: PricingVendor): LeafContent {
 			body:
 				vendor === "xai"
 					? "Prices are USD per million tokens. Rows marked OpenCode use that gateway’s table; other rows use xAI API list rates (docs.x.ai/developers/pricing). Cached-input rates are model-specific on xAI — not a flat 0.1× of input — and appear in the table when the vendor publishes them."
-					: "Prices are USD per million tokens from the bundled table. Historical rates that could not be verified are labelled beside the model. Cache reads usually cost less than full input (often about a tenth for Claude/OpenAI/Gemini); context thresholds vary by model and gateway; a recorded context tier reprices the whole request.",
+					: "Prices are USD per million tokens from the bundled table. Historical rates that could not be verified are labeled beside the model. Cache reads usually cost less than full input (often about a tenth for Claude/OpenAI/Gemini); context thresholds vary by model and gateway; a recorded context tier reprices the whole request.",
 		},
 		{
 			heading: vendor === "claude" ? "Tokenizer note" : "Subscription note",

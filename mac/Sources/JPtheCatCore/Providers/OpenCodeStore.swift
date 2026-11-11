@@ -14,8 +14,8 @@ import SQLite3
 
 /// The one place `opencode.db` / `log/opencode.log` locations are derived.
 ///
-/// A `root` that already points AT a `.db` or `.log` file is honoured as-is — fixtures and the
-/// indexer both hand a concrete file down, and both providers relied on that behaviour.
+/// A `root` that already points AT a `.db` or `.log` file is honored as-is — fixtures and the
+/// indexer both hand a concrete file down, and both providers relied on that behavior.
 public enum OpenCodeStorePaths {
 	public static func defaultRoot() -> URL {
 		FileManager.default.homeDirectoryForCurrentUser
@@ -686,7 +686,7 @@ public struct OpenCodeDetection: Sendable, Equatable {
 		return classify(refs)
 	}
 
-	/// Cached probe for the store under `root` (a root that already names the `.db` file is honoured,
+	/// Cached probe for the store under `root` (a root that already names the `.db` file is honored,
 	/// as everywhere else in `OpenCodeStorePaths`).
 	public static func current(root: URL) -> OpenCodeDetection {
 		let db = OpenCodeStorePaths.databaseFile(root: root)

@@ -17,10 +17,15 @@ final class DashboardViewModelGrokBotTests: XCTestCase {
 			reportedPlanLabel: "Grok Bot Plan")
 	}
 
-	private func build(_ plan: CursorPlanUsage?, local: Bool = false, enabled: Bool = true, model: String = "composer-2.5-fast") throws -> DashboardViewModel.RefreshBuild {
+	private func build(_ plan: CursorPlanUsage?, local: Bool = false, enabled: Bool = true, model: String = "composer-2.5-fast", hookPercent: Double? = nil) throws -> DashboardViewModel.RefreshBuild {
 		let root = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString)
 		try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
 		defer { try? FileManager.default.removeItem(at: root) }
+		if let hookPercent {
+			let captured = Date().timeIntervalSince1970
+			let payload = #"{"capturedAt":\#(captured),"weekly":{"used_percentage":\#(hookPercent),"resets_at":\#(captured + 86_400)},"plan_type":"X Premium+"}"#
+			try Data(payload.utf8).write(to: root.appendingPathComponent("grok-rate-limits.json"))
+		}
 		let file = root.appendingPathComponent("cursor.jsonl")
 		if local {
 			try JSONSerialization.data(withJSONObject: ["captured_at": Date().timeIntervalSince1970,
@@ -51,6 +56,23 @@ final class DashboardViewModelGrokBotTests: XCTestCase {
 		XCTAssertFalse(row.detailShowsPrimaryWindow)
 		XCTAssertFalse(row.detailShowsWeeklyWindow)
 		XCTAssertEqual(result.aggregateWeek, 0)
+	}
+
+	func testGrokSubscriptionWeeklyStaysBesideCursorAndGrokBot() throws {
+		let row = try XCTUnwrap(build(plan(secondary: true), local: true, hookPercent: 1).rows.first)
+		XCTAssertEqual(row.planLabel, "X Premium+")
+		XCTAssertEqual(row.weeklyUsedPct ?? -1, 1, accuracy: 0.001)
+		XCTAssertEqual(row.detailPlanMeters().map(\.key), ["grok_bot_weekly", "cursor_models", "other_models"])
+		XCTAssertEqual(row.detailWindowLabel(10080, fallback: "7-day"), "X Premium+ · weekly")
+		let lines = try XCTUnwrap(row.cursorPlan).menuBarPoolLines(meters: row.detailPlanMeters())
+		XCTAssertEqual(lines, [
+			"Cursor · Team seat: Cursor Models 64% · Other Models 18%",
+			"Grok Bot Plan · included usage: Weekly included usage 30%",
+		])
+		let planOnly = try XCTUnwrap(build(plan(secondary: true), hookPercent: 1).rows.first)
+		XCTAssertEqual(planOnly.heroPrimaryTextOverride(), "1%")
+		XCTAssertFalse(planOnly.detailShowsWeeklyWindow)
+		XCTAssertEqual(planOnly.detailPlanMeters().map(\.key), ["grok_bot_weekly", "cursor_models", "other_models"])
 	}
 
 	func testSecondaryPoolsRemainButWeeklyNeverRepeatsInDetail() throws {

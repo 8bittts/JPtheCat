@@ -40,6 +40,19 @@ final class CursorPlanUsageTests: XCTestCase {
 		XCTAssertEqual(usage.planLabel, "Grok Bot Plan")
 	}
 
+	func testQuotaGroupsNameCursorAndGrokBotSeparately() throws {
+		let usage = try XCTUnwrap(CursorPlanUsage.decode(
+			currentPeriod: teamPeriod, grokBot: teamGrokBot, planInfo: teamPlanInfo, fetchedAt: now))
+		let groups = usage.quotaGroups(meters: usage.meters)
+		XCTAssertEqual(groups.map(\.title), ["Cursor · Team seat", "Grok Bot Plan · included usage"])
+		XCTAssertEqual(groups[0].meters.map(\.label), ["Cursor Models", "Other Models"])
+		XCTAssertEqual(groups[1].meters.map(\.label), ["Weekly included usage"])
+		XCTAssertEqual(usage.menuBarPoolLines(meters: usage.meters), [
+			"Cursor · Team seat: Cursor Models 6% · Other Models 0%",
+			"Grok Bot Plan · included usage: Weekly included usage 0%",
+		])
+	}
+
 	func testDetailHeaderNeverRepeatsTheProviderName() {
 		func header(_ label: String?, plan: String? = nil, team: Bool = false) -> String {
 			CursorPlanUsage(planName: plan, isTeam: team, meters: [], fetchedAt: now, reportedPlanLabel: label)

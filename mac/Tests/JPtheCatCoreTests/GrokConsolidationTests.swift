@@ -45,6 +45,25 @@ final class GrokConsolidationTests: XCTestCase {
 		XCTAssertEqual(monthlyOnly.primaryMeter?.key, "cursor_models")
 	}
 
+	func testSubscriptionWeeklyStaysDistinctFromGrokBotAndCursor() {
+		let reset = now.addingTimeInterval(3 * 86400)
+		let sand = weekly(22)
+		let cursor = CursorPlanMeter(key: "cursor_models", label: "Cursor Models", usedPercent: 100,
+			resetsAt: now.addingTimeInterval(8 * 86400))
+		let plan = CursorPlanUsage(planName: "Team", isTeam: true, meters: [cursor, sand], fetchedAt: now,
+			reportedPlanLabel: "Grok Bot Plan")
+		let hook = RateLimitSnapshot(primary: nil, secondary: RateLimitWindow(usedPercent: 1,
+			windowMinutes: 10080, resetsAt: reset), planType: "X Premium+", capturedAt: now)
+		let snapshot = GrokPlanUsageStore.officialSnapshot(plan: plan, hook: hook, now: now)
+		XCTAssertEqual(snapshot?.planType, "X Premium+")
+		XCTAssertEqual(snapshot?.secondary?.usedPercent, 1)
+		XCTAssertEqual(GrokPlanUsageStore.primaryMeter(plan: plan, fallback: hook, now: now)?.usedPercent, 1)
+		XCTAssertFalse(GrokPlanUsageStore.sameReading(1, sand.usedPercent, reset, sand.resetsAt))
+		XCTAssertEqual(plan.quotaGroups(meters: plan.meters).map(\.title), [
+			"Cursor · Team seat", "Grok Bot Plan · included usage",
+		])
+	}
+
 	func testHookWeeklyPrecedesMonthlyWithoutDuplicatingOrInventingAPool() {
 		let monthly = CursorPlanMeter(key: "cursor_models", label: "Cursor Models", usedPercent: 99,
 			resetsAt: now.addingTimeInterval(86400))

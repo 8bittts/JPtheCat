@@ -36,7 +36,7 @@ struct OfficialUsageLink: Equatable, Sendable {
 	}
 
 	/// One wrapping sentence. A run with a URL is a link; the words around it stay plain.
-	/// Grok names Cursor and Grok because those are two different official pages.
+	/// Grok names Cursor, Grok, and Grok Bot because those are three different official pages.
 	/// OpenCode names Zen and Go the same way, and only when a workspace id was detected locally.
 	static func sentence(for providerID: String, openCodeWorkspaceID: String? = nil) -> OfficialUsageLink? {
 		switch providerID {
@@ -45,12 +45,7 @@ struct OfficialUsageLink: Equatable, Sendable {
 		case "codex":
 			return link("View official usage in Codex", "https://chatgpt.com/settings/usage?tab=overview")
 		case "grok":
-			return linked(
-				"View official ",
-				("Cursor", "https://cursor.com/dashboard/spending"),
-				" or ",
-				("Grok", "https://grok.com/?_s=usage"),
-				" plan usage.")
+			return grokPlansSentence()
 		case "grok_bot":
 			return link("View official usage in Grok Bot", "https://grok.com/dashboard")
 		case "muse_spark":
@@ -70,6 +65,24 @@ struct OfficialUsageLink: Equatable, Sendable {
 		default:
 			return nil
 		}
+	}
+
+	/// Cursor, the Grok subscription, and Grok Bot are three plans. The sentence names each page.
+	private static func grokPlansSentence() -> OfficialUsageLink? {
+		guard
+			let cursor = URL(string: "https://cursor.com/dashboard/spending"),
+			let grok = URL(string: "https://grok.com/?_s=usage"),
+			let bot = URL(string: "https://grok.com/dashboard")
+		else { return nil }
+		return OfficialUsageLink(runs: [
+			Run(text: "View official ", url: nil),
+			Run(text: "Cursor", url: cursor),
+			Run(text: ", ", url: nil),
+			Run(text: "Grok", url: grok),
+			Run(text: ", or ", url: nil),
+			Run(text: "Grok Bot", url: bot),
+			Run(text: " plan usage.", url: nil),
+		])
 	}
 
 	private static func link(_ title: String, _ url: String) -> OfficialUsageLink? {
