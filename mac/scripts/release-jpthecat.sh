@@ -316,7 +316,8 @@ git -C "$RROOT" checkout -- mac/Info.plist README.md Casks/jpthecat.rb web/publi
 rm -f "$WEB_SHA_FILE"
 git -C "$RROOT" merge --ff-only origin/main -q 2>/dev/null || true
 
-# --- Verify: download URL 200 + live signed appcast ---
+# --- Verify: download URL 200. The live appcast changes only when Vercel promotes the
+# release commit, so it is proven after promotion by sparkle-upgrade-smoke.sh, not here. ---
 info "Verify download URL"
 ok=false
 for i in $(seq 1 10); do

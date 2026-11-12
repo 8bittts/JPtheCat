@@ -35,6 +35,7 @@ Invariants:
 Post-release proofs:
 
 - `mac/scripts/sparkle-upgrade-smoke.sh` installs the oldest supported public DMG into a temporary bundle, drives Sparkle through the app menu to the live appcast, and confirms App Support and Keychain sentinels survive the relaunch.
+  It is the feed proof because it makes Sparkle's own request; a cache-busted or uncompressed `curl` of the appcast proves only the origin, and dockishOS v0.031 passed such a check while Sparkle clients received the previous feed for four minutes.
 - `mac/scripts/release-dmg-qa.sh` downloads the live DMG, verifies its SHA-256 and Finder layout at Retina scale, and copies the app into a temporary Applications folder for codesign and Gatekeeper checks.
 
 ## Sparkle vendoring
