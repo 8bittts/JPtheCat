@@ -201,6 +201,7 @@ With local events, hero remains the cost/token sparkline and detail shows each p
 See `03-data.md` for source precedence and monthly-only semantics.
 The plan-only reset countdown appears once, beneath the hero meter, never repeated in the top-right plan caption.
 The chart band names the actual primary window (`7-day` or `Billing-cycle`) with a sage `official` pill and no timeframe picker.
+The hero meter title and its VoiceOver label follow that pool (`ProviderRow.heroQuotaTitle`): `Weekly included usage` for a weekly primary, the Cursor pool label (`Cursor Models`, `Cursor · All models`) for a billing-cycle primary.
 A detail section that already names the plan uses pool-only labels such as `Weekly included usage`, never repeats the plan on each bar.
 Cursor billing-cycle meters and the Grok Bot weekly each get their own header (`CursorPlanUsage.quotaGroups`).
 The Grok subscription weekly keeps its plan name on the official window when it is not the Grok Bot pool.

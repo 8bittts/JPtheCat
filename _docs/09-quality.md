@@ -11,6 +11,7 @@ Gates by target, the guards that hold the rules, and the verification harnesses 
   `bun run build` runs the fleet performance budget gate (`web/scripts/perf-budget.ts`) between the compile and the secret scan: it caps each route's uncompressed first-load JavaScript and pins its rendering class in `web/perf-budget.json`.
   Re-baseline only for a reviewed change: `bunx next build`, `bun scripts/perf-budget.ts --baseline`, then `bunx biome format --write perf-budget.json`, with the reason in the commit.
 - **Parity:** `scripts/verify-app-demo-parity.sh` and `AppDemoParityGuardTests` prove structural parity between the native dashboard and the homepage demo; a manual side-by-side of the changed surface is still required.
+  `AppDemoParityGuardTests` runs `bun test` under `web/`, so a fresh worktree needs `bun install` in `web/` before `swift test`; without it the Swift suite fails with `Cannot find package 'react'`, which is setup, not a parity break.
 - **Visible UI or asset work** needs a real headless screenshot or the `ImageRenderer` / `JP_RENDER=1` harness, never eyeballed intent.
 - `.github/workflows/ci.yml` exists but is disabled on purpose; these local gates are the gates, and a report states which ran and why a broader one did not.
 

@@ -382,6 +382,7 @@ struct DashboardView: View {
 				if let quotaFraction = model.selectedRow?.heroChartQuotaFraction() {
 					HeroOfficialQuotaMeter(
 						fraction: quotaFraction, tint: JP.providerTint(model.selectedTintHex),
+						title: model.selectedRow?.heroQuotaTitle() ?? "Weekly included usage",
 						footerCaption: model.selectedRow?.heroFooterCaption())
 						.frame(height: 52)
 				} else {
@@ -1396,6 +1397,7 @@ private struct Composition: View {
 struct HeroOfficialQuotaMeter: View {
 	let fraction: Double
 	let tint: Color
+	var title: String = "Weekly included usage"
 	var showHeader: Bool = true
 	var footerCaption: String? = nil
 
@@ -1406,7 +1408,7 @@ struct HeroOfficialQuotaMeter: View {
 		VStack(spacing: showHeader ? 6 : 2) {
 			if showHeader {
 				HStack(alignment: .firstTextBaseline) {
-					Text("Weekly included usage")
+					Text(title)
 						.font(JPAppFont.caption)
 						.foregroundStyle(JP.inkSoft)
 					Spacer(minLength: 8)
@@ -1437,7 +1439,7 @@ struct HeroOfficialQuotaMeter: View {
 		}
 		.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
 		.accessibilityElement()
-		.accessibilityLabel("Official weekly included usage")
+		.accessibilityLabel("Official \(title)")
 		.accessibilityValue("\(usedPercent) percent used, \(remainingPercent) percent remaining")
 	}
 }

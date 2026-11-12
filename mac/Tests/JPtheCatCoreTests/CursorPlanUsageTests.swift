@@ -53,6 +53,40 @@ final class CursorPlanUsageTests: XCTestCase {
 		])
 	}
 
+	/// Real team-seat response once the shared included spend ran out: Cursor reports both pools at
+	/// 100% with one reset. Two identical bars read as a duplicate, so the reading holds one pool.
+	func testIdenticalCursorPoolsDecodeAsOneAllModelsMeter() throws {
+		let exhausted = Data("""
+			{"billingCycleStart":"1792443452000","billingCycleEnd":"1795121852000",
+			 "planUsage":{"totalSpend":125097,"includedSpend":2000,"bonusSpend":123097,"limit":2000,
+			  "autoPercentUsed":100,"apiPercentUsed":100,"totalPercentUsed":100},
+			 "spendLimitUsage":{"pooledUsed":0,"limitType":"team"},"enabled":true}
+			""".utf8)
+		let usage = try XCTUnwrap(CursorPlanUsage.decode(
+			currentPeriod: exhausted, grokBot: teamGrokBot, planInfo: teamPlanInfo, fetchedAt: now))
+		XCTAssertEqual(usage.meters.map(\.key), ["all_models", "grok_bot_weekly"])
+		XCTAssertEqual(usage.meters[0].usedPercent, 100)
+		XCTAssertEqual(usage.meters[0].resetsAt?.timeIntervalSince1970, 1_795_121_852)
+		let groups = usage.quotaGroups(meters: usage.meters)
+		XCTAssertEqual(groups[0].title, "Cursor · Team seat")
+		XCTAssertEqual(groups[0].meters.map(\.label), ["All models"])
+		XCTAssertEqual(usage.menuBarPoolLines(meters: usage.meters).first, "Cursor · Team seat: All models 100%")
+		let monthlyOnly = CursorPlanUsage(planName: "Team", isTeam: true,
+			meters: [usage.meters[0]], fetchedAt: now)
+		XCTAssertEqual(monthlyOnly.primaryMeter?.key, "all_models")
+	}
+
+	func testCursorPoolsStaySeparateWhenTheyDiffer() {
+		func keys(_ auto: Double, _ api: Double) -> [String] {
+			let period = Data(#"{"billingCycleEnd":"1795121852000","planUsage":{"autoPercentUsed":\#(auto),"apiPercentUsed":\#(api)}}"#.utf8)
+			return CursorPlanUsage.planMeters(
+				(try? JSONSerialization.jsonObject(with: period)) as? [String: Any] ?? [:]).map(\.label)
+		}
+		XCTAssertEqual(keys(100, 40), ["Cursor Models", "Other Models"])
+		XCTAssertEqual(keys(5.6, 0), ["Cursor Models", "Other Models"])
+		XCTAssertEqual(keys(0, 0), ["All models"])
+	}
+
 	func testDetailHeaderNeverRepeatsTheProviderName() {
 		func header(_ label: String?, plan: String? = nil, team: Bool = false) -> String {
 			CursorPlanUsage(planName: plan, isTeam: team, meters: [], fetchedAt: now, reportedPlanLabel: label)

@@ -455,6 +455,15 @@ extension DashboardViewModel.ProviderRow {
 		return "Awaiting official plan usage"
 	}
 
+	/// The hero bar names the pool it draws. A weekly keeps the weekly title; a Cursor
+	/// billing-cycle pool keeps its own label, so it never reads as weekly.
+	func heroQuotaTitle(now: Date = Date()) -> String {
+		guard selectorQuota(now: now) == nil, let meter = selectorPlanMeter(now: now),
+			meter.key != CursorPlanMeter.grokBotKey
+		else { return "Weekly included usage" }
+		return meter.label.hasPrefix("Cursor") ? meter.label : "Cursor · \(meter.label)"
+	}
+
 	func heroFooterCaption(now: Date = Date()) -> String? {
 		guard heroShowsOfficialPlanUsage() else { return nil }
 		return ProviderRelativeReset.resetsInPhrase(until: primaryPlanReset, now: now) ?? primaryPlanWindowLabel

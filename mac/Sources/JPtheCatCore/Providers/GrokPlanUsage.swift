@@ -22,6 +22,7 @@ extension CursorPlanUsage {
 	public var primaryMeter: CursorPlanMeter? {
 		meters.first { $0.key == CursorPlanMeter.grokBotKey }
 			?? meters.first { $0.key == "cursor_models" }
+			?? meters.first { $0.key == "all_models" }
 			?? meters.first { $0.key == "included_usage" }
 			?? meters.first
 	}

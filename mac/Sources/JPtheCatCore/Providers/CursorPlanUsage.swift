@@ -3,7 +3,7 @@ import Foundation
 /// One OFFICIAL usage meter Cursor reports for the signed-in account: a provider-computed percentage
 /// with its own reset boundary. Never derived from local tokens.
 public struct CursorPlanMeter: Sendable, Equatable, Codable, Identifiable {
-	/// Stable JP key: `cursor_models`, `other_models`, or `grok_bot_weekly`.
+	/// Stable JP key: `cursor_models`, `other_models`, `all_models`, `included_usage`, or `grok_bot_weekly`.
 	public let key: String
 	/// Cursor's own dashboard label, e.g. "Cursor Models".
 	public let label: String
@@ -94,7 +94,7 @@ public struct CursorPlanUsage: Sendable, Equatable, Codable {
 	}
 
 	public func quotaGroups(meters: [CursorPlanMeter]) -> [QuotaGroup] {
-		let cursorKeys: Set<String> = ["cursor_models", "other_models", "included_usage"]
+		let cursorKeys: Set<String> = ["cursor_models", "other_models", "all_models", "included_usage"]
 		var groups: [QuotaGroup] = []
 		let cursor = meters.filter { cursorKeys.contains($0.key) }
 		if !cursor.isEmpty { groups.append(QuotaGroup(title: cursorQuotaTitle, meters: cursor)) }
@@ -148,15 +148,24 @@ public struct CursorPlanUsage: Sendable, Equatable, Codable {
 
 	/// "Cursor Models" (auto + Composer + Cursor Grok) and "Other Models" (named API models). Both
 	/// share the billing cycle's end as their reset. A field Cursor omits yields no meter.
+	///
+	/// Once the shared included spend runs out, Cursor reports both pools at the same value (both
+	/// 100%). Two equal pools carry no extra information and read as a duplicate in the hero,
+	/// detail, and tooltip, so they become one "All models" meter. Any difference keeps both.
 	static func planMeters(_ period: [String: Any]) -> [CursorPlanMeter] {
 		guard let usage = period["planUsage"] as? [String: Any] else { return [] }
 		let resetsAt = epochMillis(period["billingCycleEnd"])
 		var meters: [CursorPlanMeter] = []
-		if let auto = JSONNumber.double(usage["autoPercentUsed"]) {
+		let auto = JSONNumber.double(usage["autoPercentUsed"])
+		let api = JSONNumber.double(usage["apiPercentUsed"])
+		if let auto, let api, GrokPlanUsageStore.sameReading(auto, api, nil, nil) {
+			return [CursorPlanMeter(key: "all_models", label: "All models", usedPercent: auto, resetsAt: resetsAt)]
+		}
+		if let auto {
 			meters.append(CursorPlanMeter(
 				key: "cursor_models", label: "Cursor Models", usedPercent: auto, resetsAt: resetsAt))
 		}
-		if let api = JSONNumber.double(usage["apiPercentUsed"]) {
+		if let api {
 			meters.append(CursorPlanMeter(
 				key: "other_models", label: "Other Models", usedPercent: api, resetsAt: resetsAt))
 		}

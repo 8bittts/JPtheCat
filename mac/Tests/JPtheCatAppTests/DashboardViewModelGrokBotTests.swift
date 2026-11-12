@@ -100,6 +100,26 @@ final class DashboardViewModelGrokBotTests: XCTestCase {
 		XCTAssertEqual(row.detailPlanMeters().map(\.key), ["other_models"])
 	}
 
+	/// Cursor-only plan with both pools exhausted: the hero carries the one All models pool and
+	/// the detail never repeats it as a second 100% bar.
+	func testMonthlyOnlyIdenticalPoolsAppearOnce() throws {
+		let end = Int((Date().timeIntervalSince1970 + 86_400) * 1000)
+		let period = Data(#"{"billingCycleEnd":"\#(end)","planUsage":{"autoPercentUsed":100,"apiPercentUsed":100,"totalPercentUsed":100},"spendLimitUsage":{"limitType":"team"}}"#.utf8)
+		let plan = try XCTUnwrap(CursorPlanUsage.decode(currentPeriod: period, grokBot: nil, planInfo: nil, fetchedAt: Date()))
+		let row = try XCTUnwrap(build(plan).rows.first)
+		XCTAssertTrue(row.heroShowsOfficialPlanUsage())
+		XCTAssertEqual(row.heroPrimaryTextOverride(), "100%")
+		XCTAssertEqual(row.primaryPlanWindowLabel, "Billing-cycle window")
+		XCTAssertEqual(row.detailPlanMeters().map(\.key), [])
+		XCTAssertEqual(row.heroQuotaTitle(), "Cursor · All models")
+	}
+
+	/// The hero bar names the pool it draws; a billing-cycle pool is never titled weekly.
+	func testHeroQuotaTitleNamesTheActualPool() throws {
+		XCTAssertEqual(try XCTUnwrap(build(plan()).rows.first).heroQuotaTitle(), "Weekly included usage")
+		XCTAssertEqual(try XCTUnwrap(build(plan(weekly: false)).rows.first).heroQuotaTitle(), "Cursor Models")
+	}
+
 	func testMissingOrExpiredPlanNeverBecomesADeadZeroDollarChart() throws {
 		let row = try XCTUnwrap(build(nil).rows.first)
 		XCTAssertTrue(row.heroShowsOfficialPlanUsage())
