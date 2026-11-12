@@ -12,6 +12,6 @@ A web change that inserts a new column (`0011` added `is_mac`) must have its mig
 
 ## Keys
 
-**[CRITICAL] Never revoke the HS256 legacy JWT signing key.**
+**Never revoke the HS256 legacy JWT signing key.**
 `mac/scripts/release-jpthecat.sh` lists and uploads releases with `supabase storage`, which (CLI 2.121) still signs those requests with the legacy `service_role` JWT, so a revoked key fails every release with `signature verification failed`.
 Keep it `previously_used` or `standby`.

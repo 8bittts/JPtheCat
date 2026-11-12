@@ -16,7 +16,7 @@ Production app and core code must not call SwiftPM's generated `Bundle.module`; 
 `scripts/build_and_run.sh` and `swift test` write the same `.build/out/Products/Debug/JPtheCat_*.bundle` in different layouts, so running one after the other in a worktree can fail `codesign` with `unsealed contents present in the bundle root`.
 That is stale build output, not your change: delete those `JPtheCat_*.bundle` directories and rebuild.
 
-**[CRITICAL] The repository-root `tools` symlink (`tools -> mac/tools`) is load-bearing — never delete it.**
+**The repository-root `tools` symlink (`tools -> mac/tools`) is load-bearing — never delete it.**
 This package's `-F tools/sparkle` unsafe flag is cwd-relative, and SwiftPM's default `swiftbuild` backend runs compile and link steps with the working directory set to the enclosing **git repository root**, not the package root.
 It therefore resolves `<repo-root>/tools/sparkle`, which exists ONLY because that symlink is tracked.
 Delete it and nothing compiles: `error: unable to resolve module dependency: 'Sparkle'`, on a fresh clone and in a worktree alike.
@@ -24,14 +24,14 @@ The deprecated `native` backend used the package root, where `mac/tools/sparkle`
 
 ## Widget
 
-**[CRITICAL] The widget executable must be linked with the legacy `_NSExtensionMain` entry point** (`Package.swift` `linkerSettings`) — the synthesized `@main WidgetBundle` traps at launch otherwise.
+**The widget executable must be linked with the legacy `_NSExtensionMain` entry point** (`Package.swift` `linkerSettings`) — the synthesized `@main WidgetBundle` traps at launch otherwise.
 Guard: `WidgetExtensionPackagingTests.testWidgetForcesNSExtensionMainEntryPoint`.
 
 The widget design is shipped and settled ([../_docs/12-ui-surface-invariants.md#widget](../_docs/12-ui-surface-invariants.md#widget)); treat it as canonical and do not re-litigate.
 Any change must re-render EVERY face at its exact point size via the `ImageRenderer` harness first.
 The exact-size render OVERSTATES the real placed Large face's usable height, so budget Large conservatively below 382pt with real slack and treat a Large vertical-layout change as unverified until confirmed on a real placed widget (this clipped the footer twice).
 
-**[HARD REQUIREMENT] Every provider addition or promotion must audit WidgetKit in the SAME change, even when the intended result is exclusion** — update `JPWidgetProviderChoice`, `WidgetPreviewData`, snapshot publishing, marks, and badge formatting when eligible, and add a regression assertion when excluded.
+**Every provider addition or promotion must audit WidgetKit in the SAME change, even when the intended result is exclusion** — update `JPWidgetProviderChoice`, `WidgetPreviewData`, snapshot publishing, marks, and badge formatting when eligible, and add a regression assertion when excluded.
 The checklist is "Widget audit" in [../_docs/11-adding-a-provider.md](../_docs/11-adding-a-provider.md#step-5--dashboard-rows-and-widgets).
 
 Data flow is one-way and snapshot-based: `DashboardViewModel` is the only refresh-work owner, `DashboardWidgetPublisher` writes `WidgetSnapshotStore` JSON into the App Group, and the extension only reads that file — never parse logs, open `usage.sqlite`, or run `UsageIndexer` inside it.
@@ -42,25 +42,25 @@ A placed widget showing an older release is first a leftover extension process (
 
 ## Correctness
 
-**[HARD REQUIREMENT] Least privilege — NO Full Disk Access, NO Accessibility, ever.**
+**Least privilege — NO Full Disk Access, NO Accessibility, ever.**
 Sources use exact home-root provider dotfolders, JP's own container/App Group, or the explicitly opted-in Cursor/Grok Bot sign-in stores in Application Support; none requires TCC access.
 Never add an entitlement, TCC usage description, `AXIsProcessTrusted`, `CGEventTap`, or Apple-events surface; never enumerate `$HOME` (providers read exact paths only); a future source inside another app's container needs an App Group or a scoped `NSOpenPanel` bookmark, never blanket FDA.
 This is a shipped marketing claim, guarded by `../web/tests/site-copy.test.ts`.
 
 Every money figure routes through `MoneyFormatter` (Core), never bare `String(format: "$%.2f")` (drops thousands separators); all figures are USD and a conversion is never invented.
 
-**[CRITICAL] EVERY accumulating scan loop in Core must use `while try stmt.step()`, never `while (try? stmt.step()) == true` or `while let row = try? stmt.step()`** — the latter collapse a real `SQLiteError.step` into loop-end and silently present a truncated total as authoritative.
+**EVERY accumulating scan loop in Core must use `while try stmt.step()`, never `while (try? stmt.step()) == true` or `while let row = try? stmt.step()`** — the latter collapse a real `SQLiteError.step` into loop-end and silently present a truncated total as authoritative.
 This is a Core-wide rule, not a `UsageIndex` one: the guard scanned only `UsageIndex.swift` for one literal statement name and stayed green while `MuseSparkProvider` and `OpenCodeProvider` shipped five of the forbidden loops on the same money path.
 Single-row `guard`/`if` fetches keep the `try?` form legitimately — one row has nothing to truncate — which is why the guard's regexes anchor on `while`.
 A non-throwing `UsageProvider.loadEvents()` cannot propagate, so a provider decode wraps its loop in `do/catch` and returns empty rather than partial.
 Shared projections route through `forEachEvent(stmt:)`; public scans `throw` and callers fall back so per-provider and aggregate figures degrade together.
 Guard: `ScanErrorSurfacingTests`.
 
-**[CRITICAL] `sqlite3_exec` halts a multi-statement string at the first failure and returns WITH THE TRANSACTION STILL OPEN.**
+**`sqlite3_exec` halts a multi-statement string at the first failure and returns WITH THE TRANSACTION STILL OPEN.**
 Every `db.execute("BEGIN IMMEDIATE; …; COMMIT;")` must wrap in `do/catch { try? db.execute("ROLLBACK;"); throw error }` or the connection wedges and the app silently stops recording spend for the rest of the process.
 Guard: `UsageIndexTests.testAFailedMultiStatementTransactionDoesNotWedgeTheConnection`.
 
-**[CRITICAL] A reused prepared statement on the shared connection must `reset()` on the way OUT, not only on the way in.**
+**A reused prepared statement on the shared connection must `reset()` on the way OUT, not only on the way in.**
 A statement parked in `SQLITE_ROW` after a cache HIT holds an open read snapshot that blocks both `VACUUM` and WAL auto-checkpointing, so the WAL grows without bound within a session.
 `UsageIndex.cursor(for:)` is the one such statement today; do not add another without the same exit reset.
 Guard: `UsageIndexTests.testCursorLookupDoesNotParkAStatementThatBlocksCheckpointing`.

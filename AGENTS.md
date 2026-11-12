@@ -42,7 +42,7 @@ For design work, read `_docs/02-design-system.md` first, then the affected contr
 
 ## Identity & Branding
 
-**[HARD REQUIREMENT] The human-readable name is always the spaced `JP the Cat`.**
+**The human-readable name is always the spaced `JP the Cat`.**
 Every user-facing surface — menus, window titles, menu-bar labels, notifications, accessibility labels, `NSHumanReadableCopyright`, website copy, SEO/OG/manifest/JSON-LD names, `llms.txt`, Sparkle notes, DMG volume name — reads `JP the Cat`, never the closed-up form.
 `JPtheCat` is permitted ONLY as a code/build identifier, an artifact filename, or the domain.
 The app's localized `CFBundleDisplayName` and `CFBundleName` (`mac/en.lproj/InfoPlist.strings`) are `JP the Cat`; the base `Info.plist` display name stays `JPtheCat` because macOS applies the localized name only when the base matches the bundle's file name (guard: `AppDisplayNameTests`).
@@ -50,7 +50,7 @@ One carve-out: the Small (170pt) widget face shows the compact `JP` wordmark, wh
 Never name anything `TokenBar`/`tokenbar` — a live shipping product owns that name.
 The bundle id `com.8bittts.jpthecat` is locked.
 
-**[HARD REQUIREMENT] Domain casing: if it is a URL shown to a person it reads `JPtheCat.com` (including `api.JPtheCat.com`); if it is not a URL it reads `JP the Cat`.**
+**Domain casing: if it is a URL shown to a person it reads `JPtheCat.com` (including `api.JPtheCat.com`); if it is not a URL it reads `JP the Cat`.**
 Lowercase survives only as a non-displayed functional identifier — `href`/`src`, `SITE.url`, `metadataBase`/canonical/`og:url`/JSON-LD `url`, the real fetch host and CSP `connect-src`, mailboxes, storage URLs, artifact filenames.
 `SITE.domain` holds the display form; `SITE.url` holds the functional link.
 Never hand-edit the Sparkle-signed `web/public/stable/appcast.xml` — fix the display name in `mac/scripts/generate-appcast.sh` so the next release regenerates it.
@@ -62,7 +62,7 @@ Incident: [_docs/00-foundation.md#brand-fidelity](_docs/00-foundation.md#brand-f
 
 ## Mac/Web Parity
 
-**[HARD REQUIREMENT] Shared native/homepage controls retain semantic parity in the same change: units, provenance, badges, actions, and themes.**
+**Shared native/homepage controls retain semantic parity in the same change: units, provenance, badges, actions, and themes.**
 The homepage is a fixed curated presentation, not the full native catalog or a native geometry mirror; its roster and design boundary are owned by [_docs/02-design-system.md#homepage-provider-boundary](_docs/02-design-system.md#homepage-provider-boundary).
 Native layout experiments and provider additions must not expand or redesign the homepage.
 Inspect every shared web call site, then run `scripts/verify-app-demo-parity.sh` and `AppDemoParityGuardTests`; retain positive native and homepage coverage checks.
@@ -76,7 +76,7 @@ Two other mac-to-web bindings break a test when only one side changes:
 
 Read [_docs/11-adding-a-provider.md](_docs/11-adding-a-provider.md) before adding or promoting any provider.
 
-**[HARD REQUIREMENT] Every new provider (dashboard-visible OR audit-only) must land in the native Advanced Analytics tray checklist (`AdvancedAnalyticsTrayView.providerOptions`) in the SAME change.**
+**Every new provider (dashboard-visible OR audit-only) must land in the native Advanced Analytics tray checklist (`AdvancedAnalyticsTrayView.providerOptions`) in the SAME change.**
 Homepage analytics and Live Data stay within the fixed homepage roster.
 A provider whose events bypass `UsageIndex` also needs a bucketing fetch feeding `ModelDaySummary.bucketed(events:calculator:)`.
 
@@ -99,7 +99,7 @@ Guard: `GrokConsolidationTests`.
 A fully-unpriced provider needs TOKEN-based display, never a dead `$0.00` (`ProviderRow.isFullyUnpriced`, `tokenSeries`).
 Pricing coverage is emitted-ID coverage, not a vendor-name checklist: lookup normalizes through `ModelIdentity`, and bundled, remote, and web pricing mirrors stay parity-guarded.
 
-**[HARD REQUIREMENT] Never fabricate a quota, tier, or plan ceiling for any provider — read the live entitlement or show nothing.**
+**Never fabricate a quota, tier, or plan ceiling for any provider — read the live entitlement or show nothing.**
 Claude exposes no plan-tier label; never read another app's Keychain item for a cosmetic label, because it makes macOS prompt for the login password.
 JP the Cat makes no Security-framework Keychain access of its own (guard: `PlanTierKeychainReadTests`).
 The reviewed exceptions are opt-in plan usage for Cursor and Grok Bot: `CursorAuthToken` reads Cursor's own sign-in (app `state.vscdb` key, else the CLI item through `/usr/bin/security`, which that item already trusts, so no prompt) and never uses Cursor's refresh token; `GrokBotAuthToken` reads Grok Bot's sign-in from `sand-secrets.json` with the Grok Bot Keychain item through `/usr/bin/security` only, and never uses Grok Bot's refresh token.
@@ -123,7 +123,7 @@ Neither ever invents quota from local tokens.
 A local-hook opt-in alone is not consent to network sign-in access.
 Copilot's OTel `token_limit`/`current_tokens` attrs are the model CONTEXT WINDOW, not a spend quota; the one honest signal is summed per-request `github.copilot.nano_aiu` deltas, never the cumulative counter.
 
-**[HARD REQUIREMENT] Any UI offering to enable, connect, or configure a provider must first detect it is locally present and stay hidden until it is.**
+**Any UI offering to enable, connect, or configure a provider must first detect it is locally present and stay hidden until it is.**
 Pattern: a pure testable `is<Tool>Detected()` in Core checking real current footprint, a self-hiding SwiftUI row refreshed on `.onAppear`, and a test proving `false` on a clean fixture.
 A bare dotfolder is not proof of install, a GUI app does not inherit shell `$PATH`, a detected binary is often a symlink, and a correctly-named env var is not proof it does what its name implies: [_docs/00-foundation.md#providertool-detection](_docs/00-foundation.md#providertool-detection).
 
@@ -140,7 +140,7 @@ Review the shipped result — the live URL, a headless screenshot for visual wor
 `mac/scripts/release-jpthecat.sh` makes its `release: … [deploy]` commit, tag, and push from a dedicated worktree at the current local `HEAD` after proving `HEAD` contains `origin/main` — do not move it back inline.
 The public install path is `brew tap 8bittts/jpthecat` + `brew trust 8bittts/jpthecat` + `brew install --cask jpthecat` (the trust step is test-pinned in `web/lib/homebrew.ts`); `Casks/jpthecat.rb`, `web/public/stable/jpthecat.rb`, and the public tap stay pinned to the same version and SHA (`release-jpthecat.sh` syncs all three).
 
-**[HARD REQUIREMENT] Sparkle release notes are customer-facing ONLY, cover the LATEST release only, and must never contain documentation, process, or internal-implementation commits.**
+**Sparkle release notes are customer-facing ONLY, cover the LATEST release only, and must never contain documentation, process, or internal-implementation commits.**
 `mac/scripts/generate-appcast.sh` renders exactly `PREVIOUS_TAG..HEAD` as a styled fragment — a `<style>` block, the `<h2>Small paws, strict standards. Here are the improvements:</h2>` heading, one `<ul>` of customer-facing bullets, and the `<p class="fine">Built with ❤️ from San Francisco and Honolulu.</p>` footer — strips `[deploy]` and conventional-commit prefixes, and must FAIL rather than publish empty or generic notes.
 Internal prefixes (`perf`/`docs`/`refactor`/`chore`/`style`) are stripped, so an all-internal release yields empty notes and aborts; a perf-only release is the recurring case.
 The sanctioned fix is a `[notes]` tag in the commit subject, which promotes that ONE commit VERBATIM — use it only when the subject already reads as user language.
@@ -171,7 +171,7 @@ The app's least-privilege posture (no Full Disk Access, no Accessibility) is a s
 
 Never commit secrets, API keys, OAuth tokens, signing keys, notary credentials, or local credential state.
 
-**[HARD REQUIREMENT] The repository is public; never track the operator-local paths.**
+**The repository is public; never track the operator-local paths.**
 `_docs/legacy-backup/` (customer data), `brand/generated/`, and `brand/reference/` stay gitignored.
 The tracked runbooks in `.claude/` and `.agents/` are public, so they never hold home paths, account details, or metrics.
 The pre-open-source history lives only in the private `8bittts/JPtheCat-archive`; never push it, rebase it onto, or merge it into the public repository (guard: the local `pre-push` hook rejects any push that contains an archive root commit).

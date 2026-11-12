@@ -284,7 +284,7 @@ final class OpenCodeStore {
 	/// the old per-provider `LIKE` probes ran fourteen scans per Settings appearance.
 	///
 	/// A mid-scan `SQLiteError` returns `nil` rather than a partial set: a partial set would read as
-	/// "this brand is not installed" and hide a row that has real usage (mac/AGENTS.md [CRITICAL]).
+	/// "this brand is not installed" and hide a row that has real usage (mac/AGENTS.md).
 	func distinctModelRefs() -> Set<OpenCodeModelRef>? {
 		var refs = Set<OpenCodeModelRef>()
 		guard
@@ -315,7 +315,7 @@ final class OpenCodeStore {
 
 	/// Every `session` row, in table order. Throws a mid-scan `SQLiteError.step` rather than
 	/// collapsing it into loop-end — a truncated session scan must never read as an authoritative
-	/// total (mac/AGENTS.md [CRITICAL]).
+	/// total (mac/AGENTS.md).
 	func forEachSession(_ body: (OpenCodeSessionRow) -> Void) throws {
 		let stmt = try db.prepare(
 			"""
@@ -619,7 +619,7 @@ enum OpenCodeModelReader {
 						usage: row.usage, project: row.projectID))
 			}
 		} catch {
-			// A truncated session scan must not read as a complete total (mac/AGENTS.md [CRITICAL]).
+			// A truncated session scan must not read as a complete total (mac/AGENTS.md).
 			store.scanFailed = true
 			return []
 		}

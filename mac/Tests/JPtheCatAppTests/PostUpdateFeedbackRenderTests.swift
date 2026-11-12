@@ -3,7 +3,7 @@ import XCTest
 
 @testable import JPtheCatApp
 
-/// Brand-fidelity render harness for the post-update feedback sheet (AGENTS.md HARD REQUIREMENT: a
+/// Brand-fidelity render harness for the post-update feedback sheet (AGENTS.md rule: a
 /// visual change is proven with a real render, never eyeballed intent). Writes the empty, typed, and
 /// send-failed states in both themes. Gated behind `JP_RENDER=1`:
 ///

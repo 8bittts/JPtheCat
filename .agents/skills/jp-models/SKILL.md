@@ -127,7 +127,7 @@ Selector verification:
 - Mirror `selectorPresentation` in the web demo and test expired, missing, unofficial, zero, and secondary-only quota windows.
 
 #### D. Advanced Analytics tray (mac **and** web — same-change parity, tier 2+)
-**[HARD REQUIREMENT]** every provider, including audit-only entries, joins the native analytics checklist in the same change.
+Every provider, including audit-only entries, joins the native analytics checklist in the same change.
 The web checklist includes only the fixed homepage roster; do not expand it for native additions.
 - `mac/Sources/JPtheCatApp/AdvancedAnalyticsWindow.swift` — add to `providerOptions`, the `checkedProviders` default set, the tint map, catalog short names, and the notional/basis classification. If the provider bypasses `UsageIndex` (Copilot-style), add a `ModelDaySummary.bucketed(events:calculator:)` fetch merged into `rows` in `reload()`/`export()`; index-fed providers (Claude/Codex/Grok/Muse Spark) need only the list entry.
 - For homepage providers only, `web/components/site/advanced-analytics-demo.tsx` — keep `ANALYTICS_PROVIDERS` and the per-provider series map aligned with `web/lib/homepage-providers.ts` (tint pulled from `menubar-demo-series`).

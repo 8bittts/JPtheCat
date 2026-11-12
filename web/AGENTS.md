@@ -34,7 +34,7 @@ The dev server runs on port 4444, not 3000.
 `scripts/scan-client-bundle-secrets.ts` is the final step of `bun run build`, so it never runs on a stale tree.
 It byte-scans `.next/static` and `.next/server/app` for every credential-shaped env VALUE in four encodings, and fails closed when zero artifacts or zero credential values were scanned.
 
-**[CRITICAL] A green/READY Vercel deploy is NOT proof the quality gate passed — run `bun run check:full` locally before any web-touching push.**
+**A green/READY Vercel deploy is NOT proof the quality gate passed — run `bun run check:full` locally before any web-touching push.**
 Vercel's build runs only `next build`, not `bun test`, knip, or react-doctor, so a failing test or doctor regression ships while Vercel still shows READY.
 `.github/workflows/ci.yml` is disabled on purpose, so the local run is the only gate; a WCAG target-size failure once deployed "green" this way.
 `react-doctor` must score 100/100 to deploy; `--blocking warning` makes any warning fail `bun run doctor`, because the tool exits 0 on warnings by default.

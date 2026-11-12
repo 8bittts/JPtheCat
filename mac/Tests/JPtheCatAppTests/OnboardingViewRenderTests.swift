@@ -3,7 +3,7 @@ import XCTest
 
 @testable import JPtheCatApp
 
-/// Brand-fidelity render harness for the first-run `OnboardingView` (AGENTS.md HARD REQUIREMENT: any new
+/// Brand-fidelity render harness for the first-run `OnboardingView` (AGENTS.md rule: any new
 /// user-facing visual surface must be PROVEN with a real render, side-by-side with the homepage/app — not
 /// just source-string contract-tested). Writes the onboarding card in both themes to PNGs so they can be
 /// eyeballed against the homepage hero / menu-bar demo. Gated behind `JP_RENDER=1` so the normal

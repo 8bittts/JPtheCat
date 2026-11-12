@@ -54,7 +54,7 @@ jobs:
 
   # Vercel's build runs only `next build` — not bun test, knip, or react-doctor — so without this job
   # a failing test or a doctor regression ships to production while Vercel still reports READY.
-  # web/AGENTS.md marks that trap [CRITICAL]; it already shipped a WCAG failure once.
+  # web/AGENTS.md documents that trap; it already shipped a WCAG failure once.
   web:
     name: Web quality
     runs-on: ubuntu-latest
