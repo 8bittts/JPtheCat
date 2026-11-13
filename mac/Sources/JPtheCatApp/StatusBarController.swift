@@ -802,7 +802,7 @@ final class StatusBarController {
         estimatedUsedPct: row.usedPct == nil && row.weeklyUsedPct == nil ? row.estimatedSharePct : nil,
         estimatedTokenCount: row.usedPct == nil && row.weeklyUsedPct == nil
           ? row.todayUsage.total : nil,
-        additionalLines: row.cursorPlan?.menuBarPoolLines(meters: row.detailPlanMeters()) ?? [])
+        additionalLines: row.cursorPlan?.menuBarPoolLines(meters: row.menuBarPlanMeters()) ?? [])
     }
   }
 

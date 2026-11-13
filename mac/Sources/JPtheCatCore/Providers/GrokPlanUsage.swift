@@ -16,15 +16,44 @@ extension ProviderID {
 	}
 }
 
+/// Which of a provider's independent official pools headlines its bar. A maxed pool tells the user
+/// nothing they can act on, so the first pool in display priority that still has room wins. Only when
+/// every pool is exhausted does the bar show an exhausted pool, and then the one that frees up soonest
+/// (a pool with no reported reset sorts last). Priority, not the largest or smallest percentage,
+/// decides among pools with room, so an unrelated fuller pool never displaces the weekly.
+public enum PlanPoolHeadline {
+	/// A pool whose bar already reads 100% (99.5% rounds there) has no usable room left.
+	public static func isExhausted(_ usedPercent: Double) -> Bool { usedPercent >= 99.5 }
+
+	/// Index of the headline pool in `pools`, which must already be in display priority; nil when empty.
+	public static func index(of pools: [(usedPercent: Double, resetsAt: Date?)]) -> Int? {
+		guard !pools.isEmpty else { return nil }
+		if let open = pools.firstIndex(where: { !isExhausted($0.usedPercent) }) { return open }
+		return pools.indices.min { left, right in
+			switch (pools[left].resetsAt, pools[right].resetsAt) {
+			case let (l?, r?): return l < r
+			case (_?, nil): return true
+			default: return false
+			}
+		}
+	}
+}
+
 extension CursorPlanUsage {
-	/// The weekly included pool wins, never the largest percentage across unrelated pools.
-	/// A Cursor-only plan uses its own billing-cycle meter without calling it weekly or 5-hour.
+	/// Display priority: the weekly included pool, then Cursor Models, All models, combined
+	/// included usage, then any other reported pool in its reported order.
+	public var prioritizedMeters: [CursorPlanMeter] {
+		let order = [CursorPlanMeter.grokBotKey, "cursor_models", "all_models", "included_usage"]
+		let ranked = order.compactMap { key in meters.first { $0.key == key } }
+		return ranked + meters.filter { !order.contains($0.key) }
+	}
+
+	/// The weekly included pool wins while it has room, never the largest percentage across unrelated
+	/// pools; a maxed pool yields to the next one with room (`PlanPoolHeadline`). A Cursor-only plan
+	/// uses its own billing-cycle meter without calling it weekly or 5-hour.
 	public var primaryMeter: CursorPlanMeter? {
-		meters.first { $0.key == CursorPlanMeter.grokBotKey }
-			?? meters.first { $0.key == "cursor_models" }
-			?? meters.first { $0.key == "all_models" }
-			?? meters.first { $0.key == "included_usage" }
-			?? meters.first
+		let ordered = prioritizedMeters
+		return PlanPoolHeadline.index(of: ordered.map { ($0.usedPercent, $0.resetsAt) }).map { ordered[$0] }
 	}
 }
 
@@ -117,20 +146,27 @@ public enum GrokPlanUsageStore {
 	}
 
 	/// One display priority shared by CLI/automation/analytics. A billing-cycle pool never
-	/// masquerades as weekly headroom.
+	/// masquerades as weekly headroom: it keeps its own key and label when it headlines.
 	public static func primaryMeter(plan: CursorPlanUsage?, fallback: RateLimitSnapshot? = nil,
 		now: Date = Date()) -> CursorPlanMeter? {
 		let plan = plan?.current(at: now)
-		if let snapshot = officialSnapshot(plan: plan, hook: fallback, now: now),
-			let weekly = snapshot.secondary, weekly.windowMinutes == 10080 {
-			if let sand = plan?.meters.first(where: { $0.key == CursorPlanMeter.grokBotKey }),
-				sameReading(sand.usedPercent, weekly.usedPercent, sand.resetsAt, weekly.resetsAt) {
-				return sand
-			}
-			return CursorPlanMeter(key: CursorPlanMeter.grokBotKey, label: snapshot.planType ?? "Weekly included usage",
+		guard let snapshot = officialSnapshot(plan: plan, hook: fallback, now: now),
+			let weekly = snapshot.secondary, weekly.windowMinutes == 10080
+		else { return plan?.primaryMeter }
+		let official: CursorPlanMeter
+		if let sand = plan?.meters.first(where: { $0.key == CursorPlanMeter.grokBotKey }),
+			sameReading(sand.usedPercent, weekly.usedPercent, sand.resetsAt, weekly.resetsAt) {
+			official = sand
+		} else {
+			official = CursorPlanMeter(key: CursorPlanMeter.grokBotKey, label: snapshot.planType ?? "Weekly included usage",
 				usedPercent: weekly.usedPercent, resetsAt: weekly.resetsAt)
 		}
-		return plan?.primaryMeter
+		// The official weekly leads; a maxed weekly yields to another of the account's pools with room.
+		let others = (plan?.prioritizedMeters ?? []).filter {
+			!sameReading($0.usedPercent, official.usedPercent, $0.resetsAt, official.resetsAt)
+		}
+		let pools = [official] + others
+		return PlanPoolHeadline.index(of: pools.map { ($0.usedPercent, $0.resetsAt) }).map { pools[$0] }
 	}
 
 	public static func rateLimits(now: Date = Date(), fallback: RateLimitSnapshot? = nil) -> RateLimitSnapshot? {

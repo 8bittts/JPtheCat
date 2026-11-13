@@ -75,6 +75,77 @@ final class DashboardViewModelGrokBotTests: XCTestCase {
 		XCTAssertEqual(planOnly.detailPlanMeters().map(\.key), ["grok_bot_weekly", "cursor_models", "other_models"])
 	}
 
+	private func pools(sand: Double, sandReset: TimeInterval = 86_400, allModels: Double = 100) -> CursorPlanUsage {
+		CursorPlanUsage(planName: "Team", isTeam: true, meters: [
+			CursorPlanMeter(key: "all_models", label: "All models", usedPercent: allModels,
+				resetsAt: Date().addingTimeInterval(8 * 86_400)),
+			CursorPlanMeter(key: CursorPlanMeter.grokBotKey, label: "Weekly included usage", usedPercent: sand,
+				resetsAt: Date().addingTimeInterval(sandReset)),
+		], fetchedAt: Date(), reportedPlanLabel: "Grok Bot Plan")
+	}
+
+	private func state(_ row: DashboardViewModel.ProviderRow) -> DashboardState {
+		DashboardState(rows: [row], aggregateSeries: [], aggregateToday: 0, aggregateWeek: 0,
+			aggregateCostProvenance: .notionalListPrice, refreshStatus: .idle(lastRefresh: Date()), selectedDays: 14)
+	}
+
+	/// X Premium+ weekly and Cursor All models maxed, Grok Bot weekly at 37%: the provider bar
+	/// shows the pool that still has room, while the maxed weekly keeps driving alerts and detail.
+	func testMaxedPoolsYieldTheProviderBarToThePoolWithRoom() throws {
+		let row = try XCTUnwrap(build(pools(sand: 37.36), local: true, hookPercent: 100).rows.first)
+		XCTAssertEqual(row.weeklyUsedPct ?? -1, 100, accuracy: 0.001)
+		XCTAssertEqual(row.selectorPlanMeter()?.key, CursorPlanMeter.grokBotKey)
+		XCTAssertNil(row.headlineQuota())
+		XCTAssertNil(row.selectorTrendSeries(), "a quota-shaped bar, never the cost sparkline")
+		let state = state(row)
+		XCTAssertEqual(state.selectorMeterFraction(row), 0.3736, accuracy: 0.0001)
+		XCTAssertEqual(state.selectorMeterDescription(row), "37% of Weekly included usage used — official Grok plan usage")
+		XCTAssertTrue(row.detailShowsWeeklyWindow)
+		XCTAssertEqual(row.detailPlanMeters().map(\.key), ["all_models", CursorPlanMeter.grokBotKey])
+
+		let planOnly = try XCTUnwrap(build(pools(sand: 37.36), hookPercent: 100).rows.first)
+		XCTAssertTrue(planOnly.heroShowsOfficialPlanUsage())
+		XCTAssertEqual(planOnly.heroPrimaryTextOverride(), "37%")
+		XCTAssertEqual(planOnly.selectorTrailingAmount(), "37%")
+		XCTAssertEqual(planOnly.heroChartQuotaFraction() ?? -1, 0.3736, accuracy: 0.0001)
+		XCTAssertEqual(planOnly.heroQuotaTitle(), "Weekly included usage")
+		XCTAssertEqual(planOnly.heroBasisLabel(), "OFFICIAL PLAN USAGE · WEEKLY")
+		XCTAssertEqual(planOnly.primaryPlanPercent ?? -1, 37.36, accuracy: 0.001)
+		XCTAssertTrue(planOnly.detailShowsWeeklyWindow, "the maxed X Premium+ weekly stays visible in the detail")
+		XCTAssertEqual(planOnly.detailPlanMeters().map(\.key), ["all_models"])
+		XCTAssertEqual(planOnly.heroSecondaryCaption(), "Grok Bot Plan", "the 37% is Grok Bot's, not X Premium+")
+		XCTAssertEqual(planOnly.planLabel, "X Premium+")
+		// The pill keeps the official X Premium+ weekly, so its tooltip still lists every other pool.
+		XCTAssertEqual(try XCTUnwrap(planOnly.cursorPlan).menuBarPoolLines(meters: planOnly.menuBarPlanMeters()), [
+			"Cursor · Team seat: All models 100%",
+			"Grok Bot Plan · included usage: Weekly included usage 37%",
+		])
+	}
+
+	func testEveryPoolMaxedKeepsTheExhaustedBarAndPrefersTheSoonestReset() throws {
+		// The hook weekly resets in 24h; Grok Bot's maxed weekly resets in 1h, so it headlines.
+		let soonest = try XCTUnwrap(build(pools(sand: 100, sandReset: 3600), local: true, hookPercent: 100).rows.first)
+		XCTAssertEqual(soonest.selectorPlanMeter()?.key, CursorPlanMeter.grokBotKey)
+		XCTAssertEqual(state(soonest).selectorMeterFraction(soonest), 1, accuracy: 0.0001)
+		// The hook weekly resets first: it keeps the bar.
+		let hookFirst = try XCTUnwrap(build(pools(sand: 100, sandReset: 3 * 86_400), local: true, hookPercent: 100).rows.first)
+		XCTAssertNil(hookFirst.selectorPlanMeter())
+		XCTAssertEqual(hookFirst.headlineQuota()?.percent ?? -1, 100, accuracy: 0.001)
+		XCTAssertEqual(state(hookFirst).selectorMeterFraction(hookFirst), 1, accuracy: 0.0001)
+	}
+
+	func testSinglePoolAndAWeeklyWithRoomKeepTheirBar() throws {
+		let single = try XCTUnwrap(build(CursorPlanUsage(planName: "Team", isTeam: true, meters: [
+			CursorPlanMeter(key: CursorPlanMeter.grokBotKey, label: "Weekly included usage", usedPercent: 100,
+				resetsAt: Date().addingTimeInterval(86_400)),
+		], fetchedAt: Date())).rows.first)
+		XCTAssertEqual(single.heroPrimaryTextOverride(), "100%")
+		XCTAssertNil(single.selectorPlanMeter())
+		let roomy = try XCTUnwrap(build(pools(sand: 37.36), local: true, hookPercent: 20).rows.first)
+		XCTAssertNil(roomy.selectorPlanMeter(), "a weekly with room is never displaced by another pool")
+		XCTAssertEqual(state(roomy).selectorMeterFraction(roomy), 0.2, accuracy: 0.0001)
+	}
+
 	func testSecondaryPoolsRemainButWeeklyNeverRepeatsInDetail() throws {
 		let row = try XCTUnwrap(build(plan(secondary: true)).rows.first)
 		XCTAssertEqual(row.detailPlanMeters().map(\.key), ["cursor_models", "other_models"])
@@ -244,8 +315,12 @@ final class DashboardViewModelGrokBotTests: XCTestCase {
 		let old = JPTheme.current
 		defer { JPTheme.current = old }
 		JPTheme.current = .sunlit
-		for (name, local) in [("plan-only", false), ("combined", true)] {
-			let result = try build(plan(secondary: local), local: local)
+		let scenarios: [(String, Bool, CursorPlanUsage, Double?)] = [
+			("plan-only", false, plan(), nil), ("combined", true, plan(secondary: true), nil),
+			("maxed-plan-only", false, pools(sand: 37.36), 100), ("maxed-combined", true, pools(sand: 37.36), 100),
+		]
+		for (name, local, usage, hook) in scenarios {
+			let result = try build(usage, local: local, hookPercent: hook)
 			let state = DashboardState(rows: result.rows, aggregateSeries: result.aggregateSeries,
 				aggregateToday: result.aggregateToday, aggregateWeek: result.aggregateWeek,
 				refreshStatus: .idle(lastRefresh: Date()), selectedId: "grok", selectedDays: 14)

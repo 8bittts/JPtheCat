@@ -378,11 +378,26 @@ extension DashboardViewModel.ProviderRow {
 		return nil
 	}
 
-	/// Official billing-cycle fallback only when no current weekly/5-hour window exists.
-	/// Never let a fuller monthly pool displace the primary weekly quota.
+	/// The official plan pool that headlines the row's bar instead of `selectorQuota`: the pool
+	/// fallback when no current weekly/5-hour window exists, or another of the account's pools with
+	/// room when that window is maxed (`PlanPoolHeadline`). A fuller pool never displaces a window that
+	/// still has room, and when every pool is maxed the one that resets soonest is shown.
 	func selectorPlanMeter(now: Date = Date()) -> CursorPlanMeter? {
-		guard isContributing, selectorQuota(now: now) == nil else { return nil }
-		return cursorPlan?.current(at: now)?.primaryMeter
+		guard isContributing, let plan = cursorPlan?.current(at: now) else { return nil }
+		guard let quota = selectorQuota(now: now) else { return plan.primaryMeter }
+		guard !quota.measured, PlanPoolHeadline.isExhausted(quota.percent) else { return nil }
+		let reset = quota.weekly ? resetsAtWeekly : resetsAt5h
+		let others = plan.prioritizedMeters.filter {
+			!GrokPlanUsageStore.sameReading($0.usedPercent, quota.percent, $0.resetsAt, reset)
+		}
+		let pools = [(usedPercent: quota.percent, resetsAt: reset)] + others.map { ($0.usedPercent, $0.resetsAt) }
+		guard let index = PlanPoolHeadline.index(of: pools), index > 0 else { return nil }
+		return others[index - 1]
+	}
+
+	/// The current window that headlines the bar, or nil when an official plan pool does.
+	func headlineQuota(now: Date = Date()) -> (percent: Double, minutes: Int?, weekly: Bool, measured: Bool)? {
+		selectorPlanMeter(now: now) == nil ? selectorQuota(now: now) : nil
 	}
 
 	func selectorTrendSeries(now: Date = Date()) -> [Double]? {
@@ -407,6 +422,15 @@ extension DashboardViewModel.ProviderRow {
 				return false
 			}
 			return true
+		}
+	}
+
+	/// Menu-bar tooltip pools: every current pool except the sand reading the pill already shows as
+	/// the official weekly. Unlike the detail, a pool the hero headlines still belongs here, because
+	/// the pill keeps the official weekly.
+	func menuBarPlanMeters(now: Date = Date()) -> [CursorPlanMeter] {
+		(cursorPlan?.current(at: now)?.meters ?? []).filter {
+			!($0.key == CursorPlanMeter.grokBotKey && displaysSandAsOfficialWeekly($0))
 		}
 	}
 
@@ -446,11 +470,18 @@ extension DashboardViewModel.ProviderRow {
 	}
 
 	var detailShowsPrimaryWindow: Bool { !isOfficialPlanOnly }
-	var detailShowsWeeklyWindow: Bool { !isOfficialPlanOnly || usedPct != nil }
-	var primaryPlanPercent: Double? { selectorQuota()?.percent ?? selectorPlanMeter()?.usedPercent }
-	var primaryPlanReset: Date? { selectorQuota()?.weekly == true ? resetsAtWeekly : (resetsAt5h ?? selectorPlanMeter()?.resetsAt) }
+	/// Plan-only rows hide the weekly gauge because the hero draws it; once a pool with room
+	/// headlines instead, the maxed weekly stays visible in the detail.
+	var detailShowsWeeklyWindow: Bool {
+		!isOfficialPlanOnly || usedPct != nil || (weeklyUsedPct != nil && selectorQuota() != nil && headlineQuota() == nil)
+	}
+	var primaryPlanPercent: Double? { headlineQuota()?.percent ?? selectorPlanMeter()?.usedPercent }
+	var primaryPlanReset: Date? {
+		if let quota = headlineQuota() { return quota.weekly ? resetsAtWeekly : resetsAt5h }
+		return selectorPlanMeter()?.resetsAt
+	}
 	var primaryPlanWindowLabel: String {
-		if let quota = selectorQuota() { return quota.weekly ? "7-day window" : "5-hour window" }
+		if let quota = headlineQuota() { return quota.weekly ? "7-day window" : "5-hour window" }
 		if let meter = selectorPlanMeter() { return meter.key == CursorPlanMeter.grokBotKey ? "7-day window" : "Billing-cycle window" }
 		return "Awaiting official plan usage"
 	}
@@ -458,7 +489,7 @@ extension DashboardViewModel.ProviderRow {
 	/// The hero bar names the pool it draws. A weekly keeps the weekly title; a Cursor
 	/// billing-cycle pool keeps its own label, so it never reads as weekly.
 	func heroQuotaTitle(now: Date = Date()) -> String {
-		guard selectorQuota(now: now) == nil, let meter = selectorPlanMeter(now: now),
+		guard headlineQuota(now: now) == nil, let meter = selectorPlanMeter(now: now),
 			meter.key != CursorPlanMeter.grokBotKey
 		else { return "Weekly included usage" }
 		return meter.label.hasPrefix("Cursor") ? meter.label : "Cursor · \(meter.label)"
@@ -478,7 +509,7 @@ extension DashboardViewModel.ProviderRow {
 
 	/// Official plan usage as a whole percentage, or an em dash while no pool has reported.
 	private func officialPlanPercentText(now: Date) -> String {
-		(selectorQuota(now: now)?.percent ?? selectorPlanMeter(now: now)?.usedPercent)
+		(headlineQuota(now: now)?.percent ?? selectorPlanMeter(now: now)?.usedPercent)
 			.map { "\(Int($0.rounded()))%" } ?? "—"
 	}
 
@@ -499,18 +530,23 @@ extension DashboardViewModel.ProviderRow {
 
 	func heroBasisLabel(now: Date = Date()) -> String? {
 		guard heroShowsOfficialPlanUsage() else { return nil }
-		return selectorQuota(now: now)?.weekly == true || selectorPlanMeter(now: now)?.key == CursorPlanMeter.grokBotKey
+		return headlineQuota(now: now)?.weekly == true || selectorPlanMeter(now: now)?.key == CursorPlanMeter.grokBotKey
 			? "OFFICIAL PLAN USAGE · WEEKLY" : "OFFICIAL PLAN USAGE"
 	}
 
 	func heroSecondaryCaption() -> String? {
 		guard heroShowsOfficialPlanUsage() else { return nil }
+		// A pool that displaced the maxed official window is captioned with its own plan, never the
+		// displaced plan's name (a Grok Bot 37% must not read as X Premium+).
+		if selectorQuota() != nil, let meter = selectorPlanMeter(), let plan = cursorPlan {
+			return meter.key == CursorPlanMeter.grokBotKey ? (plan.planLabel ?? "Grok Bot") : plan.cursorQuotaTitle
+		}
 		return planLabel ?? "Official included usage"
 	}
 
 	func heroChartQuotaFraction(now: Date = Date()) -> Double? {
 		guard heroShowsOfficialPlanUsage() else { return nil }
-		let pct = selectorQuota(now: now)?.percent ?? selectorPlanMeter(now: now)?.usedPercent ?? 0
+		let pct = headlineQuota(now: now)?.percent ?? selectorPlanMeter(now: now)?.usedPercent ?? 0
 		return min(1, max(0, pct / 100))
 	}
 

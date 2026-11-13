@@ -25,7 +25,8 @@ A `Button` nested inside another `Button`'s label gets no independent tap target
 `selectorMeter` needs an explicit `.frame(minWidth: 20, maxWidth: .infinity)`, and the badge-plus-amount group keeps `.layoutPriority(1)`.
 
 Provider rows show a quota-shaped meter for exactly two honest sources: a current OFFICIAL pool (a rolling window or explicitly labeled billing cycle), or a MEASURED gateway window (`ProviderRow.quotaIsMeasured`, badged `measured`, never `official`).
-`ProviderRow.selectorQuota(now:)` and the official billing-pool fallback `selectorPlanMeter(now:)` are the semantic sources; either suppresses the trend sparkline.
+`ProviderRow.selectorQuota(now:)` and the official plan pool `selectorPlanMeter(now:)` are the semantic sources; either suppresses the trend sparkline.
+`selectorPlanMeter` headlines when no current window exists, or when that window is maxed and another of the row's pools still has room (`PlanPoolHeadline`); `headlineQuota(now:)` is the window only when no pool displaces it, and every hero and selector readout goes through it.
 Otherwise `ProviderRow.selectorTrendSeries` supplies selected-window dollars for priced providers, or tokens for free, fully unpriced, and non-aggregable rows.
 Never turn self-relative `estimatedSharePct` or aggregate spend share into a quota-shaped percentage; `estimatedSharePct` only drives the hero's `~NN% activity` text when no window exists.
 A measured window stays OUT of the widget's official limit capsule, the spoken "N% used" value, and every alert; its monthly bar is provider-detail only.

@@ -94,6 +94,7 @@ A current Grok subscription hook weekly owns `weeklyUsedPct`, menu-bar headroom,
 Grok Bot's sand weekly stays a named pool and becomes that weekly only when no current hook weekly exists.
 Cursor billing-cycle meters stay labeled Cursor and never become the weekly window.
 Without either weekly, Cursor Models (then combined included usage, then the first reported pool) drives the selector and plan-only hero as a **billing-cycle** meter.
+A maxed pool never headlines while another of the row's pools has room: the selector and plan-only hero take the first pool in that priority with room, and only when every pool is maxed show the one that resets soonest (`PlanPoolHeadline`); `weeklyUsedPct`, alerts, the menu bar and the widget capsule keep the official weekly.
 Percentages never enter dollar totals.
 Guard: `GrokConsolidationTests`.
 A fully-unpriced provider needs TOKEN-based display, never a dead `$0.00` (`ProviderRow.isFullyUnpriced`, `tokenSeries`).

@@ -45,6 +45,55 @@ final class GrokConsolidationTests: XCTestCase {
 		XCTAssertEqual(monthlyOnly.primaryMeter?.key, "cursor_models")
 	}
 
+	func testHeadlinePoolSkipsAMaxedPoolForThePriorityPoolWithRoom() {
+		XCTAssertNil(PlanPoolHeadline.index(of: []))
+		XCTAssertEqual(PlanPoolHeadline.index(of: [(100, nil), (37, nil), (10, nil)]), 1, "priority, not the emptiest pool")
+		XCTAssertEqual(PlanPoolHeadline.index(of: [(99.6, nil), (64, nil)]), 1, "a bar that already reads 100% has no room")
+		XCTAssertEqual(PlanPoolHeadline.index(of: [(99.4, nil), (10, nil)]), 0)
+		let maxedSand = weekly(100)
+		let cursor = CursorPlanMeter(key: "cursor_models", label: "Cursor Models", usedPercent: 40,
+			resetsAt: now.addingTimeInterval(8 * 86400))
+		let plan = CursorPlanUsage(planName: nil, isTeam: false, meters: [maxedSand, cursor], fetchedAt: now)
+		XCTAssertEqual(plan.primaryMeter?.key, "cursor_models")
+	}
+
+	func testEveryPoolMaxedShowsTheExhaustedPoolThatResetsSoonest() {
+		let late = CursorPlanMeter(key: "cursor_models", label: "Cursor Models", usedPercent: 100,
+			resetsAt: now.addingTimeInterval(8 * 86400))
+		let soon = CursorPlanMeter(key: "other_models", label: "Other Models", usedPercent: 100,
+			resetsAt: now.addingTimeInterval(3600))
+		let undated = CursorPlanMeter(key: "all_models", label: "All models", usedPercent: 100, resetsAt: nil)
+		let plan = CursorPlanUsage(planName: nil, isTeam: false, meters: [late, undated, soon], fetchedAt: now)
+		XCTAssertEqual(plan.primaryMeter?.key, "other_models")
+		XCTAssertEqual(plan.primaryMeter?.usedPercent, 100)
+		XCTAssertEqual(PlanPoolHeadline.index(of: [(100, nil), (100, nil)]), 0, "no resets keeps priority order")
+	}
+
+	func testSinglePoolHeadlinesUnchangedWhetherOrNotItHasRoom() {
+		XCTAssertEqual(CursorPlanUsage(planName: nil, isTeam: false, meters: [weekly(30.46)], fetchedAt: now)
+			.primaryMeter?.usedPercent, 30.46)
+		XCTAssertEqual(CursorPlanUsage(planName: nil, isTeam: false, meters: [weekly(100)], fetchedAt: now)
+			.primaryMeter?.usedPercent, 100)
+		let hook = RateLimitSnapshot(primary: nil, secondary: RateLimitWindow(usedPercent: 100,
+			windowMinutes: 10080, resetsAt: now.addingTimeInterval(3600)), planType: "X Premium+", capturedAt: now)
+		XCTAssertEqual(GrokPlanUsageStore.primaryMeter(plan: nil, fallback: hook, now: now)?.label, "X Premium+")
+	}
+
+	func testMaxedSubscriptionWeeklyYieldsToGrokBotWeeklyWithRoom() {
+		let allModels = CursorPlanMeter(key: "all_models", label: "All models", usedPercent: 100,
+			resetsAt: now.addingTimeInterval(8 * 86400))
+		let plan = CursorPlanUsage(planName: "Team", isTeam: true, meters: [allModels, weekly(37.36)], fetchedAt: now,
+			reportedPlanLabel: "Grok Bot Plan")
+		let hook = RateLimitSnapshot(primary: nil, secondary: RateLimitWindow(usedPercent: 100,
+			windowMinutes: 10080, resetsAt: now.addingTimeInterval(3 * 86400)), planType: "X Premium+", capturedAt: now)
+		XCTAssertEqual(GrokPlanUsageStore.officialSnapshot(plan: plan, hook: hook, now: now)?.secondary?.usedPercent, 100,
+			"the official weekly itself is unchanged; only the headline moves")
+		let headline = GrokPlanUsageStore.primaryMeter(plan: plan, fallback: hook, now: now)
+		XCTAssertEqual(headline?.key, CursorPlanMeter.grokBotKey)
+		XCTAssertEqual(headline?.label, "Weekly included usage")
+		XCTAssertEqual(headline?.usedPercent ?? -1, 37.36, accuracy: 0.001)
+	}
+
 	func testSubscriptionWeeklyStaysDistinctFromGrokBotAndCursor() {
 		let reset = now.addingTimeInterval(3 * 86400)
 		let sand = weekly(22)
