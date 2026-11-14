@@ -72,9 +72,12 @@ Run each line from the repository root:
 (cd mac && swift build && swift test --parallel)                               # native gates
 bash mac/scripts/build_and_run.sh                                               # stage and launch the real .app
 (cd mac && swift run jpthecat-cli snapshot --json --provider all --indexed)     # local automation snapshot
-(cd web && bun install && bun run dev)                                          # http://localhost:4444
+(cd web && bun install && bun run dev:secrets)                                  # http://localhost:4444 — Infisical `dev`
 (cd web && bun run check:full)                                                     # full web gate
 ```
+
+`bun run dev` in `web/` is unchanged if you already have a local `.env.local` and no Infisical CLI.
+Web secrets live in the Infisical project linked from `.infisical.yaml`; see `web/AGENTS.md`.
 
 `swift run JPtheCat` is not an app-shell smoke test; use the staged `.app`.
 The app also writes `~/Library/Application Support/JPtheCat/latest-snapshot.json` for local integrations; it carries rollups and official windows only, never prompts, transcripts, code, secrets, or file paths.

@@ -10,6 +10,7 @@
 	"description": "JP the Cat — the cat that counts your agent tokens. Marketing site.",
 	"scripts": {
 		"dev": "lsof -ti:4444 | xargs kill -9 2>/dev/null || true && rm -rf .next && next dev -p 4444",
+		"dev:secrets": "infisical secrets-manager run --env=dev --projectId 71de686a-e09a-48aa-b88d-d78a4ebfa89e -- bun dev",
 		"build": "next build && bun run check:perf-budget && bun run scan:client-secrets",
 		"check:perf-budget": "bun scripts/perf-budget.ts",
 		"scan:client-secrets": "bun run scripts/scan-client-bundle-secrets.ts",
