@@ -157,6 +157,7 @@ Incidents: [_docs/00-foundation.md#sparkle-release-notes](_docs/00-foundation.md
 - **Mac app:** smallest meaningful Swift gate first, broadening by risk — `cd mac && swift build`, `swift test --parallel`, `swift build -c release`.
   An unchanged `.o` is NOT proof the build skipped your file — prove a compile with a syntax error (non-zero exit) or a semantic change: [_docs/00-foundation.md#proving-a-swift-change-compiled](_docs/00-foundation.md#proving-a-swift-change-compiled).
 - **Web:** `cd web && bun run check:full` before any production deploy; see `web/AGENTS.md` for the chain, its order, and the Vercel-READY trap.
+  Local web secrets come from Infisical via `cd web && bun run dev:secrets`; production flows Infisical `prod` through the Vercel sync, then a redeploy.
 - **Visible UI or asset work** (widget faces, themes, brand-fidelity changes, the legal 3D scene) needs a real headless screenshot or the `ImageRenderer`/`JP_RENDER=1` harness, never eyeballed intent.
 - `.github/workflows/ci.yml` exists but is disabled on purpose; the local gates above are the gates.
 - **Before reporting done:** state which gates ran and why a broader one was not.

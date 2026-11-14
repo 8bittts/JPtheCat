@@ -45,6 +45,20 @@ Playwright is pinned on the same terms but is NOT in the `check:full` chain and 
 Regenerate PWA PNGs with `scripts/generate-web-icons.mjs` (macOS can still use repo-root `./scripts/generate-brand-icons.sh`).
 The `react-email` preview CLI (`bunx react-email dev -d emails -p 4445`) is the one deliberate unpinned carve-out: it gates nothing.
 
+## Infisical
+
+This project's Infisical id is `71de686a-e09a-48aa-b88d-d78a4ebfa89e` (slug `jpthecat`).
+Log in with `infisical login` against Infisical US cloud, org `8-lee-g7-uh`.
+Run `bun run dev:secrets` for local development; it wraps `infisical secrets-manager run --env=dev -- bun dev`.
+The existing `dev` script is unchanged, so a checkout without the Infisical CLI can still use a gitignored `.env.local`.
+Production secrets flow from Infisical `prod` `/` through the Vercel sync, then a production redeploy.
+To add or rotate a secret, edit it in Infisical, wait for the Vercel sync, and redeploy.
+Vercel Sensitive variables stay Vercel-managed until they are pasted into Infisical; syncs have secret deletion disabled and will not remove them.
+Shared keys live canonically in the Infisical `shared` project (`f9421aed-0906-41e5-8bec-139a82248941`).
+On the free plan each app still keeps its own copy, so rotate a shared key in `shared` and in every app that uses it.
+Fleet details: [`8leeai/_global/infisical.md`](https://github.com/8bittts/8leeai/blob/main/_global/infisical.md).
+Run these commands from `web/`.
+
 ## Tests
 
 Tests live in `tests/*.test.ts(x)` and run on Bun's built-in runner, importing from `bun:test` — not vitest or jest.
