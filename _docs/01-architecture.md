@@ -1,10 +1,10 @@
 # Architecture
 
-Native targets, data flow, providers, indexing, pricing, rate limits, persistence, and the widget of JP the Cat.
+As-built architecture of the native app, from local agent usage logs to real or notional dollars and plan-window usage: targets, data flow, providers, indexing, pricing, rate limits, persistence, and the widget.
 
-As-built architecture of the native app: local agent usage logs → real or notional dollars → live spend and plan-window usage.
 When this doc and the code disagree, the code wins.
 UI contracts live in [12-ui-surface-invariants.md](12-ui-surface-invariants.md); provider log formats and pricing evidence in [03-data.md](03-data.md); release and signing in [05-infrastructure.md](05-infrastructure.md).
+The web app is owned elsewhere: its layout, proxy, and per-request rendering in [web/AGENTS.md](../web/AGENTS.md#layout-and-conventions), and its `/library` routes in [08-growth.md](08-growth.md#page-families).
 
 ## 1. Targets and shell
 

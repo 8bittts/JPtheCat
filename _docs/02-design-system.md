@@ -149,6 +149,7 @@ Combined `/terms` opens on the full-width three.js snow-globe scene (`web/compon
 - Constraints: strict nonce CSP with 100% procedural geometry plus the one self-hosted mascot image (no GLTF, HDRI, eval, CDN, or workers); three.js loads client-only; Reduce Motion or no WebGL shows the static SVG poster with no rAF.
 - Verify every visual change with a headless screenshot.
 - `/privacy` permanently redirects to `/terms#privacy-policy`; the Vercel-telemetry disclosure sentences in that privacy section are load-bearing (`web/tests/site-copy.test.ts`).
+
 ### Email — the Owner Ledger
 
 Every email reads its tokens from `web/emails/email-styles.ts`: colors mirrored from `web/app/globals.css` `--color-*` and admin radii from `--radius-*`, both parity-tested; change a value there, never at a call site.
@@ -169,10 +170,10 @@ JP sends no customer mail; the one shell is the owner/admin "Owner Ledger".
 Client robustness: Row/Column tables, an explicit background on every surface, `color-scheme: light` plus the dark-mode re-assertion CSS through the shared `web/emails/email-head.tsx`, AA-passing pairs, absolute `https://jpthecat.com/*` images with size and alt, HTML well under Gmail's 102KB clip, and a curated plain-text part.
 Guard: `web/tests/admin-email-shell.test.tsx`.
 
-## JP the Cat — Brand Assets
+## Brand assets
 
 Source-of-truth inventory for JP's static assets, mascot animation, and packaged sounds, with the commands that regenerate them.
-Naming rules live in root `AGENTS.md`; how assets are used lives in [02-design-system.md](02-design-system.md).
+Naming rules live in root `AGENTS.md`; how assets are used is in the sections above.
 
 ### Static assets
 

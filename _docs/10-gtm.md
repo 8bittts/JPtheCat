@@ -141,7 +141,7 @@ backlog — never a second copy here.
 *Recruiting a hunter and choosing the date are human-gated. The copy is launch-ready and
 honesty-gated to shipped scope; re-sync against `SITE` + the theme count before going live.*
 
-## 6. Website funnel
+## 7. Website funnel
 
 - Pages: the single-page homepage plus `/terms`, `/contact`, `/download`, and the `/library` hub. `/privacy` redirects to `/terms#privacy-policy`, and retired paths (`/pricing`, `/buy`, `/release-notes`, `/changelog`, `/release`, `/thanks`, `/confirmed`) redirect in one hop (`web/next.config.ts`).
 - Every download CTA goes through `DownloadCta` → `/download`; the download section links `SHA256` to the checksum derived from `public/stable/version.json`.

@@ -1,6 +1,7 @@
 # Security
 
 The privacy invariant, the permissions posture, Keychain access rules and update-feed trust for JP the Cat; `AGENTS.md` carries the rules as hard requirements and this doc explains the posture.
+The web app's side is owned elsewhere: response headers, the nonce CSP, and CORS in [web/AGENTS.md](../web/AGENTS.md#security-headers-and-cors), the built-bundle secret scan in [web/AGENTS.md](../web/AGENTS.md#commands), secrets in [web/AGENTS.md](../web/AGENTS.md#infisical), and the download table's RLS in [08-growth.md](08-growth.md#2-the-download-spine).
 
 ## Privacy invariant
 

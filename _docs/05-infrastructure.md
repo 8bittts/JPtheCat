@@ -1,6 +1,6 @@
 # Infrastructure
 
-The release pipeline, Sparkle vendoring and update UI, release hosting and the Homebrew tap for JP the Cat.
+The release pipeline, Sparkle vendoring and update UI, release hosting, the Homebrew tap, and web hosting and DNS for JP the Cat.
 
 JP the Cat ships as an unsandboxed, hardened-runtime, Developer ID app with Sparkle 2 auto-update.
 The App Sandbox cannot read the `~/.claude` and `~/.codex` dotfolders the product exists to read, so the Mac App Store is impossible; those dotfolders are not TCC-protected, so the app needs no file-access entitlement and shows no permission prompt.
@@ -59,5 +59,6 @@ Post-release proofs:
 
 ## Web, DNS, and Email Routing
 
+- The web deploy gate, the pinned-Bun build, and the digest cron schedule are owned by [web/AGENTS.md](../web/AGENTS.md#deployment-gate); the production environment variables are listed in [08-growth.md](08-growth.md#4-owner-daily-report-and-notices) and change only through Infisical ([web/AGENTS.md](../web/AGENTS.md#infisical)).
 - `jpthecat.com` (`A 216.150.1.1`), `www.jpthecat.com` (`CNAME *.vercel-dns-016.com`), and `api.jpthecat.com` (Supabase custom domain) stay DNS-only in Cloudflare behind the Vercel project `jpthecat`, with zone settings normalized to `ssl` `strict`, `always_use_https` `on`, `min_tls_version` `1.2`, `email_obfuscation` `off`, and `DNSSEC` `disabled`.
 - Outbound mail authenticates through DNS-only Resend records (`mail.jpthecat.com -> send.forge.rmta.net`, `resend._domainkey`, `send.jpthecat.com` MX/SPF, and `_dmarc` `p=none`), and inbound mail uses Cloudflare Email Routing (`route1/2/3.mx.cloudflare.net`, subaddressing on, zero custom rules, and catch-all forwarding to the operator inbox).

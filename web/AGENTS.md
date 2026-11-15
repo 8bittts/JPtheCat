@@ -2,7 +2,7 @@
 
 Marketing and programmatic-SEO site for JP the Cat.
 The repo root's [AGENTS.md](../AGENTS.md) owns cross-cutting rules (branding, mac/web parity, the provider model, worktrees, release, privacy) and is not restated here.
-Design lives in [_docs/02-design-system.md](../_docs/02-design-system.md), `/library` in [_docs/08-growth.md](../_docs/08-growth.md), and growth telemetry in [_docs/08-growth.md](../_docs/08-growth.md).
+Design lives in [_docs/02-design-system.md](../_docs/02-design-system.md), and `/library` and growth telemetry in [_docs/08-growth.md](../_docs/08-growth.md).
 
 ## Stack
 

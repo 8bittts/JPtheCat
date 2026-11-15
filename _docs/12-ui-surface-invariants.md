@@ -1,8 +1,7 @@
 # Native UI Surface Invariants
 
-Settled native UI contracts for the dashboard, windows, menu bar, alerts and typography.
+Settled contracts for the shipped macOS dashboard, windows, menu bar, alerts, and typography; read the matching section before changing one.
 
-Settled contracts for the shipped macOS surfaces; read the matching section before changing one.
 The incidents behind them are in [00-foundation.md](00-foundation.md).
 
 Dashboard, settings, and analytics have curated homepage counterparts in `web/components/site/menubar-demo.tsx` and `advanced-analytics-demo.tsx`.

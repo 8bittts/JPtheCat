@@ -1,10 +1,10 @@
 # Data
 
-Provider log formats and the model-price evidence ledger that feed JP the Cat.
+Provider log formats and the model-price evidence ledger: where each provider's usage comes from, and the evidence behind every price row.
 
-Where each provider's usage comes from, and the evidence behind every price row.
 Support status lives in `ProviderCatalog.swift`; rates live in `mac/Sources/JPtheCatCore/Resources/pricing-default.json`.
 This doc owns the source formats and the provenance of each rate, never the rates themselves.
+The web side's data is owned elsewhere: the Supabase `downloads` table, its RLS, and its redaction in [08-growth.md](08-growth.md#2-the-download-spine), and the migration and signing-key rules in [supabase/AGENTS.md](../supabase/AGENTS.md).
 
 ## Claude Code
 

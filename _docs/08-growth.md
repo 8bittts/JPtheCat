@@ -1,8 +1,7 @@
 # Growth
 
-Bot filtering, the download spine, readers, the owner digest, and the /library programmatic SEO strategy.
+How the acquisition funnel is measured and kept honest: bot filtering, the download spine, readers, the owner digest, and the `/library` programmatic SEO strategy.
 
-How the acquisition funnel is measured and kept honest.
 The daily owner digest email is the growth record; no dated growth reports are kept in the repository.
 JP the Cat is free and app usage stays local, so the server-side spine is narrow: download rows plus aggregate web traffic and search.
 
@@ -95,13 +94,13 @@ Owner-notice idempotency keys come from body-visible event fields plus a hashed 
 - Vercel snapshots env per deployment: after adding or rotating `CRON_SECRET`, ship a fresh `[deploy]` before treating it as live.
 - Read current numbers from the newest owner digest or a fresh reader run, never from this doc.
 
-## SEO & Programmatic SEO — the `/library` Hub
+## 6. SEO and the `/library` hub
 
-Owner doc for organic search: why `/library` exists, its page families, and the guardrails that keep it honest.
+Organic search through `/library`: its thesis, its page families, and the guardrails that keep it honest.
 The engine is adapted from `zoedate`'s `/library` (crawlable-but-unlinked hub, anti-thin eligibility gate, pure content generators, per-page JSON-LD, gated sitemap) and swaps its geography for a bounded product registry.
 Every count is a gate-computed ceiling, never a target; padding to a number is what Google's helpful-content system punishes.
 
-### 1. Thesis
+### Thesis
 
 - **Out-data the field:** every page is fed by data the app ships — the bundled pricing table, the provider registry, and documented plan mechanics.
   Where our data is deep (cache-write split, model-specific context tiers) we beat flat price recaps; where it is thin, we fold the model into a family table.
@@ -113,7 +112,7 @@ Every count is a gate-computed ceiling, never a target; padding to a number is w
 Competitors move fast; re-verify any rival's numbers before citing them.
 The structural gaps that still hold: free CLIs publish no marketing library, content farms have no product and blur subscription versus notional cost, and other rivals lack real cache-tier data and provenance labels.
 
-### 2. Page families
+### Page families
 
 URL root `/library`, routes under `web/app/library/`, data under `web/lib/library/`.
 
@@ -131,7 +130,7 @@ URL root `/library`, routes under `web/app/library/`, data under `web/lib/librar
 | Plans | `/library/plans/[plan]` | `plans-registry.ts` | Message counts are rough and unofficial; promotions carry their expiry |
 | Glossary | `/library/glossary/[term]` | `glossary-registry.ts`; each term carries a real mechanic and a pricing or calculator link | Reinforces the provenance vocabulary |
 
-### 3. Guardrails
+### Guardrails
 
 1. **Honesty is a hard fail.** The live set is `{claude, codex, grok, muse_spark, opencode, opencodego}`; copy names it through `liveProviderNames()`, and every non-Claude dollar co-occurs with a notional marker.
    `library-honesty.test.ts` asserts on rendered output, not registry inspection.
@@ -143,7 +142,7 @@ URL root `/library`, routes under `web/app/library/`, data under `web/lib/librar
 7. **Crawlable but unlinked:** `/library` is in `sitemap.ts` and never in nav or footer (`library-chrome.test.ts`); one low-prominence homepage FAQ link passes equity to `/library/pricing`.
 8. **Canonical host** `https://jpthecat.com` via `canonicalUrl()`, per-page metadata via `pageMetadata()`, and 60/160 SERP caps enforced by `seo.test.ts`.
 9. **Deterministic sitemap:** only search-eligible URLs plus important static pages; omit `lastModified` until a URL has a verifiable per-page source date.
-10. **Downloads stay gated:** every `/library` CTA renders off the same `version.json` data as `/download`, and uses `DownloadCta` with `source="library"` so SEO installs are a distinct channel ([08-growth.md](08-growth.md)).
+10. **Downloads stay gated:** every `/library` CTA renders off the same `version.json` data as `/download`, and uses `DownloadCta` with `source="library"` so SEO installs are a distinct channel ([§2](#2-the-download-spine)).
 11. **Money formatting** matches the app's `MoneyFormatter` (USD, locale grouping).
 12. **Calculators** are pure React state with an SSR fallback under the strict nonce CSP.
 13. **Homepage curation** never removes library models, providers, routes, or sitemap entries.

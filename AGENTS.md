@@ -18,12 +18,13 @@ This file is the enforceable contract; read the owner doc before non-trivial wor
 | Active backlog | [_docs/todos.md](_docs/todos.md) |
 | Provider log formats, model-price evidence | [_docs/03-data.md](_docs/03-data.md) |
 | Privacy invariant, permissions posture, Keychain access | [_docs/04-security.md](_docs/04-security.md) |
-| Signing, Sparkle, release hosting, permissions posture | [_docs/05-infrastructure.md](_docs/05-infrastructure.md) |
+| Signing, Sparkle, release hosting, web hosting and DNS | [_docs/05-infrastructure.md](_docs/05-infrastructure.md) |
 | Brand, palette, typography, homepage boundary, website and email design | [_docs/02-design-system.md](_docs/02-design-system.md) |
 | Native architecture, refresh, indexing, persistence | [_docs/01-architecture.md](_docs/01-architecture.md) |
 | Logo, icons, mascot video, sounds | [_docs/02-design-system.md](_docs/02-design-system.md) |
 | `/library` pSEO | [_docs/08-growth.md](_docs/08-growth.md) |
 | Download spine, bot filter, `/growth`, owner digest | [_docs/08-growth.md](_docs/08-growth.md) |
+| Launch copy and the website funnel | [_docs/10-gtm.md](_docs/10-gtm.md) |
 | Adding or promoting a provider | [_docs/11-adding-a-provider.md](_docs/11-adding-a-provider.md) |
 | Incident lessons behind the rules here | [_docs/00-foundation.md](_docs/00-foundation.md) |
 | Gates by target and the guards that hold the rules | [_docs/09-quality.md](_docs/09-quality.md) |
