@@ -24,6 +24,9 @@ Dates are the evidence in this doc; the owner docs carry none.
 - **Worktrees live under `workstreams/`**, because concurrent agents and automation reset the shared checkout and have destroyed uncommitted work there.
 - **No CI.** `.github/workflows/ci.yml` exists but is disabled on purpose; the local gates are the gates ([09-quality.md](09-quality.md)).
 - **One store, one reader, one pricing rule** for every OpenCode-derived row ([11-adding-a-provider.md](11-adding-a-provider.md)).
+- **Copilot live limits are retired.** The honest Copilot story is opt-in OTel tokens plus summed `github.copilot.nano_aiu`, non-aggregable, with no menu-bar percentage.
+  No local file holds an official quota: `~/.copilot/data.db` token columns belong to Copilot, `session_context_usage.token_limit` is the context window, and the SDK `account.getQuota` call needs the user's GitHub token on the network.
+  Never revive it by taking a GitHub token from Copilot storage, the Keychain, or `gh`, by calling `copilot_internal/user`, by embedding the Copilot SDK, or by deriving a percentage from tokens; the revive trigger is in `todos.md`.
 
 ## Engineering Log
 
@@ -350,6 +353,11 @@ Guard: `UsageIndexPathInterningTests`.
 - **The Edit Widget sheet is OS-rendered** from the App Intent declaration, so its spacing is not addressable.
   macOS has no public API to open the widget gallery, and launching `NotificationCenter.app` is a no-op (guard: `WidgetGalleryButtonTests`).
 
+### Sparkle vendoring
+
+A vendored framework missing its top-level `Updater.app` symlink or a piece of `Versions/B/{Updater.app,XPCServices,Autoupdate}` produced "An error occurred while launching the installer" and broke releases 0.014–0.021.
+The layout rule and the `verify_sparkle_vendor` preflight are in [05-infrastructure.md](05-infrastructure.md#sparkle-vendoring).
+
 ### Sparkle release notes
 
 The notes filter treats anything unmatched as customer-facing, so every leak arrived through a phrasing nobody had listed.
@@ -378,11 +386,18 @@ Before adding a hook to such a component, convert its call site to `createElemen
 - A permanent `position: fixed` bar read as "space below the footer" while document height was correct; hide it once the real CTA's `getBoundingClientRect().bottom <= window.innerHeight`.
   `IntersectionObserver` re-shows it after the target scrolls past.
 
+#### Vercel READY is not the gate
+
+A WCAG target-size failure once deployed "green", because Vercel's build runs only `next build`, not the tests, knip, or react-doctor.
+`web/AGENTS.md` carries the rule to run `bun run check:full` locally before any web-touching push.
+
 #### Download telemetry
 
+- An early overnight sample of download notices was almost entirely automated, because the notifier fired on the redirect.
 - Home and `/library` downloads stay distinct end to end: analytics event names and `channel`, and the `downloads` row `source`; the two owner-email variants were retired when downloads moved into the 8pm Pacific daily report.
 - The 2026-10-22 review found `human_downloads` up 36% with no code change: ipapi.is had dropped `is_datacenter` / `is_vpn` from its keyless free tier on 2026-09-01 (HTTP 200, new JSON shape), the fail-soft lookup wrote `null` flags, and the human CTE read `null` as "not hosting".
-  While the flags worked, 54% of non-bot rows were datacenter or anonymous; only 19 of the 136 "human" rows carried a macOS user agent, and 24h bucket logs showed zero Mac fetches.
+  While the flags worked (Jul–Aug 2026), 54% of non-bot rows were datacenter or anonymous; only 19 of the 136 "human" rows carried a macOS user agent, and 24h bucket logs showed zero Mac fetches.
+  In Oct 2026, 86% of "human" rows were Windows or Android browsers.
   A second hole compounded it: the 30-day PII job nulls `ip` and `ua`, the CTE admits `ip is null`, so monitor and burst rows (a `GrowthScan/0.1` scanner, 136 rows) flipped to human on redaction.
   Fix: parse both ipapi.is shapes and keep absent flags `null`, print `network_flagged / network_flaggable` beside every headline and raise a digest issue on any gap, persist `is_mac` at write time and lead with `mac_human_downloads`, stamp `exclusion` before redaction (migration `0011`), and add the scanner markers to the UA denylist.
   `IPAPI_IS_KEY` is now required for the hosting filter (guards: `web/tests/download-network-intel.test.ts`, `web/tests/growth-download-sql.test.ts`, `web/tests/growth-digest.test.tsx`).

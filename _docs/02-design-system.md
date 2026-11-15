@@ -167,7 +167,7 @@ JP sends no customer mail; the one shell is the owner/admin "Owner Ledger".
 - Every value, list item, and block uses the same body text; the mono face marks only the uppercase section labels (guard: `web/tests/admin-email-shell.test.tsx`).
 - An absent value uses the one vocabulary `OWNER_VALUE` in `web/lib/email/owner-vocabulary.ts`, where each word means one thing (`not configured` never ran, `failed` errored, `none in this window` ran and found nothing); a real zero prints as a number (`0`), never a word.
 
-Client robustness: Row/Column tables, an explicit background on every surface, `color-scheme: light` plus the dark-mode re-assertion CSS through the shared `web/emails/email-head.tsx`, AA-passing pairs, absolute `https://jpthecat.com/*` images with size and alt, HTML well under Gmail's 102KB clip, and a curated plain-text part.
+Client robustness: Row/Column tables (never CSS flex or grid), an explicit background on every surface, `color-scheme: light` plus the dark-mode re-assertion CSS through the shared `web/emails/email-head.tsx`, AA-passing pairs, absolute `https://jpthecat.com/*` images with size and alt, HTML well under Gmail's 102KB clip, and a curated plain-text part.
 Guard: `web/tests/admin-email-shell.test.tsx`.
 
 ## Brand assets

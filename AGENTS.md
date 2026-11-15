@@ -39,7 +39,7 @@ For design work, read `_docs/02-design-system.md` first, then the affected contr
 - One owner per fact; other docs point to it.
   A rule here stays terse and names its guard; the incident goes in `_docs/00-foundation.md` as a short entry.
 - `README.md` version-badge and download-link blocks are generated — never hand-edit them.
-- `web/tests/no-fiction.test.ts` scans every `AGENTS.md`, `README.md`, every top-level `_docs/*.md`, `mac/Sources`, and the web app for stale pre-launch copy; when a surface flips live, update the copy and that guard's rule list in the same change.
+- `web/tests/no-fiction.test.ts` guards docs and source against stale pre-launch copy ([scan scope](_docs/09-quality.md#gates)); when a surface flips live, update the copy and that guard's rule list in the same change.
 
 ## Identity & Branding
 
@@ -143,7 +143,7 @@ Review the shipped result — the live URL, a headless screenshot for visual wor
 The public install path is `brew tap 8bittts/jpthecat` + `brew trust 8bittts/jpthecat` + `brew install --cask jpthecat` (the trust step is test-pinned in `web/lib/homebrew.ts`); `Casks/jpthecat.rb`, `web/public/stable/jpthecat.rb`, and the public tap stay pinned to the same version and SHA (`release-jpthecat.sh` syncs all three).
 
 **Sparkle release notes are customer-facing ONLY, cover the LATEST release only, and must never contain documentation, process, or internal-implementation commits.**
-`mac/scripts/generate-appcast.sh` renders exactly `PREVIOUS_TAG..HEAD` as a styled fragment — a `<style>` block, the `<h2>Small paws, strict standards. Here are the improvements:</h2>` heading, one `<ul>` of customer-facing bullets, and the `<p class="fine">Built with ❤️ from San Francisco and Honolulu.</p>` footer — strips `[deploy]` and conventional-commit prefixes, and must FAIL rather than publish empty or generic notes.
+`mac/scripts/generate-appcast.sh` renders exactly `PREVIOUS_TAG..HEAD` as a styled fragment — a `<style>` block, the `<h2>Small paws, strict standards. Here are the improvements:</h2>` heading, one `<ul>` of customer-facing bullets, and the `<p class="fine">` footer line — strips `[deploy]` and conventional-commit prefixes, and must FAIL rather than publish empty or generic notes.
 Internal prefixes (`perf`/`docs`/`refactor`/`chore`/`style`) are stripped, so an all-internal release yields empty notes and aborts; a perf-only release is the recurring case.
 The sanctioned fix is a `[notes]` tag in the commit subject, which promotes that ONE commit VERBATIM — use it only when the subject already reads as user language.
 `[notes]` cannot promote a `docs:`/`release:` commit, but it IS evaluated BEFORE the CamelCase-symbol filter, which is the only reason a provider name shaped like a code symbol can carry its own bullet: `[notes] Add MiMo and OpenCode support` reaches users, the identical subject untagged is dropped.
@@ -158,7 +158,7 @@ Incidents: [_docs/00-foundation.md#sparkle-release-notes](_docs/00-foundation.md
 - **Mac app:** smallest meaningful Swift gate first, broadening by risk — `cd mac && swift build`, `swift test --parallel`, `swift build -c release`.
   An unchanged `.o` is NOT proof the build skipped your file — prove a compile with a syntax error (non-zero exit) or a semantic change: [_docs/00-foundation.md#proving-a-swift-change-compiled](_docs/00-foundation.md#proving-a-swift-change-compiled).
 - **Web:** `cd web && bun run check:full` before any production deploy; see `web/AGENTS.md` for the chain, its order, and the Vercel-READY trap.
-  Local web secrets come from Infisical via `cd web && bun run dev:secrets`; production values change only in Infisical `prod`, whose auto-sync writes Vercel production, then a redeploy.
+  Web secrets, local and production, follow [web/AGENTS.md](web/AGENTS.md#infisical).
 - **Visible UI or asset work** (widget faces, themes, brand-fidelity changes, the legal 3D scene) needs a real headless screenshot or the `ImageRenderer`/`JP_RENDER=1` harness, never eyeballed intent.
 - `.github/workflows/ci.yml` exists but is disabled on purpose; the local gates above are the gates.
 - **Before reporting done:** state which gates ran and why a broader one was not.

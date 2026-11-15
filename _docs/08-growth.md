@@ -14,16 +14,15 @@ traffic → CTA click → /download redirect
 
 ## 1. Bot filtering
 
-An early overnight sample of download notices was almost entirely automated, because the notifier fired on the redirect.
-A row counts as a human download only if it passes all of these; removing any layer reopens a measured inflation hole:
+A row counts as a human download only if it passes all of these; removing any layer reopens a measured inflation hole ([measurements](00-foundation.md#download-telemetry)):
 1. **Owner smoke sources** (`smoke-test`, `production-test`, the `JP-the-Cat-smoke-test-bot/…` user agent) are excluded.
 2. **User-agent denylist at write time** — `web/lib/analytics/download-bot.ts` sets `is_bot` for empty and known automated agents, including self-named scanners (`growthscan`, `pdfmin`, `observatory`) and the operator's `smoke` agents.
 3. **Same-IP burst at read time** (`burst_ips`) — two or more distinct CTA sources from one IP inside 8 seconds.
-4. **Hosting or anonymizing networks** (`network_is_hosting`, `network_is_anonymous`) — 54% of non-bot rows were datacenter or anonymous while the lookup worked (Jul–Aug 2026).
+4. **Hosting or anonymizing networks** (`network_is_hosting`, `network_is_anonymous`).
    A `null` flag means the lookup returned nothing, not "clean": every reader prints `network_flagged / network_flaggable` beside the headline, and the digest raises a `Needs attention` issue for any gap.
 5. **Repeat monitors** (`monitor_ips`) — an IP downloading on four or more distinct days, which the burst window cannot see.
 6. **Durable exclusion stamp** (`exclusion`) — migration `0011` rewrites the redaction job to stamp `monitor` / `burst` on a row BEFORE nulling its IP, because the human CTE admits `ip is null` rows and a scanner caught today otherwise became human a month later.
-7. **Platform** (`is_mac`, persisted at write time) — the headline `mac_human` population keeps only macOS browsers, the one client that can open the DMG; 86% of "human" rows in Oct 2026 were Windows or Android browsers.
+7. **Platform** (`is_mac`, persisted at write time from the frozen `Macintosh; Intel Mac OS X 10_15_7` user-agent token) — the headline `mac_human` population keeps only macOS browsers, the one client that can open the DMG.
 
 The read-time rules live in one module, `web/lib/analytics/growth-download-sql.ts`, shared by the CLI reader and the digest because the two drifted once (guard: `web/tests/growth-download-sql.test.ts`, which also pins the burst and monitor constants to migration `0011`).
 The 30-day PII redaction nulls `ip`, `ua`, and `referer`; `is_bot`, `is_mac`, and `exclusion` are the only classifications that survive it, so rows redacted before `is_mac` existed (before 2026-09-21) report as `platform_unknown` and never get a Mac figure.
@@ -39,7 +38,7 @@ The 30-day PII redaction nulls `ip`, `ua`, and `referer`; `is_bot`, `is_mac`, an
   Every homepage CTA (hero, pricing, FAQ) sends `pricing` on purpose so the by-source trend stays continuous with older rows; `hero` and `nav` are retired values.
   Splitting homepage placements would start a new series, so do it only by explicit decision.
 - **Enrichment:** coarse Vercel edge headers (city, region, country, timezone; postcode is not stored since 2026-11-06) plus a fail-soft ipapi.is lookup for ASN and hosting flags; no latitude or longitude is stored.
-  **`IPAPI_IS_KEY` is required for the hosting filter, not optional:** since 2026-09-01 the keyless free tier returns a string `asn`, no `is_datacenter`, and no `is_vpn`, and caps at 30 lookups per client IP per day, so without a key every row carries `null` flags and the datacenter rule is blind.
+  **`IPAPI_IS_KEY` is required for the hosting filter, not optional:** the keyless free tier returns a string `asn`, no `is_datacenter`, and no `is_vpn`, and caps at 30 lookups per client IP per day, so without a key every row carries `null` flags and the datacenter rule is blind.
   A free ipapi.is account restores the flags at 1,000 lookups a day; add `IPAPI_IS_KEY` in Infisical `prod`, then redeploy production.
   The parser accepts both shapes and keeps an absent flag `null` (guard: `web/tests/download-network-intel.test.ts`).
 - **RLS:** INSERT-only for `anon`/`authenticated` with a payload-shape `WITH CHECK` (never `WITH CHECK (true)`); readers connect as `postgres` over the session pooler.

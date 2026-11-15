@@ -12,7 +12,7 @@ Agent routing lives in `AGENTS.md` with `mac/AGENTS.md`, `web/AGENTS.md` and `su
 | `02-design-system.md`          | Brand thesis, homepage provider boundary, color, typography, motion, charts and icons, website, brand assets        |
 | `03-data.md`                   | Provider log formats and the model-price evidence ledger; the Supabase schema and RLS are owned by `08-growth.md` and `supabase/AGENTS.md` |
 | `04-security.md`               | Privacy invariant, Keychain rules, harness configuration, permissions posture, update-feed trust; web headers, CSP, CORS and secrets are owned by `web/AGENTS.md` |
-| `05-infrastructure.md`         | Release pipeline, Sparkle vendoring, update UI at runtime, release hosting, the Homebrew tap, web hosting and DNS; the web deploy gate and cron are owned by `web/AGENTS.md` |
+| `05-infrastructure.md`         | Release pipeline, Sparkle vendoring, update UI at runtime, release hosting, the Homebrew tap, web hosting and DNS; the web deploy gate is owned by `web/AGENTS.md` and the cron by `08-growth.md` |
 | `08-growth.md`                 | Bot filtering, download spine, readers, owner digest, the `/library` pSEO strategy           |
 | `09-quality.md`                | Gates by target, guards, release verification                                                                      |
 | `10-gtm.md`                    | Product Hunt launch package and the website funnel                                                                 |

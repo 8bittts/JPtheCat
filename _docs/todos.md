@@ -90,13 +90,7 @@ Follow [`11-adding-a-provider.md`](11-adding-a-provider.md); every provider read
 Current tiers live in root `AGENTS.md`; only open triggers belong here.
 - **Gemini:** re-check when Antigravity exposes a usable local usage signal.
 - **Copilot to tier 4:** needs real model ids, trustworthy dollar accounting, and an honest quota story; quota is not a local file today.
-
-### Copilot live limits (retired — revive only on the trigger)
-
-The honest Copilot story is opt-in OTel tokens plus summed `github.copilot.nano_aiu`, non-aggregable, with no menu-bar percentage.
-No local file holds an official quota: `~/.copilot/data.db` token columns belong to Copilot, `session_context_usage.token_limit` is the context window, and the SDK `account.getQuota` call needs the user's GitHub token on the network.
-Never revive it by taking a GitHub token from Copilot storage, the Keychain, or `gh`, by calling `copilot_internal/user`, by embedding the Copilot SDK, or by deriving a percentage from tokens.
-Revive trigger: Copilot CLI writes an official remaining-quota snapshot to a local file; then add it as an opt-in Live Data source that stays non-aggregable.
+- **Copilot live limits:** revive only when Copilot CLI writes an official remaining-quota snapshot to a local file; then add it as an opt-in Live Data source that stays non-aggregable ([decision](00-foundation.md#decisions)).
 
 ### File-watch coverage
 
@@ -120,7 +114,7 @@ Copy is ready in [`10-gtm.md`](10-gtm.md).
 
 The target patterns are in `8leeai/_docs/13-starter-kit.md`; each item below is a measured gap against it.
 
-- [ ] Raise the web app's TypeScript to the target set, one flag per slice, fixing by narrowing and never by a non-null assertion: `noUncheckedIndexedAccess` (82 errors), `exactOptionalPropertyTypes` (34) and `noPropertyAccessFromIndexSignature` (68; it also needs Biome's `useLiteralKeys` rule off). `noImplicitOverride` is already on.
+- [ ] Raise the web app's TypeScript to the target set, one flag per slice, fixing by narrowing and never by a non-null assertion: `noUncheckedIndexedAccess` (82 errors), `exactOptionalPropertyTypes` (34) and `noPropertyAccessFromIndexSignature` (68; it also needs Biome's `useLiteralKeys` rule off).
 - [ ] Add `web/.env.example` listing every environment name the web app reads, with a test that fails when the code reads a name the file omits.
 - [ ] Move the untracked hooks in `.git/hooks` into a tracked `.githooks/` with a setup step, keeping the pre-push archive guard; setting `core.hooksPath` before that move would turn the existing hooks off.
 - [ ] Move the remaining `ObservableObject` models in `mac/Sources` to `@Observable`, and write new Swift suites with Swift Testing; the 1,220 XCTest tests stay until a suite is touched.

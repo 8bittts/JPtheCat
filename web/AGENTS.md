@@ -37,7 +37,7 @@ It byte-scans `.next/static` and `.next/server/app` for every credential-shaped 
 
 **A green/READY Vercel deploy is NOT proof the quality gate passed — run `bun run check:full` locally before any web-touching push.**
 Vercel's build runs only `next build`, not `bun test`, knip, or react-doctor, so a failing test or doctor regression ships while Vercel still shows READY.
-`.github/workflows/ci.yml` is disabled on purpose, so the local run is the only gate; a WCAG target-size failure once deployed "green" this way.
+`.github/workflows/ci.yml` is disabled on purpose, so the local run is the only gate ([incident](../_docs/00-foundation.md#vercel-ready-is-not-the-gate)).
 `react-doctor` must score 100/100 to deploy; `--blocking warning` makes any warning fail `bun run doctor`, because the tool exits 0 on warnings by default.
 Justified exceptions live in `doctor.config.json` — never suppress a finding the code could fix instead.
 
@@ -82,7 +82,7 @@ Many tests are content guardrails (SEO length limits, copy pins, no-fiction/hone
 This directory is the Vercel project root.
 Install and build run through `scripts/run-pinned-bun.cjs`, which derives and verifies Bun from `packageManager`.
 `ignoreCommand` builds only when the SUBJECT line of the most recent commit carries `[deploy]`; a `[deploy]` written only in a commit body does not build (`tests/vercel-deploy-marker.test.ts` runs the real command).
-Vercel Cron hits `app/api/cron/growth-digest` at `0 3 * * *` AND `0 4 * * *`, guarded by `CRON_SECRET`; only the firing that is 20:00 in Los Angeles sends (`lib/analytics/rollup-schedule.ts`), so keep both entries or the report skips half the year.
+Vercel Cron hits `app/api/cron/growth-digest` twice a day and only one firing sends, so keep both `vercel.json` entries or the report skips half the year ([schedule](../_docs/08-growth.md#4-owner-daily-report-and-notices)).
 
 ## Security headers and CORS
 
@@ -104,10 +104,9 @@ A download never emails the owner on its own: `/download` only persists the row,
 ## Email
 
 JP sends no customer mail (no license, newsletter, or broadcast).
-Every owner/admin notice uses the spartan `emails/admin-email-shell.tsx`, which reads `email-styles.ts` (hex mirrored from `app/globals.css`), and the design is owned by [02-design-system.md](../_docs/02-design-system.md#email--the-owner-ledger).
+Every owner/admin notice uses the spartan `emails/admin-email-shell.tsx`; its tokens, layout, and client-robustness rules are owned by [02-design-system.md](../_docs/02-design-system.md#email--the-owner-ledger).
 **A new owner notice builds an `AdminEmailContent` for `AdminEmail`, with anything wrong in `issues`** (guard: `tests/admin-email-shell.test.tsx`).
 **The headline must be `emailColors.gingerDeep`, NOT ink** — Gmail mobile dark mode force-lightens large near-black inline text to white (guard: `tests/admin-email-shell.test.tsx`).
-Layout is Row/Column tables, never CSS flex or grid; every surface needs an explicit background plus `color-scheme: light`; every text/CTA pair passes WCAG AA.
 Idempotency keys include body-shaping event fields, never an hour bucket, because Resend rejects a reused key whose body changed within 24h.
 Resend tag values are ASCII letters, numbers, underscore, and dash only; today's senders tag with fixed literals and enum values, and a tag built from request data must be reduced to that set first.
 `RESEND_API_KEY` is required in production; `RESEND_FROM_EMAIL` defaults to `JP the Cat <downloads@jpthecat.com>`.
@@ -139,15 +138,14 @@ One `lib/library/eligibility.ts` gate serves both routes and the sitemap.
 
 ## Growth analytics
 
+[_docs/08-growth.md](../_docs/08-growth.md) owns the download spine, the bot-filter layers, and the readers.
 A raw `/download` hit is NOT an install — always report `mac_human_downloads`, never `human_downloads` alone and never `all_hits`.
-`/download` persists one bot-classified row per redirect to Supabase `public.downloads` (insert-only under RLS), with `is_mac` set from the frozen `Macintosh; Intel Mac OS X 10_15_7` token so the platform survives the 30-day UA redaction.
-Bot classification is the UA denylist in `lib/analytics/download-bot.ts` at write time plus the read-time burst, hosting-network, repeat-monitor, and durable `exclusion` rules in `lib/analytics/growth-download-sql.ts`, which both the CLI reader and the digest must use (guard: `tests/growth-download-sql.test.ts`).
-A `null` hosting flag is "lookup returned nothing", never "clean": readers print the flag coverage and the digest raises an issue for any gap, because the ipapi.is free tier silently dropped the flags once and the headline rose 36% ([incident](../_docs/00-foundation.md#download-telemetry)).
-Readers: `bun scripts/growth-metrics.ts [days] [--json]`, `bun scripts/growth-extra.ts [days] [--json]`, and `bun scripts/analytics-pull.ts`.
+The CLI reader and the digest must both take their read-time bot rules from `lib/analytics/growth-download-sql.ts` (guard: `tests/growth-download-sql.test.ts`).
+A `null` hosting flag is "lookup returned nothing", never "clean" ([incident](../_docs/00-foundation.md#download-telemetry)).
 
 ## Legal pages and mascot
 
-The combined `/terms` page uses `components/legal/legal-document.tsx` and opens on one full-width WebGL scene (`/privacy` redirects to its privacy section; `/release` is retired): procedural geometry plus the single self-hosted mascot image (strict nonce CSP — no GLTF or HDRI), lazy-imported client-only, with a static SVG poster and no rAF for reduced motion or missing WebGL.
+The combined `/terms` page (`components/legal/legal-document.tsx`) and its WebGL scene are owned by [02-design-system.md](../_docs/02-design-system.md#legal-pages); the strict nonce CSP allows no GLTF or HDRI there.
 Always verify visual changes there with a headless screenshot.
 
 The homepage mascot renders with NO thought bubbles — that treatment is native-app-only, guarded by `tests/site-copy.test.ts`.

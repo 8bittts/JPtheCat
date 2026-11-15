@@ -35,13 +35,13 @@ Invariants:
 Post-release proofs:
 
 - `mac/scripts/sparkle-upgrade-smoke.sh` installs the oldest supported public DMG into a temporary bundle, drives Sparkle through the app menu to the live appcast, and confirms App Support and Keychain sentinels survive the relaunch.
-  It is the feed proof because it makes Sparkle's own request; a cache-busted or uncompressed `curl` of the appcast proves only the origin, and dockishOS v0.031 passed such a check while Sparkle clients received the previous feed for four minutes.
+  It is the feed proof because it makes Sparkle's own request; a cache-busted or uncompressed `curl` of the appcast proves only the origin (the fleet starter kit owns the rule and its incident).
 - `mac/scripts/release-dmg-qa.sh` downloads the live DMG, verifies its SHA-256 and Finder layout at Retina scale, and copies the app into a temporary Applications folder for codesign and Gatekeeper checks.
 
 ## Sparkle vendoring
 
 - Sparkle is vendored at `mac/tools/sparkle/` and SHA-pinned in its `VERSION` file; `build-dmg.sh`'s `verify_sparkle_vendor` preflight aborts on drift.
-- Keep the framework's top-level `Updater.app` symlink and `Versions/B/{Updater.app,XPCServices,Autoupdate}`; a missing piece produces "An error occurred while launching the installer" and broke releases 0.014–0.021.
+- Keep the framework's top-level `Updater.app` symlink and `Versions/B/{Updater.app,XPCServices,Autoupdate}`; a missing piece produces "An error occurred while launching the installer" ([incident](00-foundation.md#sparkle-vendoring)).
 - Sparkle's MIT notice ships in every bundle as `Contents/Resources/Sparkle-LICENSE.txt`, copied from `mac/tools/sparkle/LICENSE` by `build-dmg.sh` (which fails closed without it) and `build_and_run.sh` (guard: `SparkleLicenseNoticeTests`).
 - Re-vendor only from the official `Sparkle-<ver>.tar.xz` archive, never SwiftPM artifacts, which ship no helper apps; `.gitignore` keeps explicit `!tools/sparkle/…` lines so the global `*.app` rule cannot drop the helper.
 - `Package.swift` links Sparkle with `-F tools/sparkle` unsafe flags, so this leaf package cannot be another package's dependency, and the flag resolves through the tracked root `tools -> mac/tools` symlink (`mac/AGENTS.md`).
@@ -59,6 +59,6 @@ Post-release proofs:
 
 ## Web, DNS, and Email Routing
 
-- The web deploy gate, the pinned-Bun build, and the digest cron schedule are owned by [web/AGENTS.md](../web/AGENTS.md#deployment-gate); the production environment variables are listed in [08-growth.md](08-growth.md#4-owner-daily-report-and-notices) and change only through Infisical ([web/AGENTS.md](../web/AGENTS.md#infisical)).
+- The web deploy gate and the pinned-Bun build are owned by [web/AGENTS.md](../web/AGENTS.md#deployment-gate); the digest cron schedule and the production environment variables are in [08-growth.md](08-growth.md#4-owner-daily-report-and-notices), and those variables change only through Infisical ([web/AGENTS.md](../web/AGENTS.md#infisical)).
 - `jpthecat.com` (`A 216.150.1.1`), `www.jpthecat.com` (`CNAME *.vercel-dns-016.com`), and `api.jpthecat.com` (Supabase custom domain) stay DNS-only in Cloudflare behind the Vercel project `jpthecat`, with zone settings normalized to `ssl` `strict`, `always_use_https` `on`, `min_tls_version` `1.2`, `email_obfuscation` `off`, and `DNSSEC` `disabled`.
 - Outbound mail authenticates through DNS-only Resend records (`mail.jpthecat.com -> send.forge.rmta.net`, `resend._domainkey`, `send.jpthecat.com` MX/SPF, and `_dmarc` `p=none`), and inbound mail uses Cloudflare Email Routing (`route1/2/3.mx.cloudflare.net`, subaddressing on, zero custom rules, and catch-all forwarding to the operator inbox).
