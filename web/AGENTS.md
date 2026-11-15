@@ -27,6 +27,7 @@ bun run doctor:diff  # react-doctor . --verbose --scope changed --base main
 bun run check:full   # check && test && knip && doctor && build — the full gate, in that order
 bun run check:perf-budget   # per-route first-load JS caps and rendering classes vs perf-budget.json (runs inside build)
 bun run scan:client-secrets # byte-scan the built browser output for secret VALUES (last step of build)
+bun run a11y         # axe-core audit of the public routes against a running dev server (not in check:full)
 ```
 
 The dev server runs on port 4444, not 3000.
@@ -40,8 +41,8 @@ Vercel's build runs only `next build`, not `bun test`, knip, or react-doctor, so
 `react-doctor` must score 100/100 to deploy; `--blocking warning` makes any warning fail `bun run doctor`, because the tool exits 0 on warnings by default.
 Justified exceptions live in `doctor.config.json` — never suppress a finding the code could fix instead.
 
-Every tool in the `quality` chain (Biome, knip, react-doctor) is a pinned devDependency resolved from `node_modules/.bin` — never reintroduce `bunx <tool>@latest`.
-Playwright is pinned on the same terms but is NOT in the `check:full` chain and has no browser specs; consumers are `scripts/generate-og-image.mjs` (OG/Twitter card) and asset guards in `tests/social-assets.test.ts`.
+Every tool in the `check:full` chain (Biome, knip, react-doctor) is a pinned devDependency resolved from `node_modules/.bin` — never reintroduce `bunx <tool>@latest`.
+Playwright is pinned on the same terms but is NOT in the `check:full` chain and has no browser specs; consumers are `scripts/generate-og-image.mjs` (OG/Twitter card, guarded by `tests/social-assets.test.ts`) and `scripts/a11y-audit.ts` (`bun run a11y`).
 Regenerate PWA PNGs with `scripts/generate-web-icons.mjs` (macOS can still use repo-root `./scripts/generate-brand-icons.sh`).
 The `react-email` preview CLI (`bunx react-email dev -d emails -p 4445`) is the one deliberate unpinned carve-out: it gates nothing.
 
@@ -97,7 +98,7 @@ Public CTAs may point at `/download`, which fails closed unless `public/stable/v
 **Download always starts on first click.**
 `startDownload()` fires a programmatic `<a>` click to `/download` BEFORE the modal opens, and the modal is a non-blocking download-started note (no email field) that never re-triggers the download.
 A download never emails the owner on its own: `/download` only persists the row, and the 8pm Pacific daily report counts it (guard: `tests/download.test.ts`).
-`DownloadCta` links keep `prefetch={false}`, and `/download` prefetch requests (`next-router-prefetch`, `Purpose`/`Sec-Purpose: prefetch`) return 204/no-store with no redirect and no owner notice.
+`DownloadCta` links keep `prefetch={false}`, and `/download` prefetch requests (`next-router-prefetch`, `Purpose`/`Sec-Purpose: prefetch`) return 204/no-store with no redirect and no download row.
 
 
 ## Email

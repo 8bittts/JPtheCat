@@ -167,7 +167,7 @@ Incidents: [_docs/00-foundation.md#sparkle-release-notes](_docs/00-foundation.md
 **The one privacy invariant: prompts, code, transcripts, provider credentials, and local usage databases must never leave the user's Mac.**
 The exception is unified opt-in Grok plan usage: it sends a saved Cursor or Grok Bot sign-in token only to the existing three DashboardService methods on `api2.cursor.sh`; no refresh tokens, prompts, code, paths or local usage.
 The public privacy policy discloses it.
-Every telemetry, analytics, and email surface (Vercel Analytics, the owner daily report, download notices, support reports) must honor it — none may ever include prompts, code, transcripts, token history, costs, credentials, project paths, or local-usage-database contents.
+Every telemetry, analytics, and email surface (Vercel Analytics, the owner daily report, support reports) must honor it — none may ever include prompts, code, transcripts, token history, costs, credentials, project paths, or local-usage-database contents.
 Mac app product analytics stay opt-in and off by default.
 The app's least-privilege posture (no Full Disk Access, no Accessibility) is a shipped marketing claim guarded by `web/tests/site-copy.test.ts`; the rules that keep it true live in [mac/AGENTS.md](mac/AGENTS.md).
 

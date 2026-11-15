@@ -34,13 +34,14 @@ The 30-day PII redaction nulls `ip`, `ua`, and `referer`; `is_bot`, `is_mac`, an
 - **Table** `public.downloads` (migrations `0001`, `0002`, `0003`, `0009`, `0010`, `0011`): version, source, referer, coarse geo, network context, user agent, `is_bot`, `is_mac`, and `exclusion`; `0010` schedules the daily redaction through `pg_cron` and `0011` makes it stamp `exclusion` first.
   The insert policy pins `exclusion` to null, so the web key can never stamp a row.
 - **Write path:** `web/app/download/route.ts` builds a bot-classified record (`web/lib/analytics/downloads-store.ts`) and POSTs it to PostgREST inside `after()`, sending the publishable key (`SUPABASE_PUBLISHABLE_KEY`) on the `apikey` header only.
-  Persistence and email run under `Promise.allSettled`, so telemetry never breaks the download; bot rows persist but never email.
+  The route enriches the event, then persists the row for bots and humans alike, and sends no email.
+  A failed insert is logged and swallowed, so telemetry never breaks the download.
 - **Sources:** the route stores only `direct`, `pricing`, `library`, and `production-test` (`ALLOWED_DOWNLOAD_SOURCES`); any other value becomes `external`.
   Every homepage CTA (hero, pricing, FAQ) sends `pricing` on purpose so the by-source trend stays continuous with older rows; `hero` and `nav` are retired values.
   Splitting homepage placements would start a new series, so do it only by explicit decision.
 - **Enrichment:** coarse Vercel edge headers (city, region, country, timezone; postcode is not stored since 2026-11-06) plus a fail-soft ipapi.is lookup for ASN and hosting flags; no latitude or longitude is stored.
   **`IPAPI_IS_KEY` is required for the hosting filter, not optional:** since 2026-09-01 the keyless free tier returns a string `asn`, no `is_datacenter`, and no `is_vpn`, and caps at 30 lookups per client IP per day, so without a key every row carries `null` flags and the datacenter rule is blind.
-  A free ipapi.is account restores the flags at 1,000 lookups a day; set the key in Vercel Production and ship a `[deploy]`.
+  A free ipapi.is account restores the flags at 1,000 lookups a day; add `IPAPI_IS_KEY` in Infisical `prod`, then redeploy production.
   The parser accepts both shapes and keeps an absent flag `null` (guard: `web/tests/download-network-intel.test.ts`).
 - **RLS:** INSERT-only for `anon`/`authenticated` with a payload-shape `WITH CHECK` (never `WITH CHECK (true)`); readers connect as `postgres` over the session pooler.
   Re-run Supabase advisors after any DDL.
@@ -82,7 +83,7 @@ It never includes prompts, code, transcripts, token history, costs, credentials,
 Search Console queries and pages rank by clicks, then impressions.
 
 Immediate notices are limited to customer messages: the in-app support report.
-Downloads never email one by one beyond the owner download notice.
+Downloads never email one by one; the daily report counts them.
 Owner-notice idempotency keys come from body-visible event fields plus a hashed identity, never an hourly bucket.
 
 **Production env:** `CRON_SECRET`; `RESEND_API_KEY` with `RESEND_FROM_EMAIL` and the `*_NOTIFICATION_TO` / `GROWTH_DIGEST_TO` overrides; `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`; `VERCEL_TOKEN`; `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`, `GSC_SITE_URL`; optional `GITHUB_TOKEN`.

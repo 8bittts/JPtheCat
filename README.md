@@ -76,7 +76,7 @@ bash mac/scripts/build_and_run.sh                                               
 (cd web && bun run check:full)                                                     # full web gate
 ```
 
-`bun run dev` in `web/` is unchanged if you already have a local `.env.local` and no Infisical CLI.
+`bun run dev` in `web/` reads a local `.env.local` and needs no Infisical CLI.
 Web secrets live in the Infisical project linked from `.infisical.yaml`; see `web/AGENTS.md`.
 
 `swift run JPtheCat` is not an app-shell smoke test; use the staged `.app`.

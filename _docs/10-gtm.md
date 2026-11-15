@@ -143,6 +143,6 @@ honesty-gated to shipped scope; re-sync against `SITE` + the theme count before 
 
 ## 6. Website funnel
 
-- Pages: the single-page homepage plus `/privacy`, `/terms`, `/contact`, `/download`, and the `/library` hub. Retired paths (`/pricing`, `/buy`, `/release-notes`, `/changelog`, `/release`, `/thanks`, `/confirmed`) redirect in one hop (`web/next.config.ts`).
+- Pages: the single-page homepage plus `/terms`, `/contact`, `/download`, and the `/library` hub. `/privacy` redirects to `/terms#privacy-policy`, and retired paths (`/pricing`, `/buy`, `/release-notes`, `/changelog`, `/release`, `/thanks`, `/confirmed`) redirect in one hop (`web/next.config.ts`).
 - Every download CTA goes through `DownloadCta` → `/download`; the download section links `SHA256` to the checksum derived from `public/stable/version.json`.
 - The FAQ keeps the order free tools → providers → notch apps (`web/tests/site-copy.test.ts`).

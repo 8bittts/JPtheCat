@@ -59,5 +59,5 @@ Post-release proofs:
 
 ## Web, DNS, and Email Routing
 
-- `jpthecat.com` (`A 216.150.1.1`), `www.jpthecat.com` (`CNAME *.vercel-dns-016.com`), and `api.jpthecat.com` (Supabase custom domain) stay DNS-only in Cloudflare behind `8lee/jpthecat-web`, with zone settings normalized to `ssl` `strict`, `always_use_https` `on`, `min_tls_version` `1.2`, `email_obfuscation` `off`, and `DNSSEC` `disabled`.
+- `jpthecat.com` (`A 216.150.1.1`), `www.jpthecat.com` (`CNAME *.vercel-dns-016.com`), and `api.jpthecat.com` (Supabase custom domain) stay DNS-only in Cloudflare behind the Vercel project `jpthecat`, with zone settings normalized to `ssl` `strict`, `always_use_https` `on`, `min_tls_version` `1.2`, `email_obfuscation` `off`, and `DNSSEC` `disabled`.
 - Outbound mail authenticates through DNS-only Resend records (`mail.jpthecat.com -> send.forge.rmta.net`, `resend._domainkey`, `send.jpthecat.com` MX/SPF, and `_dmarc` `p=none`), and inbound mail uses Cloudflare Email Routing (`route1/2/3.mx.cloudflare.net`, subaddressing on, zero custom rules, and catch-all forwarding to the operator inbox).
