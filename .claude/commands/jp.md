@@ -4,10 +4,8 @@ description: Build, verify, sign, notarize, and publish the JPtheCat macOS app �
 
 # /jp — JPtheCat build & release
 
-> **⚠ SYNC — mirrored command.** This file is mirrored 1:1 between **Claude**
-> (`.claude/commands/jp.md`, in-repo) and **Codex** (`~/.codex/commands/jp.md`, global). If you
-> change ANYTHING here — modes, gates, scripts, paths, versions, safety — update **both** files in
-> the same change so they never drift.
+> This file is the one copy of the `/jp` workflow.
+> The global Codex command and the Codex `jp` skill are short pointers to it, so a change lands here only.
 
 The release workflow for JPtheCat, modeled on `/yen-zip` (YEN) and `build-dockishOS`. JP the Cat is
 **free** (no license, trial, or purchase flow) — customer-facing Sparkle notes and the public site
@@ -112,7 +110,7 @@ cd "$(git rev-parse --show-toplevel)"/web && bun run check:full   # GATE: 100/10
 ```
 
 Then **verify promotion** (poll the Vercel API until production == the pushed short-SHA in READY
-state, as in `/ship` step 9). A release is not "shipped" until production shows the new commit.
+state, as in `/ship` step 7). A release is not "shipped" until production shows the new commit.
 
 ### Phase 4b — Mac DMG release (WORKS NOW)
 

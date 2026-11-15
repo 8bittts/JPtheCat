@@ -48,14 +48,14 @@ The `react-email` preview CLI (`bunx react-email dev -d emails -p 4445`) is the 
 
 ## Infisical
 
-This project's Infisical id is `71de686a-e09a-48aa-b88d-d78a4ebfa89e` (slug `jpthecat`); log in with `infisical login` (US cloud, org `8-lee-g7-uh`).
+This project's Infisical id is `71de686a-e09a-48aa-b88d-d78a4ebfa89e` (slug `jpthecat`); log in with `infisical login` (US cloud).
 Run `bun run dev:secrets` for local development; it injects Infisical `dev`, and plain `bun run dev` still reads a gitignored `.env.local`.
 Production secrets live in Infisical `prod` at `/`, and the `vercel-prod-jpthecat` sync copies every change to Vercel production as a Sensitive variable; redeploy production to load it.
 Change a production secret only in Infisical: the sync overwrites a Vercel-side edit to a synced key and re-creates one deleted only in Vercel.
 To retire a production key, delete it in Infisical and in Vercel, because the sync never deletes.
 Vercel preview and development variables are not synced and stay Vercel-managed.
 A key that matches across apps has a canonical copy in the Infisical `shared` project; rotate it there and in every app that holds a copy.
-Fleet details: [`8leeai/_global/infisical.md`](https://github.com/8bittts/8leeai/blob/main/_global/infisical.md).
+Fleet details: `8leeai/_global/infisical.md`.
 Run these commands from `web/`.
 
 ## Tests
