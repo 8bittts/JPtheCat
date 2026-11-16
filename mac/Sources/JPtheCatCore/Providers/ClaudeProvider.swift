@@ -25,7 +25,11 @@ public struct ClaudeProvider: UsageProvider {
 	/// Claude's OFFICIAL 5h/weekly windows, when the opt-in statusline capture has written them
 	/// (`ClaudeRateLimitStore`). Nil when the capture isn't installed or is stale — we then show no
 	/// gauge rather than a reconstructed estimate (token counts can't reproduce Claude's real %).
-	public func latestRateLimits() -> RateLimitSnapshot? { ClaudeRateLimitStore.load() }
+	/// Per-model bars (Fable) fall back to Claude Code's own usage cache when the statusline
+	/// omits them, which Claude Code 2.1.325 always does.
+	public func latestRateLimits() -> RateLimitSnapshot? {
+		ClaudeRateLimitStore.load(fallbackModelWindows: ClaudeUsageCache.modelWindows())
+	}
 
 	/// Flags a just-rolled-over 5h/weekly window so the dashboard shows an "awaiting fresh data" hint
 	/// rather than a silently blank gauge (the "bars reset randomly" report). False until the opt-in

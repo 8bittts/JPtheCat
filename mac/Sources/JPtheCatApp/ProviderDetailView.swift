@@ -316,7 +316,10 @@ struct ProviderDetail: View {
 					ForEach(ProviderDetailLayout.windowsByUsage(row.modelWindows)) { scoped in
 						VStack(alignment: .leading, spacing: 8) {
 							gauge(scoped.label, pct: scoped.window.usedPercent, official: true)
-							resetLine(scoped.window.resetsAt)
+							VStack(alignment: .leading, spacing: 2) {
+								resetLine(scoped.window.resetsAt)
+								reportedLine(scoped.reportedAt)
+							}
 						}
 					}
 				}
@@ -336,6 +339,15 @@ struct ProviderDetail: View {
 	@ViewBuilder private func resetLine(_ date: Date?) -> some View {
 		if let phrase = ProviderRelativeReset.resetsInPhrase(until: date) {
 			Text(phrase).font(JPAppFont.micro).foregroundStyle(JP.inkFaint)
+		}
+	}
+
+	/// A model bar from Claude Code's usage cache updates only when Claude Code fetches usage, so it
+	/// names its reading time. A statusline bar has no `reportedAt` and shows nothing here.
+	@ViewBuilder private func reportedLine(_ date: Date?) -> some View {
+		if let date {
+			Text("Reported \(date.formatted(date: .abbreviated, time: .shortened))")
+				.font(JPAppFont.micro).foregroundStyle(JP.inkFaint)
 		}
 	}
 

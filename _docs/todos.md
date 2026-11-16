@@ -19,6 +19,7 @@
 ### Live-limit capture and OpenCode reader installed verification
 
 - [ ] Confirm the Claude weekly gauge matches claude.ai's All models bar after the next Claude reply.
+- [ ] Confirm the Fable bar returns under All models with a `Reported` line after `/usage` refreshes Claude Code's usage cache.
 - [ ] Confirm the next OpenCode turn on a model with a brand row (Muse Spark, Nemotron, MiMo, Big Pickle, or DeepSeek) reaches that brand row through `session_message`.
 
 ## Follow-On Candidates

@@ -59,12 +59,17 @@ public struct ModelScopedRateLimitWindow: Sendable, Equatable, Identifiable {
 	/// Server-supplied label from `rate_limits.model_scoped[].display_name`. Nil for a legacy
 	/// `seven_day_*` key, which still maps through `labels`.
 	public let displayName: String?
+	/// When the provider produced this reading, set only for a source that is not refreshed every
+	/// turn (Claude Code's `~/.claude.json` usage cache). Nil for a statusline row. Diagnostic and
+	/// display-only: like `capturedAt`, it never hides the window; only `resetsAt` does.
+	public let reportedAt: Date?
 	public var id: String { key }
 
-	public init(key: String, window: RateLimitWindow, displayName: String? = nil) {
+	public init(key: String, window: RateLimitWindow, displayName: String? = nil, reportedAt: Date? = nil) {
 		self.key = key
 		self.window = window
 		self.displayName = displayName
+		self.reportedAt = reportedAt
 	}
 
 	/// Display labels for the legacy `seven_day_*` keys. `seven_day_opus` kept its old spelling after
@@ -89,7 +94,7 @@ public struct ModelScopedRateLimitWindow: Sendable, Equatable, Identifiable {
 
 	public func current(at now: Date = Date()) -> ModelScopedRateLimitWindow? {
 		window.current(at: now).map {
-			ModelScopedRateLimitWindow(key: key, window: $0, displayName: displayName)
+			ModelScopedRateLimitWindow(key: key, window: $0, displayName: displayName, reportedAt: reportedAt)
 		}
 	}
 }

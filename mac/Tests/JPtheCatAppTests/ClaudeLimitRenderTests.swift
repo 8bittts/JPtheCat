@@ -91,7 +91,8 @@ final class ClaudeLimitRenderTests: XCTestCase {
 			ModelScopedRateLimitWindow(
 				key: "model_scoped:Fable",
 				window: RateLimitWindow(usedPercent: 96, windowMinutes: 10080, resetsAt: weekReset),
-				displayName: "Fable"),
+				// Claude Code 2.1.325 sends Fable only through its usage cache, which names its reading time.
+				displayName: "Fable", reportedAt: Date().addingTimeInterval(-26 * 3600)),
 		]
 
 		let content = ProviderDetail(row: row, days: 7)

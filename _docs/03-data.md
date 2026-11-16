@@ -38,7 +38,15 @@ An explicit empty array clears them.
 An absent key on a first reading means "not reported", never 0%.
 A legacy `seven_day_opus` or `seven_day_sonnet` object still decodes.
 When its label matches a `model_scoped` row, the server row wins.
-`~/.claude.json` `cachedUsageUtilization` refreshes only when Claude Code fetches usage, so it is not a second source.
+Claude Code 2.1.325 dropped `model_scoped` from the statusline: its payload carries only `five_hour`, `seven_day`, and `spend_limit`.
+The per-model rows now reach this Mac only through Claude Code's own usage cache, `~/.claude.json` `cachedUsageUtilization`.
+Its `utilization.limits` rows with `kind == "weekly_scoped"` and a `scope.model.display_name` are the model bars; `percent` is 0–100 and `resets_at` is ISO-8601.
+Claude Code writes that cache only when it fetches usage (for example `/usage`), so `ClaudeUsageCache` reads it read-only as a fallback and stamps each row with `fetchedAtMs` as `reportedAt`.
+A cache is used only when its `accountUuid` equals `oauthAccount.accountUuid`; a missing or different account is ignored.
+A cached row without a readable `resets_at` is skipped, because nothing else could retire it.
+A current statusline row wins over a cached row with the same label; an expired one does not, because the capture keeps its last `model_scoped` rows when a payload omits the key.
+A cached row never creates a Claude gauge without the opt-in capture.
+Its own `resets_at` is still the only display gate, and the detail names the reading time under the reset.
 Model-scoped bars stay in provider detail only, labeled with the server name under an All models bar (guard: `ModelScopedWindowScopeTests`).
 
 ## Codex

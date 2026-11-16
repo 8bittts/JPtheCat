@@ -244,6 +244,11 @@ Revision 4 writes `model_scoped` (`display_name`, `utilization` already 0–100,
 An empty array still clears it.
 Guards: `StatuslineCaptureTests.testBlockWritesModelScopedFableBesideAllModels`, `testLaterPayloadKeepsFableUntilAnEmptyModelScopedArrayClearsIt`.
 
+**A statusline field can disappear in a Claude Code update.**
+Claude Code 2.1.325 stopped sending `model_scoped` on the statusline, so the revision 4 capture had nothing to forward and the Fable bar vanished from the detail.
+`ClaudeUsageCache` now fills a missing model bar from Claude Code's own `~/.claude.json` usage cache, labeled with its reading time because it refreshes only when Claude Code fetches usage.
+Guards: `ClaudeUsageCacheTests`.
+
 **A frozen Claude reading must not contradict the limit notice.**
 Claude's statusline stops after a session-limit refusal, freezing the last official value below 100%.
 When the high-and-stale heuristic says "likely exhausted", the gauge shows an explicitly estimated 100% and names the frozen reading; it once showed 86% beside a confirmed refusal.

@@ -22,7 +22,7 @@ The incident is in [00-foundation.md](00-foundation.md#keychain-and-identity).
 ## Harness configuration
 
 Provider setup changes require explicit opt-in.
-Claude-limits capture only reads `~/.claude/settings.json` and edits the user's own statusline script; Grok capture writes its marked `~/.grok/hooks/` file; Cursor capture installs only JP's entry in the designed `~/.cursor/hooks.json`, preserving unrelated hooks.
+Claude-limits capture only reads `~/.claude/settings.json` and edits the user's own statusline script; JP also reads, never writes, the `cachedUsageUtilization` and `oauthAccount.accountUuid` keys of `~/.claude.json` for per-model bars; Grok capture writes its marked `~/.grok/hooks/` file; Cursor capture installs only JP's entry in the designed `~/.cursor/hooks.json`, preserving unrelated hooks.
 
 ## Permissions posture
 

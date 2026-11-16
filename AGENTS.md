@@ -118,7 +118,7 @@ Both capture-age gates shipped once and were reverted: [_docs/00-foundation.md#r
 Grok's hook file is the remaining age gate: `GrokRateLimitStore.maxAgeSeconds` drops a capture older than 12 hours, and an absent hook lets the sand weekly own the row.
 Sand and Cursor meters still follow only their own `resets_at`.
 
-Claude live limits require opt-in local statusline capture.
+Claude live limits require opt-in local statusline capture; Claude Code's `~/.claude.json` usage cache only fills a missing per-model bar beside a captured window, never a gauge on its own (`ClaudeUsageCacheTests`).
 Grok plan usage and `GrokRateLimitCapture` are separate opt-ins.
 The hook weekly is the Grok subscription, not a fallback behind Grok Bot.
 Neither ever invents quota from local tokens.

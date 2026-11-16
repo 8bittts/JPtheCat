@@ -30,9 +30,33 @@ public enum ClaudeRateLimitStore {
 	// developer machine silently deleted that machine's genuine leftover capture file as a side effect
 	// — caught only by noticing the file had vanished after a test run. Tests must always pass an
 	// explicit temp `url:` from here on.
-	public static func load(now: Date = Date(), url: URL? = nil) -> RateLimitSnapshot? {
-		guard let url = url ?? defaultURL(), let data = try? Data(contentsOf: url) else { return nil }
-		return decode(data, now: now)
+	///
+	/// `fallbackModelWindows` fills per-model bars the capture did not report (Claude Code's usage
+	/// cache, `ClaudeUsageCache`). It never creates a snapshot on its own: without a captured
+	/// plan-wide window there is no Claude gauge, so the opt-in capture stays the gate.
+	public static func load(
+		now: Date = Date(), url: URL? = nil, fallbackModelWindows: [ModelScopedRateLimitWindow] = []
+	) -> RateLimitSnapshot? {
+		guard let url = url ?? defaultURL(), let data = try? Data(contentsOf: url),
+			let current = decodeRaw(data)?.current(at: now)
+		else { return nil }
+		return merging(current, fallbackModelWindows: fallbackModelWindows.compactMap { $0.current(at: now) })
+	}
+
+	/// Appends each fallback row whose label the snapshot does not already carry. A statusline row
+	/// is refreshed every turn, so it wins over a cached row for the same model. Callers pass only
+	/// current windows: the capture keeps its last `model_scoped` rows when a payload omits the key,
+	/// so an expired statusline row must not shadow a current cached one.
+	static func merging(
+		_ snapshot: RateLimitSnapshot, fallbackModelWindows: [ModelScopedRateLimitWindow]
+	) -> RateLimitSnapshot {
+		var labels = Set(snapshot.modelWindows.map { $0.label.lowercased() })
+		let extra = fallbackModelWindows.filter { labels.insert($0.label.lowercased()).inserted }
+		guard !extra.isEmpty else { return snapshot }
+		return RateLimitSnapshot(
+			primary: snapshot.primary, secondary: snapshot.secondary, planType: snapshot.planType,
+			capturedAt: snapshot.capturedAt, modelWindows: snapshot.modelWindows + extra,
+			credits: snapshot.credits)
 	}
 
 	/// True when the opt-in statusline capture is present AND fresh — i.e. Claude live limits are
@@ -176,7 +200,7 @@ public enum ClaudeRateLimitStore {
 	/// `model_scoped.resets_at` is ISO-8601. Legacy `seven_day_*` windows still use epoch seconds,
 	/// and `RateLimitWindow.init(json:)` handles those. A missing or unreadable reset stays nil, which
 	/// leaves the percentage on screen rather than inventing an expiry.
-	private static func resetDate(_ raw: Any?) -> Date? {
+	static func resetDate(_ raw: Any?) -> Date? {
 		if let epoch = JSONNumber.double(raw) { return Date(timeIntervalSince1970: epoch) }
 		guard let string = raw as? String else { return nil }
 		if let date = ISOTimestamp.fractional.date(from: string) ?? ISOTimestamp.plain.date(from: string) {
