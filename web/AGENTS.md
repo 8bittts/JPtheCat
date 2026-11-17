@@ -34,6 +34,7 @@ The dev server runs on port 4444, not 3000.
 
 `scripts/scan-client-bundle-secrets.ts` is the final step of `bun run build`, so it never runs on a stale tree.
 It byte-scans `.next/static` and `.next/server/app` for every credential-shaped env VALUE in four encodings, and fails closed when zero artifacts or zero credential values were scanned.
+On Vercel it always has one: the project's OIDC federation is on, so every build carries `VERCEL_OIDC_TOKEN`, which the scan includes.
 
 **A green/READY Vercel deploy is NOT proof the quality gate passed — run `bun run check:full` locally before any web-touching push.**
 Vercel's build runs only `next build`, not `bun test`, knip, or react-doctor, so a failing test or doctor regression ships while Vercel still shows READY.
@@ -50,7 +51,7 @@ The `react-email` preview CLI (`bunx react-email dev -d emails -p 4445`) is the 
 
 This project's Infisical id is `71de686a-e09a-48aa-b88d-d78a4ebfa89e` (slug `jpthecat`); log in with `infisical login` (US cloud).
 Run `bun run dev:secrets` for local development; it injects Infisical `dev`, and plain `bun run dev` still reads a gitignored `.env.local`.
-Production secrets live in Infisical `prod` at `/`, and the `vercel-prod-jpthecat` sync copies every change to Vercel production as a Sensitive variable; redeploy production to load it.
+The site reads no environment variable, so Infisical `prod` and `dev` and the Vercel project hold none; a future key lives in `prod` at `/`, and the `vercel-prod-jpthecat` sync copies it to Vercel production as a Sensitive variable; redeploy production to load it.
 Change a production secret only in Infisical: the sync overwrites a Vercel-side edit to a synced key and re-creates one deleted only in Vercel.
 To retire a production key, delete it in Infisical and in Vercel, because the sync never deletes.
 Vercel preview and development variables are not synced and stay Vercel-managed.
