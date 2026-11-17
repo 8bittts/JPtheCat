@@ -104,6 +104,7 @@ Public CTAs may point at `/download`, which fails closed unless `public/stable/v
 
 The site sends no email: no owner notices, reports, newsletter, or broadcast.
 Support is a `mailto:` link to `support@jpthecat.com` on `/contact`, and the app's support report opens the user's own mail app.
+`app/api/support-report` survives only to answer 410: app versions up to 1.160 still POST there and count any 2xx as sent, and Next answers a POST to a missing route with a 200 page (guard: `tests/support-report-retired.test.ts`).
 Never add an email sender or a support form endpoint without an explicit operator request and a privacy-policy update in the same change.
 
 ## Accessibility — WCAG 2.1 AA (required)
