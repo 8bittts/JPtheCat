@@ -15,7 +15,7 @@ build→verify→sign→notarize→DMG→appcast→release pipeline.
 
 **Bare `/jp` ALWAYS does a full release — every single time.** It commits ALL current working-tree
 changes first (one non-`[deploy]` WIP commit), then runs `release-jpthecat.sh`: web quality gate →
-notarized DMG → production smoke gate → signed appcast → Supabase upload (DMG+sha256) →
+notarized DMG → production smoke gate → signed appcast → draft GitHub Release upload (DMG+sha256+deltas) →
 `web/public/stable/*` + `Casks/jpthecat.rb` → `release: … [deploy]` commit + tag → push → Vercel
 promotion check. It ships and deploys the website too, every time. This is outward-facing and hard
 to undo — that is the intended behavior of a bare
@@ -29,14 +29,14 @@ Run everything from the repo root (`git rev-parse --show-toplevel`).
 
 | Invocation | Behavior | Status |
 |---|---|---|
-| `/jp` | **Full release (default).** Commit ALL working-tree changes → `release-jpthecat.sh`: web quality gate → notarized DMG → smoke → appcast → Supabase upload → `web/public/stable/*` + `Casks/jpthecat.rb` → `release: … [deploy]` commit + tag → push → verify. Ships mac + web. | ✅ **works now** |
+| `/jp` | **Full release (default).** Commit ALL working-tree changes → `release-jpthecat.sh`: web quality gate → notarized DMG → smoke → appcast → draft GitHub Release upload → `web/public/stable/*` + `Casks/jpthecat.rb` → `release: … [deploy]` commit + tag → push → publish the release → verify. Ships mac + web. | ✅ **works now** |
 | `/jp release` | Explicit alias for the bare-`/jp` full release above. | ✅ **works now** |
 | `/jp check` | **Full green check** (old default): mac (build + test + staged-app verify + CLI smoke) **and** web (`bun run check:full`). No shipping. | ✅ works now |
 | `/jp local` | Build + launch the local Dock-visible `.app` and confirm the bundle shape (`mac/scripts/build_and_run.sh --verify`). | ✅ works now |
 | `/jp cli` | Build + run `jpthecat-cli --json` (today/7d cost readout). | ✅ works now |
 
 `/jp` / `/jp release` = commit-all-WIP then `mac/scripts/release-jpthecat.sh` (all four scripts exist and are verified). It ships
-BOTH surfaces atomically: the mac DMG goes to the public Supabase `releases` bucket (served over the branded CNAME `api.jpthecat.com`), `Casks/jpthecat.rb` is pinned to the same version + SHA-256, and the `[deploy]` release commit
+BOTH surfaces atomically: the mac DMG goes to the `v<version>` GitHub Release on the public `8bittts/JPtheCat` repository, `Casks/jpthecat.rb` is pinned to the same version + SHA-256, and the `[deploy]` release commit
 promotes the site (the `/download` route + Sparkle feed both read `web/public/stable/`). It is
 outward-facing and hard to undo (a published tag/release + a live deploy) — run it deliberately.
 
@@ -122,14 +122,14 @@ cd "$(git rev-parse --show-toplevel)"/mac
 ./scripts/build-dmg.sh --local    # signed, skip notarization (fast)
 ./scripts/build-dmg.sh --unsigned # ad-hoc (no Developer ID; bootstrapping)
 ./scripts/smoke-test.sh --production   # verify the notarized DMG (Gatekeeper + deep codesign + checksum)
-./scripts/generate-appcast.sh     # signed appcast.xml (headless EdDSA, api.jpthecat.com enclosure URLs)
-./scripts/release-jpthecat.sh [ver] [--dry-run]   # full: web quality → DMG → smoke → appcast → Supabase upload → stable files + cask → web [deploy]
+./scripts/generate-appcast.sh     # signed appcast.xml (headless EdDSA, GitHub Release enclosure URLs)
+./scripts/release-jpthecat.sh [ver] [--dry-run]   # full: web quality → DMG → smoke → appcast → draft GitHub Release → stable files + cask → web [deploy] → publish
 ```
 
 Verified gates (all green on a real run): sign **inner→outer, never `--deep`** (Sparkle XPC/Updater →
 framework → app last); notarize the **DMG** via the `JPtheCat-Notarization` keychain profile;
 `stapler staple` + `spctl -a -t open` + `spctl -a -t exec` → `source=Notarized Developer ID`; appcast
-enclosure EdDSA-signed with `length=` matching the DMG bytes and the URL pointing at `api.jpthecat.com` (the release scripts default to `CANONICAL_RELEASES_BASE`; the raw project host stays as a `/download` rollback fallback).
+enclosure EdDSA-signed with `length=` matching the DMG bytes and the URL pointing at `https://github.com/8bittts/JPtheCat/releases/download/v<version>/` (`mac/scripts/release-github.sh` owns the repository and the URL shape).
 Resource bundles go to `Contents/Resources` ONLY (a copy in the `.app` root breaks codesign sealing).
 
 ---
@@ -140,7 +140,7 @@ Resource bundles go to `Contents/Resources` ONLY (a copy in the `.app` root brea
   · `web/public/stable/JPtheCat-<ver>.dmg.sha256` (public checksum linked from the site)
   · `Casks/jpthecat.rb` (Homebrew cask pinned to the same public DMG version + SHA-256)
 - Notarized: `*.notary-submission.json`, "Notarization ticket stapled" in the output
-- The release script prints the Supabase download URL
+- The release script prints the GitHub Release download URL
 
 ---
 
@@ -162,7 +162,7 @@ mkdir -p ~/.config/jpthecat
 chmod 600 ~/.config/jpthecat/sparkle_ed25519_priv.key   # OUTSIDE the repo; never commit
 ```
 
-The Supabase CLI must be linked to the JPtheCat project in `mac/` (`supabase link --project-ref duqpnrpzadrxqdbspjft`) for the upload step.
+`gh` must be signed in with push access to the public `8bittts/JPtheCat` repository; the release preflight fails closed otherwise.
 
 Do not create or update `mac/CHANGELOG.md`. Git commit history is the changelog; the release flow
 generates comprehensive Sparkle update notes from meaningful commit history. The notes should sound
@@ -189,7 +189,7 @@ release failure.
 ## Safety
 
 - **Release publishes the download — never the local app.** `/jp release` builds into `mac/build/`,
-  uploads the DMG to Supabase, and deploys the web manifest; it MUST NOT install to `/Applications`
+  uploads the DMG to its GitHub Release, and deploys the web manifest; it MUST NOT install to `/Applications`
   or otherwise touch the user's installed copy. Existing installs upgrade themselves through Sparkle
   (users click "Check for Updates" or the scheduled check fires) — that is the whole point of the
   update feed. Do not add an install/relaunch step to the release path. (Verifying a build locally is
@@ -212,7 +212,7 @@ release failure.
   local testing; `web/public/stable/{version.json,appcast.xml,JPtheCat-<ver>.dmg.sha256}` plus
   `Casks/jpthecat.rb` = the *published manifest/install metadata* of the release (the "saved copy" of what shipped). A successful build/release writes the manifest to
   `public/stable` and keeps the local build in `mac/build/` — and **never touches `/Applications`.**
-- **Never commit `mac/build/` or `.build/`** — gitignored; release artifacts go to Supabase Storage, not the tree.
+- **Never commit `mac/build/` or `.build/`** — gitignored; release artifacts go to GitHub Releases, not the tree.
 - **Release notes are part of the release gate** — no vague "Improvements and fixes" fallback, no
   hand-maintained changelog, and no signed-appcast hand edits. Fix `mac/scripts/generate-appcast.sh`
   when the note contract needs to change.

@@ -7,16 +7,16 @@
 # update, and verifies the temporary app relaunches at the live version/build while App Support data
 # survives. Requires Accessibility permission for the shell app running the script.
 #
-#   ./scripts/sparkle-upgrade-smoke.sh          # default old install: JPtheCat-0.004.dmg
-#   ./scripts/sparkle-upgrade-smoke.sh 0.080
+#   ./scripts/sparkle-upgrade-smoke.sh          # default old install: JPtheCat-1.148.dmg
+#   ./scripts/sparkle-upgrade-smoke.sh 1.155    # any version with a GitHub Release (1.148 or newer)
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 APP_NAME="JPtheCat"
-OLD_VERSION="${1:-0.004}"
+OLD_VERSION="${1:-1.148}"
 OLD_DMG="JPtheCat-${OLD_VERSION}.dmg"
-RELEASE_BASE="https://api.jpthecat.com/storage/v1/object/public/releases"
+. "scripts/release-github.sh"
 MANIFEST_URL="https://jpthecat.com/stable/version.json"
 APPCAST_URL="https://jpthecat.com/stable/appcast.xml"
 INSTALLED_APP="/Applications/JPtheCat.app"
@@ -281,7 +281,7 @@ pass "live feed target ${LATEST_VERSION} build ${LATEST_BUILD}"
 
 info "Download old public install (${OLD_DMG})"
 old_dmg_path="$TMPDIR/$OLD_DMG"
-fetch_url "${RELEASE_BASE}/${OLD_DMG}" "$old_dmg_path"
+fetch_url "$(jptc_release_asset_url "$OLD_VERSION" "$OLD_DMG")" "$old_dmg_path"
 sha_file="../web/public/stable/${OLD_DMG}.sha256"
 if [ ! -f "$sha_file" ]; then
 	fetch_url "https://jpthecat.com/stable/${OLD_DMG}.sha256" "$TMPDIR/${OLD_DMG}.sha256"

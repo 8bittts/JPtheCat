@@ -80,7 +80,6 @@
 		--measure-dialog-md: 400px;
 		--measure-dialog-lg: 430px;
 		--radius-control: 7px;
-		--radius-compact: 9px;
 		--radius-dialog: 14px;
 		--radius-card: 18px;
 		--dialog-backdrop: rgba(34, 29, 21, 0.45);
@@ -197,9 +196,6 @@
 	   contract; these roles normalize the surrounding marketing and utility UI. */
 	.reading-shell {
 		max-width: var(--measure-reading);
-	}
-	.compact-radius {
-		border-radius: var(--radius-compact);
 	}
 	.dialog-panel {
 		margin: auto;
@@ -340,16 +336,6 @@
 		color: var(--color-ink-faint);
 	}
 
-	/* Accounting-paper hairlines: a faint ledger ruling behind a section */
-	.ledger {
-		background-image: repeating-linear-gradient(
-			to bottom,
-			transparent 0,
-			transparent 31px,
-			color-mix(in oklab, var(--color-line) 55%, transparent) 31px,
-			color-mix(in oklab, var(--color-line) 55%, transparent) 32px
-		);
-	}
 
 	/* Legal-page 3D diorama stage height — kept as a token (base + svh clamp) rather than an inline
 	   component clamp(), so the one responsive-height value the legal scene uses stays with the rest

@@ -12,6 +12,8 @@ Dates are the evidence in this doc; the owner docs carry none.
 - 2026-07-03: the full `/library` pSEO site ships, and the remote pricing layer lands.
 - 2026-11: the license, trial and paywall code is removed, and every feature becomes free.
 - 2026-11-06: the source goes public under MIT as a fresh repository with a new root commit, because the old history held customer emails, Stripe IDs, and device hashes; that history lives only in the private `8bittts/JPtheCat-archive`.
+- 2026-11-17: releases move from the Supabase `releases` bucket behind `api.jpthecat.com` to GitHub Releases on the public repository (v1.148 to v1.160 backfilled), and the Supabase project is deleted.
+  The download database, the 8pm owner digest and its cron, every owner email, and the support-report endpoint go with it; support became a `mailto:` link and the app's report opens the user's mail app.
 - The rest of the record is the engineering log below: each entry states what broke, the rule now, and the guard that holds it, while the contract it protects lives in its owner doc.
 
 ## Decisions
@@ -405,7 +407,7 @@ A WCAG target-size failure once deployed "green", because Vercel's build runs on
   In Oct 2026, 86% of "human" rows were Windows or Android browsers.
   A second hole compounded it: the 30-day PII job nulls `ip` and `ua`, the CTE admits `ip is null`, so monitor and burst rows (a `GrowthScan/0.1` scanner, 136 rows) flipped to human on redaction.
   Fix: parse both ipapi.is shapes and keep absent flags `null`, print `network_flagged / network_flaggable` beside every headline and raise a digest issue on any gap, persist `is_mac` at write time and lead with `mac_human_downloads`, stamp `exclusion` before redaction (migration `0011`), and add the scanner markers to the UA denylist.
-  `IPAPI_IS_KEY` is now required for the hosting filter (guards: `web/tests/download-network-intel.test.ts`, `web/tests/growth-download-sql.test.ts`, `web/tests/growth-digest.test.tsx`).
+  The whole download spine, with these guards, was removed on 2026-11-17 (Timeline); the lesson stands for any future download counter: a raw redirect is not an install.
 
 #### Web design normalization
 

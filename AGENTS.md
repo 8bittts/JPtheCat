@@ -1,12 +1,11 @@
 # AGENTS.md — jpthecat (root)
 
 JP the Cat (code identifier `JPtheCat`) is a calm, light-themed macOS menu-bar app showing Claude Code spend, Codex and Grok rate-limit usage, Muse Spark notional list-price cost, and OpenCode Zen / OpenCode Go gateway usage, with a labeled provider catalog behind it.
-It ships as a native Swift app (`mac/`) plus a Next.js marketing/pSEO site (`web/`), alongside `supabase/` (migrations for release storage and download growth), `Casks/`, `brand/`, and `scripts/`.
+It ships as a native Swift app (`mac/`) plus a Next.js marketing/pSEO site (`web/`), alongside `Casks/`, `brand/`, and `scripts/`; releases are GitHub Releases on this repository.
 
 Directory-scoped rules load automatically beside the code and are not restated here:
 - [mac/AGENTS.md](mac/AGENTS.md) — Swift app, widget, release scripts, native correctness invariants.
 - [web/AGENTS.md](web/AGENTS.md) — Next.js stack, gate chain, downloads, email, accessibility, SEO, growth.
-- [supabase/AGENTS.md](supabase/AGENTS.md) — manual migrations and the Supabase key rule.
 
 ## Documentation
 
@@ -19,11 +18,11 @@ This file is the enforceable contract; read the owner doc before non-trivial wor
 | Provider log formats, model-price evidence | [_docs/03-data.md](_docs/03-data.md) |
 | Privacy invariant, permissions posture, Keychain access | [_docs/04-security.md](_docs/04-security.md) |
 | Signing, Sparkle, release hosting, web hosting and DNS | [_docs/05-infrastructure.md](_docs/05-infrastructure.md) |
-| Brand, palette, typography, homepage boundary, website and email design | [_docs/02-design-system.md](_docs/02-design-system.md) |
+| Brand, palette, typography, homepage boundary, website design | [_docs/02-design-system.md](_docs/02-design-system.md) |
 | Native architecture, refresh, indexing, persistence | [_docs/01-architecture.md](_docs/01-architecture.md) |
 | Logo, icons, mascot video, sounds | [_docs/02-design-system.md](_docs/02-design-system.md) |
 | `/library` pSEO | [_docs/08-growth.md](_docs/08-growth.md) |
-| Download spine, bot filter, `/growth`, owner digest | [_docs/08-growth.md](_docs/08-growth.md) |
+| Measurement limits (no download database, no owner email) | [_docs/08-growth.md](_docs/08-growth.md) |
 | Launch copy and the website funnel | [_docs/10-gtm.md](_docs/10-gtm.md) |
 | Adding or promoting a provider | [_docs/11-adding-a-provider.md](_docs/11-adding-a-provider.md) |
 | Incident lessons behind the rules here | [_docs/00-foundation.md](_docs/00-foundation.md) |
@@ -51,7 +50,7 @@ One carve-out: the Small (170pt) widget face shows the compact `JP` wordmark, wh
 Never name anything `TokenBar`/`tokenbar` — a live shipping product owns that name.
 The bundle id `com.8bittts.jpthecat` is locked.
 
-**Domain casing: if it is a URL shown to a person it reads `JPtheCat.com` (including `api.JPtheCat.com`); if it is not a URL it reads `JP the Cat`.**
+**Domain casing: if it is a URL shown to a person it reads `JPtheCat.com`; if it is not a URL it reads `JP the Cat`.**
 Lowercase survives only as a non-displayed functional identifier — `href`/`src`, `SITE.url`, `metadataBase`/canonical/`og:url`/JSON-LD `url`, the real fetch host and CSP `connect-src`, mailboxes, storage URLs, artifact filenames.
 `SITE.domain` holds the display form; `SITE.url` holds the functional link.
 Never hand-edit the Sparkle-signed `web/public/stable/appcast.xml` — fix the display name in `mac/scripts/generate-appcast.sh` so the next release regenerates it.
@@ -168,7 +167,7 @@ Incidents: [_docs/00-foundation.md#sparkle-release-notes](_docs/00-foundation.md
 **The one privacy invariant: prompts, code, transcripts, provider credentials, and local usage databases must never leave the user's Mac.**
 The exception is unified opt-in Grok plan usage: it sends a saved Cursor or Grok Bot sign-in token only to the existing three DashboardService methods on `api2.cursor.sh`; no refresh tokens, prompts, code, paths or local usage.
 The public privacy policy discloses it.
-Every telemetry, analytics, and email surface (Vercel Analytics, the owner daily report, support reports) must honor it — none may ever include prompts, code, transcripts, token history, costs, credentials, project paths, or local-usage-database contents.
+Every telemetry, analytics, and support surface (Vercel Analytics, the support report the user sends from their own mail app) must honor it — none may ever include prompts, code, transcripts, token history, costs, credentials, project paths, or local-usage-database contents.
 Mac app product analytics stay opt-in and off by default.
 The app's least-privilege posture (no Full Disk Access, no Accessibility) is a shipped marketing claim guarded by `web/tests/site-copy.test.ts`; the rules that keep it true live in [mac/AGENTS.md](mac/AGENTS.md).
 

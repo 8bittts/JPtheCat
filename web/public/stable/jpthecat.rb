@@ -2,7 +2,7 @@ cask "jpthecat" do
   version "1.160"
   sha256 "96fa4acb40c3ca5887506c0e5cf40657e05d77e7c6bede57093e24fcee60b5dc"
 
-  url "https://api.jpthecat.com/storage/v1/object/public/releases/JPtheCat-#{version}.dmg"
+  url "https://github.com/8bittts/JPtheCat/releases/download/v#{version}/JPtheCat-#{version}.dmg"
   name "JP the Cat"
   desc "Menu bar AI coding cost meter"
   homepage "https://jpthecat.com/"

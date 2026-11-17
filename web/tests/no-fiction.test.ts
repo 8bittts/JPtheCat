@@ -5,13 +5,7 @@ import { extname, join } from "node:path";
 const WEB_SOURCE_ROOTS = ["app", "components", "lib"];
 const REPO_SOURCE_ROOTS = ["../mac/Sources"];
 const WEB_PUBLIC_TEXT_FILES = ["public/llms.txt"];
-const AGENT_DOCS = [
-	"../AGENTS.md",
-	"../mac/AGENTS.md",
-	"AGENTS.md",
-	"../supabase/AGENTS.md",
-	"../README.md",
-];
+const AGENT_DOCS = ["../AGENTS.md", "../mac/AGENTS.md", "AGENTS.md", "../README.md"];
 // Every top-level owner doc, derived rather than listed, so a renamed or added doc stays covered.
 const OWNER_DOC_DIR = "../_docs";
 const MIN_OWNER_DOCS = 10;

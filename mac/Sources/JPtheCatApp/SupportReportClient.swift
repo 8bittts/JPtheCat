@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 
 enum SupportReportSendResult: Sendable, Equatable {
@@ -6,47 +7,50 @@ enum SupportReportSendResult: Sendable, Equatable {
   case failed
 }
 
+/// Hands a support report to the user's own mail app, addressed to support@JPtheCat.com.
+///
+/// JP has no support endpoint and sends no email itself: the report travels only if the user sends
+/// the message their mail app opens, from their own address.
 enum SupportReportClient {
-  static let endpoint = URL(string: "https://jpthecat.com/api/support-report")!
+  static let supportAddress = "support@jpthecat.com"
+  static let subject = "JP the Cat support report"
 
-  struct RequestBody: Encodable {
-    let contactEmail: String?
-    let message: String?
-    let report: String
-    let appVersion: String?
-
-    enum CodingKeys: String, CodingKey {
-      case contactEmail = "contact_email"
-      case message
-      case report
-      case appVersion = "app_version"
-    }
-  }
-
-  static func send(contactEmail: String?, message: String?, report: String) async -> SupportReportSendResult {
+  @MainActor
+  static func send(
+    contactEmail: String?,
+    message: String?,
+    report: String,
+    open: @MainActor (URL) -> Bool = { NSWorkspace.shared.open($0) }
+  ) async -> SupportReportSendResult {
     let email = contactEmail?.trimmingCharacters(in: .whitespacesAndNewlines)
-    let note = message?.trimmingCharacters(in: .whitespacesAndNewlines)
     if let email, !email.isEmpty, !isPlausibleEmail(email) {
       return .invalidEmail
     }
+    guard let url = mailtoURL(contactEmail: email, message: message, report: report) else {
+      return .failed
+    }
+    return open(url) ? .sent : .failed
+  }
 
-    var request = URLRequest(url: endpoint)
-    request.httpMethod = "POST"
-    request.timeoutInterval = 20
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.setValue("JPtheCat/\(appVersion ?? "unknown")", forHTTPHeaderField: "User-Agent")
-    let body = RequestBody(
-      contactEmail: email?.isEmpty == false ? email : nil,
-      message: note?.isEmpty == false ? note : nil,
-      report: report,
-      appVersion: appVersion)
-    guard let encoded = try? JSONEncoder().encode(body) else { return .failed }
-    request.httpBody = encoded
+  /// The `mailto:` URL for a report: the user's note first, then the reply address they typed (if
+  /// any), then the report with the app version.
+  static func mailtoURL(contactEmail: String?, message: String?, report: String) -> URL? {
+    let note = message?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    let email = contactEmail?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    var sections: [String] = []
+    if !note.isEmpty { sections.append(note) }
+    if !email.isEmpty { sections.append("Reply to: \(email)") }
+    sections.append(report)
+    if let appVersion { sections.append("App version: \(appVersion)") }
 
-    guard let (_, response) = try? await URLSession.shared.data(for: request),
-      let http = response as? HTTPURLResponse
-    else { return .failed }
-    return (200..<300).contains(http.statusCode) ? .sent : .failed
+    var components = URLComponents()
+    components.scheme = "mailto"
+    components.path = supportAddress
+    components.queryItems = [
+      URLQueryItem(name: "subject", value: subject),
+      URLQueryItem(name: "body", value: sections.joined(separator: "\n\n")),
+    ]
+    return components.url
   }
 
   private static var appVersion: String? {

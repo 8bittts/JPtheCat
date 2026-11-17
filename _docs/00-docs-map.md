@@ -1,7 +1,7 @@
 # JP the Cat Documentation Map
 
-Calm, light-themed macOS menu-bar app showing AI coding-agent spend and rate-limit headroom, with a Next.js marketing and pSEO site, Supabase release storage and download telemetry, and a Homebrew tap.
-Agent routing lives in `AGENTS.md` with `mac/AGENTS.md`, `web/AGENTS.md` and `supabase/AGENTS.md`; this index follows the fleet documentation standard that `/docs` audits against.
+Calm, light-themed macOS menu-bar app showing AI coding-agent spend and rate-limit headroom, with a Next.js marketing and pSEO site, GitHub Releases downloads, and a Homebrew tap.
+Agent routing lives in `AGENTS.md` with `mac/AGENTS.md` and `web/AGENTS.md`; this index follows the fleet documentation standard that `/docs` audits against.
 
 ## Owner docs
 
@@ -10,10 +10,10 @@ Agent routing lives in `AGENTS.md` with `mac/AGENTS.md`, `web/AGENTS.md` and `su
 | `00-foundation.md`             | History, decisions, and the engineering log of incidents behind the rules in `AGENTS.md`                          |
 | `01-architecture.md`           | Native targets, data flow, providers, the normalized record, indexing, pricing, rate limits, persistence, widget; the web app's layout and routes are owned by `web/AGENTS.md` and `08-growth.md` |
 | `02-design-system.md`          | Brand thesis, homepage provider boundary, color, typography, motion, charts and icons, website, brand assets        |
-| `03-data.md`                   | Provider log formats and the model-price evidence ledger; the Supabase schema and RLS are owned by `08-growth.md` and `supabase/AGENTS.md` |
+| `03-data.md`                   | Provider log formats and the model-price evidence ledger; the website keeps no data                                |
 | `04-security.md`               | Privacy invariant, Keychain rules, harness configuration, permissions posture, update-feed trust; web headers, CSP, CORS and secrets are owned by `web/AGENTS.md` |
-| `05-infrastructure.md`         | Release pipeline, Sparkle vendoring, update UI at runtime, release hosting, the Homebrew tap, web hosting and DNS; the web deploy gate is owned by `web/AGENTS.md` and the cron by `08-growth.md` |
-| `08-growth.md`                 | Bot filtering, download spine, readers, owner digest, the `/library` pSEO strategy           |
+| `05-infrastructure.md`         | Release pipeline, Sparkle vendoring, update UI at runtime, release hosting, the Homebrew tap, web hosting and DNS; the web deploy gate and env posture are owned by `web/AGENTS.md` |
+| `08-growth.md`                 | Measurement limits and the `/library` pSEO strategy                                          |
 | `09-quality.md`                | Gates by target, guards, release verification                                                                      |
 | `10-gtm.md`                    | Product Hunt launch package and the website funnel                                                                 |
 | `11-adding-a-provider.md`      | Provider add and promotion playbook                                                                                |
@@ -23,13 +23,13 @@ Agent routing lives in `AGENTS.md` with `mac/AGENTS.md`, `web/AGENTS.md` and `su
 ## Not applicable
 
 - `06-payments.md`: the app is free with no payment, licensing, or trial surface; public positioning is owned by `10-gtm.md` and retired licensing history by `00-foundation.md`.
-- `07-email.md`: the owner digest is owned by `08-growth.md`, with the shared mail contract in `web/AGENTS.md`; no customer lifecycle mail is sent.
+- `07-email.md`: the site sends no email; support is a `mailto:` link to `support@jpthecat.com`, and the rule is owned by `web/AGENTS.md`.
 
 ## Other surfaces
 
 | Path                                                 | Notes                                                                                        |
 | ---------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `AGENTS.md`, `mac/AGENTS.md`, `web/AGENTS.md`, `supabase/AGENTS.md` | The enforceable contract and its directory-scoped rules                        |
+| `AGENTS.md`, `mac/AGENTS.md`, `web/AGENTS.md`        | The enforceable contract and its directory-scoped rules                                      |
 | `README.md`                                          | Public overview; its version-badge and download-link blocks are generated, never hand-edited |
 | `CONTRIBUTING.md`, `LICENSE`                         | Contributor gates and hard rules; MIT license for the code, with JP's name and mascot art reserved in `README.md` |
 | `legacy-backup/`                                     | Operator-local, gitignored archive of the retired paid era; holds customer data, never public |
@@ -47,5 +47,4 @@ Code, scripts and tests, then the owner doc, then `AGENTS.md`, then `README.md`.
 ## Known doc drift
 
 - `10-gtm.md` launch copy must be re-synced with `web/lib/site.ts` before use.
-- An applied migration under `supabase/migrations/` cites `_docs/17-engineering-log.md`, now the engineering log inside `00-foundation.md`; applied migrations are not edited.
 - The `_comment` field of the served `web/public/stable/pricing.json` cites a `_docs/04-pricing-and-limits.md` that no longer exists; the served pricing file is not edited in a documentation pass.

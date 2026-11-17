@@ -20,9 +20,9 @@ One command owns it: `bash mac/scripts/release-jpthecat.sh [version]` (also `/jp
   Drag-to-Applications un-quarantines the copy and avoids app translocation; a notarized, stapled app still shows one friendly first-launch prompt.
 - **Versions:** `CFBundleVersion` is a monotonic integer floored above the latest published `<sparkle:version>`, because Sparkle compares build numbers; the bump math is covered by `VersionBumpTests`.
 - **Appcast:** `generate-appcast.sh` publishes exactly one `<item>` (`--maximum-versions 1`), feeds the last five DMGs in only to build deltas, and purges Sparkle's never-pruned extraction cache on every run.
-- **Hosting:** the public Supabase Storage `releases` bucket behind `https://api.jpthecat.com`.
-  `/download` (`web/app/download/route.ts`) validates `version.json` (sha256, release date, trusted host) and redirects; it trusts `api.jpthecat.com` and the raw project host as a rollback fallback.
-  The release uploads with `supabase storage`, so read [supabase/AGENTS.md](../supabase/AGENTS.md) § Keys before changing the project's signing keys.
+- **Hosting:** each release is a GitHub Release on this public repository, tagged `v<version>`, holding `JPtheCat-<v>.dmg`, `JPtheCat-<v>.sha256`, and that release's Sparkle deltas; `mac/scripts/release-github.sh` owns the repository and the URL shape, and nothing is pruned because older DMGs are the delta sources.
+  The release uploads to a draft, proves the DMG bytes through an authenticated download, pushes the release commit and tag, then publishes the draft while Vercel is still building, so the assets are public before the site points at them (guard: `ReleaseGitHubTests`).
+  `/download` (`web/app/download/route.ts`) validates `version.json` (sha256, release date, trusted `github.com/8bittts/JPtheCat/releases/download/` path) and redirects; it records nothing.
 - **Source:** the public `github.com/8bittts/JPtheCat` repository, whose `main` the Vercel project `jpthecat` (root `web/`) is Git-connected to; the `[deploy]` subject marker gates its builds.
 - **Manifest:** the release rewrites `web/public/stable/{version.json,appcast.xml}`, the README markers, and all three cask copies, then commits `release: JPtheCat vX [deploy]` plus a tag from a dedicated worktree (root `AGENTS.md`).
 
@@ -59,6 +59,6 @@ Post-release proofs:
 
 ## Web, DNS, and Email Routing
 
-- The web deploy gate and the pinned-Bun build are owned by [web/AGENTS.md](../web/AGENTS.md#deployment-gate); the digest cron schedule and the production environment variables are in [08-growth.md](08-growth.md#4-owner-daily-report-and-notices), and those variables change only through Infisical ([web/AGENTS.md](../web/AGENTS.md#infisical)).
-- `jpthecat.com` (`A 216.150.1.1`), `www.jpthecat.com` (`CNAME *.vercel-dns-016.com`), and `api.jpthecat.com` (Supabase custom domain) stay DNS-only in Cloudflare behind the Vercel project `jpthecat`, with zone settings normalized to `ssl` `strict`, `always_use_https` `on`, `min_tls_version` `1.2`, `email_obfuscation` `off`, and `DNSSEC` `disabled`.
+- The web deploy gate and the pinned-Bun build are owned by [web/AGENTS.md](../web/AGENTS.md#deployment-gate); the site reads no environment variable at runtime, and any maintainer variable changes only through Infisical ([web/AGENTS.md](../web/AGENTS.md#infisical)).
+- `jpthecat.com` (`A 216.150.1.1`) and `www.jpthecat.com` (`CNAME *.vercel-dns-016.com`) stay DNS-only in Cloudflare behind the Vercel project `jpthecat`, with zone settings normalized to `ssl` `strict`, `always_use_https` `on`, `min_tls_version` `1.2`, `email_obfuscation` `off`, and `DNSSEC` `disabled`.
 - Outbound mail authenticates through DNS-only Resend records (`mail.jpthecat.com -> send.forge.rmta.net`, `resend._domainkey`, `send.jpthecat.com` MX/SPF, and `_dmarc` `p=none`), and inbound mail uses Cloudflare Email Routing (`route1/2/3.mx.cloudflare.net`, subaddressing on, zero custom rules, and catch-all forwarding to the operator inbox).

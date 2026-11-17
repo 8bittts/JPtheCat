@@ -5,10 +5,9 @@ import JPtheCatCore
 /// that goes with it.
 ///
 /// The prompt is the one moment JP asks for anything: the first time the dashboard opens after the
-/// app's version changes, it offers a plain text box and sends whatever the user writes to
-/// `support@JPtheCat.com` through the SAME `SupportReportClient` path the Settings support report
-/// uses. There is no rating, no star gate, and no telemetry — an unsent prompt produces no network
-/// call at all.
+/// app's version changes, it offers a plain text box and hands whatever the user writes to their own
+/// mail app, addressed to `support@JPtheCat.com`, through the SAME `SupportReportClient` path the
+/// Settings support report uses. There is no rating, no star gate, no telemetry, and no network call.
 ///
 /// `decide` is pure so the whole show/suppress matrix is testable without a window, defaults suite,
 /// or bundle. Everything it needs is passed in.
@@ -60,8 +59,8 @@ struct PostUpdateFeedbackPresentation: Equatable {
 /// Deliberately NOT `SupportReport`: that report carries provider rows and dollar figures, which
 /// nobody expects to travel with a one-line "the menu bar is too
 /// wide". This carries the two facts needed to act on a report — which build, which macOS — and the
-/// sheet says so in plain words above the Send button. The `JP the Cat support report` first line is
-/// the contract the `/api/support-report` route validates on.
+/// sheet says so in plain words above the Send button. The `JP the Cat support report` first line
+/// lets support recognize the message.
 enum PostUpdateFeedbackReport {
   static func make(
     appVersion: String,

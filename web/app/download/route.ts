@@ -1,29 +1,15 @@
 import { readFile } from "node:fs/promises";
 import { basename, join } from "node:path";
-import { after, type NextRequest, NextResponse } from "next/server";
-import { enrichDownloadNetworkIntel } from "@/lib/analytics/download-network-intel";
-import {
-	buildDownloadRecord,
-	type DownloadRecord,
-	recordDownload,
-} from "@/lib/analytics/downloads-store";
-import {
-	createDownloadNotificationEvent,
-	type DownloadNotificationEvent,
-} from "@/lib/email/download-notification";
+import { type NextRequest, NextResponse } from "next/server";
 
-// Validate → 302: the DMG is hosted on Supabase Storage (a public `releases` bucket), so the private
-// repo's source stays private while the download is fully public. version.json ships in the deploy
-// bundle and is rewritten by the release pipeline; `/download` gives marketing a clean, stable URL.
+// Validate → 302: the DMG is a GitHub Release asset on the public repository. version.json ships in
+// the deploy bundle and is rewritten by the release pipeline; `/download` gives marketing a clean,
+// stable URL and records nothing.
 
 const NOINDEX_HEADER = "noindex, nofollow, noarchive, nosnippet, noimageindex";
-const TRUSTED_RELEASE_HOSTNAMES = new Set([
-	"api.jpthecat.com",
-	// Legacy project host remains accepted so an emergency rollback manifest can still work.
-	"duqpnrpzadrxqdbspjft.supabase.co",
-]);
-// Supabase public objects live under /storage/v1/object/public/<bucket>/<file>.
-const RELEASE_PATH_PREFIX = "/storage/v1/object/public/releases/";
+const TRUSTED_RELEASE_HOSTNAME = "github.com";
+// GitHub Release assets live under /<owner>/<repo>/releases/download/<tag>/<file>.
+const RELEASE_PATH_PREFIX = "/8bittts/JPtheCat/releases/download/";
 
 function downloadNotFoundResponse() {
 	return new NextResponse("Download not available", {
@@ -87,7 +73,7 @@ export function resolveDownloadRedirectTarget(raw: unknown): string | null {
 			return null;
 		}
 		if (
-			!TRUSTED_RELEASE_HOSTNAMES.has(parsed.hostname) ||
+			parsed.hostname !== TRUSTED_RELEASE_HOSTNAME ||
 			parsed.pathname.length <= RELEASE_PATH_PREFIX.length ||
 			!parsed.pathname.startsWith(RELEASE_PATH_PREFIX) ||
 			!parsed.pathname.toLowerCase().endsWith(".dmg")
@@ -106,26 +92,6 @@ export function resolveDownloadRedirectTarget(raw: unknown): string | null {
 	}
 }
 
-type DownloadSideEffectDeps = {
-	enrichDownloadNetworkIntel: typeof enrichDownloadNetworkIntel;
-	recordDownload: typeof recordDownload;
-};
-
-// Downloads no longer email the owner one by one: the persisted row is the record, and the 8pm
-// Pacific daily report (app/api/cron/growth-digest) counts and ranks them.
-export async function runDownloadSideEffects(
-	event: DownloadNotificationEvent,
-	downloadRecordOrRequest: DownloadRecord | Request,
-	deps: DownloadSideEffectDeps = { enrichDownloadNetworkIntel, recordDownload },
-) {
-	const enrichedEvent = await deps.enrichDownloadNetworkIntel(event);
-	const downloadRecord =
-		downloadRecordOrRequest instanceof Request
-			? buildDownloadRecord(enrichedEvent, downloadRecordOrRequest)
-			: downloadRecordOrRequest;
-	await deps.recordDownload(downloadRecord);
-}
-
 // Read the version manifest once per instance, not per request.
 const RELEASE_REDIRECT_URL: string | null = await (async () => {
 	try {
@@ -142,7 +108,7 @@ const RELEASE_REDIRECT_URL: string | null = await (async () => {
 })();
 
 /**
- * Download route: /download → 302 to the latest verified DMG on Supabase Storage.
+ * Download route: /download → 302 to the latest verified DMG on GitHub Releases.
  */
 export async function GET(request: NextRequest) {
 	if (isPrefetchRequest(request)) {
@@ -151,14 +117,6 @@ export async function GET(request: NextRequest) {
 	if (!RELEASE_REDIRECT_URL) {
 		return downloadNotFoundResponse();
 	}
-
-	const event = createDownloadNotificationEvent({
-		releaseUrl: RELEASE_REDIRECT_URL,
-		request,
-	});
-	after(async () => {
-		await runDownloadSideEffects(event, request);
-	});
 
 	return NextResponse.redirect(RELEASE_REDIRECT_URL, {
 		status: 302,

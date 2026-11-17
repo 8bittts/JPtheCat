@@ -742,29 +742,6 @@
 	color: var(--sb-ink);
 	opacity: 0.75;
 }
-.sb-ui-title {
-	font-size: 14px;
-	line-height: 1.25;
-	font-weight: 600;
-	color: var(--sb-ink);
-}
-.sb-ui-copy {
-	font-size: 12px;
-	line-height: 1.4;
-	color: var(--sb-ink);
-	opacity: 0.85;
-}
-.sb-ui-label {
-	font-size: 11px;
-	line-height: 1.35;
-	font-weight: 600;
-	color: var(--sb-ink);
-	opacity: 0.75;
-}
-.sb-ui-label--alert {
-	color: var(--sb-orange-ink);
-	opacity: 1;
-}
 .sb-form-label {
 	display: block;
 	margin-bottom: 6px;
@@ -790,12 +767,6 @@
 .sb-form-control:focus-visible {
 	outline: 4px solid var(--sb-sky);
 	outline-offset: 2px;
-}
-.sb-form-control--textarea {
-	height: auto;
-	min-height: 64px;
-	padding: 10px 12px;
-	resize: vertical;
 }
 .sb-form-panel {
 	margin-top: 32px;
@@ -1026,24 +997,6 @@
 .sb-effort-chip--high {
 	background: var(--sb-yellow);
 	color: var(--sb-orange-ink);
-}
-.sb-btn-ghost {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	font-family: var(--sb-font-body);
-	font-size: 13px;
-	font-weight: 600;
-	line-height: 1;
-	padding: 10px 16px;
-	border: 3px solid var(--sb-ink);
-	border-radius: 999px;
-	background: var(--sb-white);
-	color: var(--sb-ink);
-	cursor: pointer;
-}
-.sb-btn-ghost:hover {
-	background: var(--sb-bg);
 }
 .dialog-panel-sb {
 	background: var(--sb-white);

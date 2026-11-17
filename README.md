@@ -18,7 +18,7 @@ Native, local-first, private, free, and open source under the MIT license.
 <!-- /version-badge -->
 
 <!-- download-link -->
-**Download:** [JP the Cat v1.160 DMG](https://api.jpthecat.com/storage/v1/object/public/releases/JPtheCat-1.160.dmg)
+**Download:** [JP the Cat v1.160 DMG](https://github.com/8bittts/JPtheCat/releases/download/v1.160/JPtheCat-1.160.dmg)
 <!-- /download-link -->
 
 **Homebrew:**
@@ -57,7 +57,6 @@ There is no license, trial, or checkout.
 JPtheCat/
 ├── mac/      macOS app — SwiftPM: JPtheCatCore, JPtheCatApp, JPtheCatWidgetExtension, jpthecat-cli
 ├── web/      Marketing and /library pSEO site — Next.js 16 on Vercel
-├── supabase/ Migrations — release storage, download growth table, rate limit
 ├── Casks/    Homebrew cask, pinned to the published DMG
 ├── brand/    Mascot art and generation prompts
 ├── scripts/  Asset generation and repo-level guards

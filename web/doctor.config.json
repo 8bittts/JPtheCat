@@ -14,11 +14,6 @@
 					"react-doctor/click-events-have-key-events",
 					"react-doctor/no-noninteractive-element-interactions"
 				]
-			},
-			{
-				"comment": "React Email templates are server-rendered transactional modules, never Fast Refresh boundaries; colocated plain-text exports are the canonical paired email API.",
-				"files": ["emails/growth-digest.tsx", "emails/support-report.tsx"],
-				"rules": ["react-doctor/only-export-components"]
 			}
 		]
 	}

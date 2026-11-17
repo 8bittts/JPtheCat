@@ -17,7 +17,7 @@
 - Publishes a 64-provider catalog with explicit support status: `live`, `local next`, `connect later`, `api later`, or `candidate`.
 - Builds toward Antigravity/Gemini local sources and connect-account providers.
 - Least-privilege by design: no Full Disk Access and no Accessibility permission. JP reads exact provider dotfolders and explicitly opted-in sign-in stores, plus its own capture files — never the rest of your disk.
-- Fully local-first: prompts, code, transcripts, and token history stay on your Mac. No account is required for the local cost engine. The Mac app's product analytics are off by default; the marketing site uses Vercel Web Analytics and Speed Insights for aggregate page, CTA click, and performance telemetry, and successful non-bot `/download` requests may send an owner notification through Resend with coarse Vercel edge location context (city, region, country, timezone; no postal code; never lat/long) plus ipapi.is ASN/network and hosting/anonymizer signals. Every download button goes to `/download` and shows a short download-started note; no email is collected. The app is free and makes no license, trial, or purchase calls; update checks and downloads never include prompts, code, transcripts, token history, provider credentials, computed costs, or the local usage database, and no raw hardware identifiers ever leave your Mac. Owner/admin notices may be sent for downloads. The optional, off-by-default Grok plan-usage toggle uses a saved Cursor or Grok Bot sign-in token only with `api2.cursor.sh`; one Grok view consolidates local activity and official plan pools on a shared five-minute cadence.
+- Fully local-first: prompts, code, transcripts, and token history stay on your Mac. No account is required for the local cost engine. The Mac app's product analytics are off by default; the marketing site uses Vercel Web Analytics and Speed Insights for aggregate page, CTA click, and performance telemetry, and `/download` records nothing.
 
 ## Pages
 - [Home](https://jpthecat.com/): overview, live demo, features, widget, themes, privacy, free download, FAQ.
@@ -33,7 +33,7 @@
 ## Details
 - Platform: macOS 14 (Sonoma) or later, Apple Silicon.
 - Pricing posture: free. There is no paid tier, license key, trial, or checkout.
-- Download status: the public `/download` route redirects to the signed, notarized stable DMG only when its manifest has a trusted URL, sha256, and release date; otherwise it fails closed. Each homepage download CTA fires a Vercel Analytics custom event and shows a short download-started note; successful trusted non-bot redirects send a Resend owner notice when `RESEND_API_KEY` is configured, while bot rows still persist for aggregate `/growth` bot-pressure reporting. Downloads that come through the programmatic-SEO `/library` hub are captured as a distinct "library" channel — a separately-named analytics event and a distinct second download owner notification variant — so SEO-driven downloads are distinguishable from homepage downloads.
+- Download status: the public `/download` route redirects to the signed, notarized stable DMG only when its manifest has a trusted URL, sha256, and release date; otherwise it fails closed. Each homepage download CTA fires a Vercel Analytics custom event and shows a short download-started note. The DMG and update files are GitHub Release assets on the open-source repository, and the site sends no email.
 - Not affiliated with Anthropic, OpenAI, Google, GitHub, Cursor, or any other listed AI provider.
 - Contact: https://jpthecat.com/contact
 

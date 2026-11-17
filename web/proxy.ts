@@ -34,7 +34,7 @@ export function buildContentSecurityPolicy(nonce: string) {
 		// The JP hover sound is packaged media, so static audio/video assets must stay playable.
 		"media-src 'self' blob: data:",
 		"font-src 'self' data:",
-		"connect-src 'self' https://api.jpthecat.com",
+		"connect-src 'self'",
 		"manifest-src 'self'",
 		"frame-src 'none'",
 		"object-src 'none'",
@@ -56,8 +56,8 @@ export function buildContentSecurityPolicy(nonce: string) {
  * it too. Using a nonce forces dynamic rendering — acceptable for a small
  * marketing site, and the price of a strict, `unsafe-inline`-free script policy.
  *
- * `connect-src` includes `https://api.jpthecat.com` because the download CTA and future
- * calls resolve through that branded release/API host.
+ * `connect-src` is same-origin only: the download CTA is a 302 navigation to GitHub Releases,
+ * never a fetch.
  */
 export function proxy(request: NextRequest) {
 	const nonce = btoa(crypto.randomUUID());

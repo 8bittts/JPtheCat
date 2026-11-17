@@ -5,7 +5,7 @@ import SwiftUI
 /// after the app's version changes.
 ///
 /// No stars, no 1-5 gate, no thumbs — a rating is a step in front of the only thing worth having,
-/// which is words. Send routes through the same `SupportReportClient` → `/api/support-report` path as the
+/// which is words. Send hands the note to the user's mail app through the same `SupportReportClient` as the
 /// Settings support report, carrying `PostUpdateFeedbackReport`'s two-fact body (build + macOS) and
 /// nothing else. Dismissing sends nothing at all.
 ///
@@ -70,9 +70,9 @@ enum PostUpdateFeedbackStatus: Equatable {
 
   var text: String {
     switch self {
-    case .sent: "Sent — thank you."
+    case .sent: "Opened in your mail app — thank you."
     case .invalidEmail: "That email doesn’t look right. Leave it blank or enter a valid address."
-    case .failed: "Couldn’t send. Try again, or email support@JPtheCat.com directly."
+    case .failed: "Couldn’t open your mail app. Email support@JPtheCat.com directly."
     }
   }
 
@@ -166,7 +166,7 @@ struct PostUpdateFeedbackSheetBody: View {
 
   private var disclosure: some View {
     Text(
-      "JP emails this to support@JPtheCat.com with your app version and macOS version attached. "
+      "JP opens your mail app with this addressed to support@JPtheCat.com, with your app version and macOS version attached. "
         + "No usage data, no costs, no provider list, nothing from your projects."
     )
     .font(JPAppFont.micro)

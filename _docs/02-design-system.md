@@ -54,7 +54,7 @@ Provenance is carried by sage and honey badges; there is no separate estimate hu
 Status color drives the gauge; provider color stays on identity.
 Accent, status, and provider color are three channels and never mix.
 
-**Gradient.** The one shipped gradient is the warm `honey`→`ginger` ribbon (estimate gauge, email accent rule); everything else is flat.
+**Gradient.** The one shipped gradient is the warm `honey`→`ginger` ribbon (estimate gauge); everything else is flat.
 
 **Interactive rollover (hard).** Every clickable control has a visible warm hover: Sticker Bomb word CTAs use `.sb-btn`, and the support modal's secondary action uses `.sb-btn-ghost`; icon controls (modal close, mobile-nav summary, FAQ toggle) turn `hover:border-ginger` + `hover:text-ginger-deep` over a `hover:bg-paper-2` wash.
 
@@ -99,7 +99,6 @@ Money uses only `metricHero`, `metric`, and `metricSmall` ([12-ui-surface-invari
 - Palette: cream dot-grid canvas (`--sb-bg`), ink outlines, ginger/orange CTAs (`--sb-orange`, `--sb-orange-ink`, `--sb-honey`, `--sb-yellow`, `--sb-pink`). No mint/seafoam panel fills on public routes (guard: `web/tests/sticker-typography.test.ts`).
 The homepage **demo card** keeps Sunlit Ledger compact roles in `globals.css` (`ui-*`, `demo-*`, `compact-*`) — native parity, not the Sticker Bomb marketing scale.
 A class, custom property or keyframe exists in either stylesheet only while a component uses it (guard: `web/tests/stylesheet-dead-rules.test.ts`); add the rule in the change that applies it.
-Email may duplicate values inline, but `web/tests/design-system-normalization.test.ts` proves its brand colors equal the site tokens.
 
 ## 4. Motion
 
@@ -149,26 +148,6 @@ Combined `/terms` opens on the full-width three.js snow-globe scene (`web/compon
 - Constraints: strict nonce CSP with 100% procedural geometry plus the one self-hosted mascot image (no GLTF, HDRI, eval, CDN, or workers); three.js loads client-only; Reduce Motion or no WebGL shows the static SVG poster with no rAF.
 - Verify every visual change with a headless screenshot.
 - `/privacy` permanently redirects to `/terms#privacy-policy`; the Vercel-telemetry disclosure sentences in that privacy section are load-bearing (`web/tests/site-copy.test.ts`).
-
-### Email — the Owner Ledger
-
-Every email reads its tokens from `web/emails/email-styles.ts`: colors mirrored from `web/app/globals.css` `--color-*` and admin radii from `--radius-*`, both parity-tested; change a value there, never at a call site.
-JP sends no customer mail; the one shell is the owner/admin "Owner Ledger".
-
-**Owner/admin mail, the "Owner Ledger"** (`web/emails/admin-email-shell.tsx`: the daily report and support reports) is spartan and gets straight to the point.
-- A 640px card: a 36px logo and wordmark row, a coral `Needs attention` block when something is wrong, a 26px Fraunces heading in `gingerDeep`, a one-line lede, uppercase mono section labels over `Label: value` bullets, and a one-line footer.
-- A ranked list (top pages, sources, queries) sits one level under its label as a numbered 1. 2. 3. list with each count's unit, never one `·`-joined line; a JPtheCat.com page links to the live page.
-- No hero, badge, button, signature, or privacy paragraph.
-- Each template builds one `AdminEmailContent`, and the HTML and plain-text parts both render from it; null rows and empty sections drop out.
-- Issues lead and stay rare: support reports, the digest's failed legs, and a hosting filter that got no flags.
-  `coral` is used for nothing else.
-- Sections run who / what first and forensic IDs last; the digest runs Health, Downloads, Traffic, Search, Signals.
-- Humanize values (friendly browser, labeled Pacific time); a raw string kept for forensics, such as the user agent, gets its own row.
-- Every value, list item, and block uses the same body text; the mono face marks only the uppercase section labels (guard: `web/tests/admin-email-shell.test.tsx`).
-- An absent value uses the one vocabulary `OWNER_VALUE` in `web/lib/email/owner-vocabulary.ts`, where each word means one thing (`not configured` never ran, `failed` errored, `none in this window` ran and found nothing); a real zero prints as a number (`0`), never a word.
-
-Client robustness: Row/Column tables (never CSS flex or grid), an explicit background on every surface, `color-scheme: light` plus the dark-mode re-assertion CSS through the shared `web/emails/email-head.tsx`, AA-passing pairs, absolute `https://jpthecat.com/*` images with size and alt, HTML well under Gmail's 102KB clip, and a curated plain-text part.
-Guard: `web/tests/admin-email-shell.test.tsx`.
 
 ## Brand assets
 

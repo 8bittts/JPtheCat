@@ -401,7 +401,7 @@ private struct SupportReportSheet: View {
         }
         VStack(alignment: .leading, spacing: 3) {
           Text("Send a support report").font(JPAppFont.bodyStrong).foregroundStyle(JP.ink)
-          Text("JP will email support@JPtheCat.com with a report.")
+          Text("JP opens your mail app with a report to support@JPtheCat.com.")
             .font(JPAppFont.body)
             .foregroundStyle(JP.inkSoft)
             .fixedSize(horizontal: false, vertical: true)
@@ -451,7 +451,7 @@ private struct SupportReportSheet: View {
       if let status {
         Text(status)
           .font(JPAppFont.micro)
-          .foregroundStyle(status == "Sent to support." ? JP.sage : JP.gingerDeep)
+          .foregroundStyle(status == "Opened in your mail app." ? JP.sage : JP.gingerDeep)
       }
 
       HStack {
@@ -486,13 +486,13 @@ private struct SupportReportSheet: View {
       sending = false
       switch result {
       case .sent:
-        status = "Sent to support."
+        status = "Opened in your mail app."
         dismiss()
         onClose()
       case .invalidEmail:
         status = "That email doesn’t look right. Leave it blank or enter a valid address."
       case .failed:
-        status = "Couldn’t send. The redacted report is still on your clipboard."
+        status = "Couldn’t open your mail app. The redacted report is still on your clipboard."
       }
     }
   }

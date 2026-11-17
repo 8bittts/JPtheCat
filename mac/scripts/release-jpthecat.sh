@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 #
-# release-jpthecat.sh — cut a full JPtheCat release: notarized DMG → Supabase → live web deploy.
+# release-jpthecat.sh — cut a full JPtheCat release: notarized DMG → GitHub Release → live web deploy.
 #
 #   ./scripts/release-jpthecat.sh            # release the current Info.plist version (first time) or bump patch
 #   ./scripts/release-jpthecat.sh 0.002      # release an explicit version
 #   ./scripts/release-jpthecat.sh --dry-run  # build+notarize+appcast+smoke, but DO NOT publish/tag/push/deploy
 #
 # Pipeline: preconditions → (bump) → build-dmg (notarized) → smoke-test --production →
-# generate-appcast → upload DMG+sha256 to Supabase Storage → write web/public/stable/{version.json,
-# appcast.xml, JPtheCat-X.dmg.sha256,jpthecat.rb} + README markers + Homebrew cask → commit
-# "release: JPtheCat vX [deploy]" + tag → push HEAD+tag → verify download.
+# generate-appcast → upload DMG+sha256+deltas to a DRAFT GitHub Release → write web/public/stable/
+# {version.json, appcast.xml, JPtheCat-X.dmg.sha256, jpthecat.rb} + README markers + Homebrew cask →
+# commit "release: JPtheCat vX [deploy]" + tag → push HEAD+tag → publish the release → verify download.
+# The draft is published seconds after the push; Vercel needs over a minute to build the release
+# commit, so the assets are public before the site and the appcast point at them.
 #
 # [HARDENING] The metadata commit+tag+push is done from a DEDICATED git worktree checked out at
 # the current local HEAD — never this shared checkout — because concurrent agents `git reset --hard
@@ -24,8 +26,7 @@
 # This is OUTWARD-FACING and hard to undo (a published tag + a live deploy). Requires:
 #   - Developer ID cert + notary profile JPtheCat-Notarization (build-dmg.sh handles verification)
 #   - exported Sparkle key at ~/.config/jpthecat/sparkle_ed25519_priv.key (generate-appcast.sh)
-#   - Supabase CLI linked to the JPtheCat project (link state lives in the repo-root supabase/.temp;
-#     a worktree inherits it from the main checkout, see ensure_supabase_link)
+#   - gh signed in with push access to the public 8bittts/JPtheCat repository
 
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"   # = mac/
@@ -38,10 +39,6 @@ cd "$REPO_ROOT"
 
 APP_NAME="JPtheCat"
 PLIST="Info.plist"
-# DMG is hosted on Supabase Storage (public `releases` bucket) behind the branded Supabase custom
-# domain. Uploads still use the Supabase CLI/project link; public manifests/appcasts use this URL.
-CANONICAL_RELEASES_BASE="https://api.jpthecat.com/storage/v1/object/public/releases"
-SUPABASE_RELEASES_BASE="${JPTHECAT_RELEASES_BASE:-$CANONICAL_RELEASES_BASE}"
 
 DRY_RUN=false
 EXPLICIT_VERSION=""
@@ -59,31 +56,8 @@ fail() { printf "\033[1;31mERROR:\033[0m %s\n" "$1" >&2; exit 1; }
 
 . "${REPO_ROOT}/scripts/release-versioning.sh"
 . "${REPO_ROOT}/scripts/release-readme.sh"
+. "${REPO_ROOT}/scripts/release-github.sh"
 
-[ "$SUPABASE_RELEASES_BASE" = "$CANONICAL_RELEASES_BASE" ] \
-	|| [ "${JPTHECAT_ALLOW_NON_CANONICAL_RELEASE_HOST:-false}" = true ] \
-	|| fail "release base must be ${CANONICAL_RELEASES_BASE} (set JPTHECAT_ALLOW_NON_CANONICAL_RELEASE_HOST=true only for an intentional fallback)"
-
-command -v supabase >/dev/null 2>&1 || fail "supabase CLI not found"
-
-# The Supabase CLI resolves its project by walking up to the repo-root supabase/ directory, and keeps
-# the link in the gitignored supabase/.temp. A fresh worktree therefore has no link, and the release
-# failed there until the state was copied by hand. Inherit it from the main checkout, but ONLY when
-# that checkout is linked to THIS project; anything else fails closed at the reachability check.
-SUPABASE_PROJECT_REF="duqpnrpzadrxqdbspjft"
-ensure_supabase_link() {
-	local here="${RROOT}/supabase/.temp"
-	[ -s "${here}/project-ref" ] && return 0
-	local common main
-	common="$(git -C "$RROOT" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)" || return 0
-	main="$(dirname "$common")"
-	[ "$main" != "$RROOT" ] || return 0
-	local source="${main}/supabase/.temp"
-	[ "$(cat "${source}/project-ref" 2>/dev/null)" = "$SUPABASE_PROJECT_REF" ] || return 0
-	[ -d "${RROOT}/supabase" ] || return 0
-	cp -R "$source" "${RROOT}/supabase/" || fail "could not copy Supabase link state from ${source}"
-	step "inherited Supabase link from main checkout (${main})"
-}
 [ -d "$WEB_STABLE" ] || fail "web stable dir not found at ${WEB_STABLE}"
 
 # --- Precondition: release-metadata files must be clean (no half-edited version/manifest) ---
@@ -101,13 +75,11 @@ BUILD_DIRTY="$(git -C "$RROOT" status --porcelain -- \
 	mac/JPtheCat.entitlements mac/JPtheCatWidgetExtension.entitlements \
 	mac/JPtheCatWidgetExtension-Info.plist mac/AppIcon.icns mac/tools 2>/dev/null || true)"
 [ -z "$BUILD_DIRTY" ] || fail "uncommitted DMG build inputs — the notarized app would not match HEAD; commit them first (/jp Phase 4-pre):\n${BUILD_DIRTY}"
-ensure_supabase_link
-supabase storage ls "ss:///releases/" --remote --experimental >/dev/null 2>&1 \
-	|| fail "Supabase not linked/reachable (run in ${RROOT}: supabase link --project-ref ${SUPABASE_PROJECT_REF})"
+jptc_verify_release_repo || fail "GitHub release repository is not ready (see the error above)"
 git -C "$RROOT" fetch origin main -q
 git -C "$RROOT" merge-base --is-ancestor origin/main HEAD \
 	|| fail "local HEAD does not include origin/main — rebase or merge before releasing so the isolated worktree cannot ship stale code"
-step "clean metadata + Supabase reachable; local HEAD includes origin/main"
+step "clean metadata + GitHub release repository public and pushable; local HEAD includes origin/main"
 
 # --- Web production gate (react-doctor 100/100 + full quality chain), BEFORE the expensive mac
 # steps. A bare release ALWAYS ships a "[deploy]" commit that promotes the site, and AGENTS.md's
@@ -181,7 +153,7 @@ info "Generate signed appcast"; bash scripts/generate-appcast.sh
 DMG="build/${APP_NAME}-${VERSION}.dmg"
 SHA_FILE="build/${APP_NAME}-${VERSION}.sha256"
 CHECKSUM="$(awk '{print $1}' "$SHA_FILE")"
-DOWNLOAD_URL="${SUPABASE_RELEASES_BASE}/${APP_NAME}-${VERSION}.dmg"
+DOWNLOAD_URL="$(jptc_release_asset_url "$VERSION" "${APP_NAME}-${VERSION}.dmg")"
 RELEASE_DATE="$(date -u +%Y-%m-%d)"
 
 if [ "$DRY_RUN" = true ]; then
@@ -193,40 +165,28 @@ if [ "$DRY_RUN" = true ]; then
 	exit 0
 fi
 
-# --- Upload DMG + checksum to Supabase Storage (public `releases` bucket) ---
-info "Uploading to Supabase Storage"
-command -v supabase >/dev/null 2>&1 || fail "supabase CLI not found"
-supabase storage ls "ss:///releases/" --remote --experimental >/dev/null 2>&1 \
-	|| fail "Supabase project not linked (run in ${RROOT}: supabase link --project-ref ${SUPABASE_PROJECT_REF})"
-
-for name in "${APP_NAME}-${VERSION}.dmg" "${APP_NAME}-${VERSION}.sha256"; do
-	public_url="${SUPABASE_RELEASES_BASE}/${name}"
-	if curl -fsSI "$public_url" >/dev/null 2>&1; then
-		fail "release object already exists: ${public_url}; bump the version instead of overwriting published bytes"
-	fi
-done
-
-for f in "$DMG" "$SHA_FILE"; do
-	remote="ss:///releases/$(basename "$f")"
-	supabase storage cp "$f" "$remote" --remote --experimental --cache-control no-cache --yes >/dev/null 2>&1 || fail "upload failed: $f"
-done
-# Confirm the public DMG is reachable + byte-identical.
-REMOTE_SHA="$(curl -fsSL "${DOWNLOAD_URL}?verify=$(date +%s)" | shasum -a 256 | awk '{print $1}')"
+# --- Upload DMG + checksum + deltas to a DRAFT GitHub Release ---
+# A draft is not public, so nothing is downloadable until the release commit is pushed and the draft
+# is published below. The bytes are proven identical through the authenticated draft download.
+info "Uploading to a draft GitHub Release (${TAG})"
+jptc_prepare_draft_release "$TAG" "JP the Cat ${VERSION}" || fail "could not prepare the draft release ${TAG}"
+jptc_upload_release_asset "$TAG" "$DMG" || fail "DMG upload failed"
+jptc_upload_release_asset "$TAG" "$SHA_FILE" || fail "checksum upload failed"
+VERIFY_DIR="$(mktemp -d "${TMPDIR:-/tmp}/jpthecat-release-verify.XXXXXX")"
+gh release download "$TAG" --repo "$JPTC_RELEASE_REPO" --pattern "${APP_NAME}-${VERSION}.dmg" --dir "$VERIFY_DIR" \
+	|| fail "could not download the draft DMG back for verification"
+REMOTE_SHA="$(shasum -a 256 "${VERIFY_DIR}/${APP_NAME}-${VERSION}.dmg" | awk '{print $1}')"
+/bin/rm -rf "$VERIFY_DIR"
 [ "$REMOTE_SHA" = "$CHECKSUM" ] || fail "uploaded DMG sha mismatch (${REMOTE_SHA} != ${CHECKSUM})"
-REMOTE_SHA_FILE="$(curl -fsSL "${SUPABASE_RELEASES_BASE}/${APP_NAME}-${VERSION}.sha256?verify=$(date +%s)" | awk '{print $1}')"
-[ "$REMOTE_SHA_FILE" = "$CHECKSUM" ] || fail "uploaded sha256 mismatch (${REMOTE_SHA_FILE} != ${CHECKSUM})"
-step "uploaded + verified public DMG (${CHECKSUM})"
+step "uploaded + verified draft DMG (${CHECKSUM})"
 
-# Upload any delta update(s) generate-appcast.sh produced (build/archives/*.delta — small binary
-# diffs from past versions to this one, referenced by the appcast's sparkle:deltaFrom entries). A
-# delta upload failure is NOT fatal to the release — Sparkle transparently falls back to the full DMG
-# for any client whose matching delta enclosure 404s, so the worst case is a slightly slower update
-# for some users, never a broken one.
+# Deltas from past versions (build/archives/*.delta, referenced by the appcast's sparkle:deltaFrom
+# entries). A delta upload failure is NOT fatal — Sparkle falls back to the full DMG for any client
+# whose delta enclosure 404s, so the worst case is a slower update, never a broken one.
 DELTA_FILES=(build/archives/*.delta)
 if [ -e "${DELTA_FILES[0]:-}" ]; then
 	for f in "${DELTA_FILES[@]}"; do
-		remote="ss:///releases/$(basename "$f")"
-		if supabase storage cp "$f" "$remote" --remote --experimental --cache-control no-cache --yes >/dev/null 2>&1; then
+		if jptc_upload_release_asset "$TAG" "$f"; then
 			step "uploaded delta: $(basename "$f")"
 		else
 			step "WARNING: delta upload failed (non-fatal, falls back to full DMG): $(basename "$f")"
@@ -291,6 +251,13 @@ done
 git -C "$REL_WORKTREE" tag -a "$TAG" -m "${APP_NAME} ${VERSION}"
 git -C "$REL_WORKTREE" push origin "$TAG"
 step "pushed HEAD + ${TAG}"
+
+# --- Publish the draft release on the pushed tag. Vercel is still building the release commit, so
+# the assets go public before /download, version.json and the appcast point at them. ---
+info "Publish GitHub Release ${TAG}"
+gh release edit "$TAG" --repo "$JPTC_RELEASE_REPO" --draft=false --latest >/dev/null \
+	|| fail "could not publish the draft release ${TAG}; publish it now: gh release edit ${TAG} --repo ${JPTC_RELEASE_REPO} --draft=false --latest"
+step "published release ${TAG}"
 
 # --- Sync the public Homebrew tap. The public install path is
 # `brew tap 8bittts/jpthecat && brew trust 8bittts/jpthecat && brew install --cask jpthecat`; this

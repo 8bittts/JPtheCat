@@ -4,7 +4,7 @@ Provider log formats and the model-price evidence ledger: where each provider's 
 
 Support status lives in `ProviderCatalog.swift`; rates live in `mac/Sources/JPtheCatCore/Resources/pricing-default.json`.
 This doc owns the source formats and the provenance of each rate, never the rates themselves.
-The web side's data is owned elsewhere: the Supabase `downloads` table, its RLS, and its redaction in [08-growth.md](08-growth.md#2-the-download-spine), and the migration and signing-key rules in [supabase/AGENTS.md](../supabase/AGENTS.md).
+The web side keeps no data: there is no database, and `/download` records nothing ([08-growth.md](08-growth.md#1-measurement)).
 
 ## Claude Code
 

@@ -51,13 +51,13 @@ final class ReadmeReleaseMarkerTests: XCTestCase {
 		Keep this footer.
 		""".write(to: readme, atomically: true, encoding: .utf8)
 
-		try bash("jptc_update_readme_release_markers \(shellQuote(readme.path)) 0.128 https://api.jpthecat.com/releases/JPtheCat-0.128.dmg")
+		try bash("jptc_update_readme_release_markers \(shellQuote(readme.path)) 0.128 https://github.com/8bittts/JPtheCat/releases/download/v0.128/JPtheCat-0.128.dmg")
 		let updated = try String(contentsOf: readme, encoding: .utf8)
 
 		XCTAssertTrue(updated.contains("Keep this intro."))
 		XCTAssertTrue(updated.contains("Keep this footer."))
 		XCTAssertTrue(updated.contains("**Stable release:** `v0.128`"))
-		XCTAssertTrue(updated.contains("**Download:** [JP the Cat v0.128 DMG](https://api.jpthecat.com/releases/JPtheCat-0.128.dmg)"))
+		XCTAssertTrue(updated.contains("**Download:** [JP the Cat v0.128 DMG](https://github.com/8bittts/JPtheCat/releases/download/v0.128/JPtheCat-0.128.dmg)"))
 		XCTAssertFalse(updated.contains("old badge"))
 		XCTAssertFalse(updated.contains("old link"))
 	}

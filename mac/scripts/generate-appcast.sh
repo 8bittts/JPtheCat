@@ -25,11 +25,9 @@ RROOT="$(cd "$REPO_ROOT/.." && pwd)"
 cd "$REPO_ROOT"
 
 APP_NAME="JPtheCat"
-# DMG is hosted on Supabase Storage (public `releases` bucket) behind the branded Supabase custom
-# domain. The raw project host remains an emergency fallback, but manifests/appcasts should prefer
-# api.jpthecat.com. Override via JPTHECAT_RELEASES_BASE.
-CANONICAL_RELEASES_BASE="https://api.jpthecat.com/storage/v1/object/public/releases"
-SUPABASE_RELEASES_BASE="${JPTHECAT_RELEASES_BASE:-$CANONICAL_RELEASES_BASE}"
+# DMGs and deltas are assets of the version's GitHub Release on the public repository
+# (scripts/release-github.sh owns the repository and the URL shape).
+. "${REPO_ROOT}/scripts/release-github.sh"
 APPCAST_TOOL="tools/sparkle/bin/generate_appcast"
 ED_ACCOUNT="${JPTHECAT_ED_KEYCHAIN_ACCOUNT:-jpthecat}"
 ED_KEY_FILE="${JPTHECAT_ED_KEY_FILE:-$HOME/.config/jpthecat/sparkle_ed25519_priv.key}"
@@ -53,10 +51,6 @@ render_notes_section() {
 	fi
 }
 
-[ "$SUPABASE_RELEASES_BASE" = "$CANONICAL_RELEASES_BASE" ] \
-	|| [ "${JPTHECAT_ALLOW_NON_CANONICAL_RELEASE_HOST:-false}" = true ] \
-	|| fail "release base must be ${CANONICAL_RELEASES_BASE} (set JPTHECAT_ALLOW_NON_CANONICAL_RELEASE_HOST=true only for an intentional fallback)"
-
 [ -d "$APP_BUNDLE" ]   || fail "App bundle not found at ${APP_BUNDLE} — run build-dmg.sh first"
 [ -x "$APPCAST_TOOL" ] || fail "Sparkle generate_appcast not found at ${APPCAST_TOOL}"
 
@@ -74,10 +68,10 @@ cp "$DMG_PATH" "$ARCHIVES_DIR/"
 # [Delta updates] Fetch the last few PUBLISHED releases' DMGs so generate_appcast (which has BUILT-IN
 # delta generation — confirmed via its own --help text) can compute BinaryDelta patches from each of
 # them to this version, letting upgrading users download a small patch (~2-3% of the DMG size in
-# practice) instead of the full DMG. Supabase Storage already retains every past DMG forever (nothing
-# is ever deleted there), so this is just fetching material that already exists — no new retention
-# policy needed. Sourced from git tags (the release script always tags AND uploads together, so tags
-# are a reliable proxy for "what's actually on Supabase"). A missing/unreachable historical DMG is
+# practice) instead of the full DMG. Every GitHub Release keeps its DMG, so this is just fetching
+# material that already exists — no retention policy needed. Sourced from git tags (the release
+# script always tags AND publishes together, so a tag is a reliable proxy for a published release,
+# from v1.148 on). A missing/unreachable historical DMG is
 # NOT fatal — generate_appcast just computes fewer (or zero) deltas for those and the release
 # continues as a full-DMG-only update, exactly like today's shipped behavior. Bounded at 5 (matches
 # generate_appcast's own --maximum-deltas default) so this never grows unbounded release after release.
@@ -90,7 +84,7 @@ if [ -n "$PAST_TAGS" ]; then
 		[ -n "$tag" ] || continue
 		past_version="${tag#v}"
 		past_dmg="${APP_NAME}-${past_version}.dmg"
-		past_url="${SUPABASE_RELEASES_BASE}/${past_dmg}"
+		past_url="$(jptc_release_asset_url "$past_version" "$past_dmg")"
 		if curl -fsSL "$past_url" -o "${ARCHIVES_DIR}/${past_dmg}" 2>/dev/null; then
 			FETCHED_DELTA_SOURCES=$((FETCHED_DELTA_SOURCES + 1))
 			step "Fetched ${past_dmg} (delta source)"
@@ -105,7 +99,7 @@ if [ "$FETCHED_DELTA_SOURCES" -eq 0 ]; then
 fi
 
 # Start from a CLEAN feed: generate_appcast APPENDS to an existing appcast.xml, so a stale prior
-# run leaves dead older-version items (e.g. a pre-Supabase GitHub URL) in the published feed.
+# run leaves dead older-version items (e.g. a retired release host) in the published feed.
 /bin/rm -f "$OUTPUT"
 
 # Release notes HTML (Sparkle embeds a <dmgbasename>.html sitting next to the archive). JPtheCat's
@@ -294,7 +288,7 @@ fi
 step "Release notes generated from git history (${LOG_RANGE})"
 fi  # end of git-generated notes (skipped when JPTHECAT_NOTES_HTML is set)
 
-DOWNLOAD_PREFIX="${SUPABASE_RELEASES_BASE}/"
+DOWNLOAD_PREFIX="$(jptc_release_download_prefix "$VERSION")"
 
 # --maximum-versions 1: keep the PUBLISHED feed to exactly one <item> (the latest release) — the past
 # DMGs fetched above are raw material for delta computation only, never published as their own feed
@@ -333,10 +327,10 @@ fi
 grep -q 'sparkle:edSignature' "$OUTPUT" || fail "appcast missing sparkle:edSignature — signing failed"
 step "Enclosure EdDSA-signed"
 
-# The enclosure URL must point at the public Supabase release object.
+# The enclosure URL must point at this version's public GitHub Release asset.
 grep -q "${DOWNLOAD_PREFIX}${APP_NAME}-${VERSION}.dmg" "$OUTPUT" \
-	|| fail "appcast enclosure URL is not the expected Supabase release URL"
-step "Enclosure URL → Supabase Storage"
+	|| fail "appcast enclosure URL is not the expected GitHub Release asset URL"
+step "Enclosure URL → GitHub Release ${VERSION}"
 
 if command -v xmllint >/dev/null 2>&1; then
 	xmllint --noout "$OUTPUT" || fail "appcast.xml is not well-formed XML"

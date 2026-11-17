@@ -30,7 +30,7 @@ export default function TermsAndPrivacy() {
 						lede="How JP the Cat handles your data, what the free app promises, and the plain-language rules for using the website and downloads."
 						meta={
 							<>
-								Last updated November 5, 2026. Questions? Use the contact page or ping @8bit on X.
+								Last updated November 17, 2026. Questions? Use the contact page or ping @8bit on X.
 							</>
 						}
 					/>

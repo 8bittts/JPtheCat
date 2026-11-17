@@ -18,7 +18,7 @@ type RepoLinkProps = Omit<ComponentProps<"a">, "href" | "onClick" | "rel" | "tar
 	target: RepoLinkTarget;
 };
 
-/** An outbound link to the public repository that the owner digest counts. */
+/** An outbound link to the public repository, counted as a Vercel Web Analytics event. */
 export function RepoLink({ placement, target, ...props }: RepoLinkProps) {
 	return (
 		<a

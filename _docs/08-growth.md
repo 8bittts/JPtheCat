@@ -1,99 +1,20 @@
 # Growth
 
-How the acquisition funnel is measured and kept honest: bot filtering, the download spine, readers, the owner digest, and the `/library` programmatic SEO strategy.
+What the site measures, and the `/library` programmatic SEO strategy.
 
-The daily owner digest email is the growth record; no dated growth reports are kept in the repository.
-JP the Cat is free and app usage stays local, so the server-side spine is narrow: download rows plus aggregate web traffic and search.
+## 1. Measurement
 
-```
-traffic → CTA click → /download redirect
-(GSC, Vercel)  (Vercel events)  (downloads table)
-```
+JP the Cat is free and app usage stays local, so the site measures only aggregate web traffic.
+`/download` redirects to the current GitHub Release DMG and records nothing; there is no download database, owner email, digest, or cron.
+Never add a download counter, a growth database, or an owner report without an explicit operator request and a privacy-policy update in the same change.
 
-> [NOTE] A raw `/download` hit is NOT an install. Every growth number leads with `mac_human_downloads`, never `human_downloads` and never `all_hits`.
-
-## 1. Bot filtering
-
-A row counts as a human download only if it passes all of these; removing any layer reopens a measured inflation hole ([measurements](00-foundation.md#download-telemetry)):
-1. **Owner smoke sources** (`smoke-test`, `production-test`, the `JP-the-Cat-smoke-test-bot/…` user agent) are excluded.
-2. **User-agent denylist at write time** — `web/lib/analytics/download-bot.ts` sets `is_bot` for empty and known automated agents, including self-named scanners (`growthscan`, `pdfmin`, `observatory`) and the operator's `smoke` agents.
-3. **Same-IP burst at read time** (`burst_ips`) — two or more distinct CTA sources from one IP inside 8 seconds.
-4. **Hosting or anonymizing networks** (`network_is_hosting`, `network_is_anonymous`).
-   A `null` flag means the lookup returned nothing, not "clean": every reader prints `network_flagged / network_flaggable` beside the headline, and the digest raises a `Needs attention` issue for any gap.
-5. **Repeat monitors** (`monitor_ips`) — an IP downloading on four or more distinct days, which the burst window cannot see.
-6. **Durable exclusion stamp** (`exclusion`) — migration `0011` rewrites the redaction job to stamp `monitor` / `burst` on a row BEFORE nulling its IP, because the human CTE admits `ip is null` rows and a scanner caught today otherwise became human a month later.
-7. **Platform** (`is_mac`, persisted at write time from the frozen `Macintosh; Intel Mac OS X 10_15_7` user-agent token) — the headline `mac_human` population keeps only macOS browsers, the one client that can open the DMG.
-
-The read-time rules live in one module, `web/lib/analytics/growth-download-sql.ts`, shared by the CLI reader and the digest because the two drifted once (guard: `web/tests/growth-download-sql.test.ts`, which also pins the burst and monitor constants to migration `0011`).
-The 30-day PII redaction nulls `ip`, `ua`, and `referer`; `is_bot`, `is_mac`, and `exclusion` are the only classifications that survive it, so rows redacted before `is_mac` existed (before 2026-09-21) report as `platform_unknown` and never get a Mac figure.
-
-## 2. The download spine
-
-- **Table** `public.downloads` (migrations `0001`, `0002`, `0003`, `0009`, `0010`, `0011`): version, source, referer, coarse geo, network context, user agent, `is_bot`, `is_mac`, and `exclusion`; `0010` schedules the daily redaction through `pg_cron` and `0011` makes it stamp `exclusion` first.
-  The insert policy pins `exclusion` to null, so the web key can never stamp a row.
-- **Write path:** `web/app/download/route.ts` builds a bot-classified record (`web/lib/analytics/downloads-store.ts`) and POSTs it to PostgREST inside `after()`, sending the publishable key (`SUPABASE_PUBLISHABLE_KEY`) on the `apikey` header only.
-  The route enriches the event, then persists the row for bots and humans alike, and sends no email.
-  A failed insert is logged and swallowed, so telemetry never breaks the download.
-- **Sources:** the route stores only `direct`, `pricing`, `library`, and `production-test` (`ALLOWED_DOWNLOAD_SOURCES`); any other value becomes `external`.
-  Every homepage CTA (hero, pricing, FAQ) sends `pricing` on purpose so the by-source trend stays continuous with older rows; `hero` and `nav` are retired values.
-  Splitting homepage placements would start a new series, so do it only by explicit decision.
-- **Enrichment:** coarse Vercel edge headers (city, region, country, timezone; postcode is not stored since 2026-11-06) plus a fail-soft ipapi.is lookup for ASN and hosting flags; no latitude or longitude is stored.
-  **`IPAPI_IS_KEY` is required for the hosting filter, not optional:** the keyless free tier returns a string `asn`, no `is_datacenter`, and no `is_vpn`, and caps at 30 lookups per client IP per day, so without a key every row carries `null` flags and the datacenter rule is blind.
-  A free ipapi.is account restores the flags at 1,000 lookups a day; add `IPAPI_IS_KEY` in Infisical `prod`, then redeploy production.
-  The parser accepts both shapes and keeps an absent flag `null` (guard: `web/tests/download-network-intel.test.ts`).
-- **RLS:** INSERT-only for `anon`/`authenticated` with a payload-shape `WITH CHECK` (never `WITH CHECK (true)`); readers connect as `postgres` over the session pooler.
-  Re-run Supabase advisors after any DDL.
-- **No Supabase SDK** in the web runtime; one `fetch` to `/rest/v1/downloads`.
-
-## 3. Readers
-
-- `web/scripts/growth-metrics.ts [days] [--json]` — read-only Postgres over the pooler (`SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`): headline (`mac_human_downloads` first, `human_downloads` for continuity, `network_flagged / network_flaggable` for filter coverage), window deltas for both populations, monthly trend with `platform_unknown`, platform split, Mac-only source, version, and country, and bot agents.
-- `web/scripts/growth-extra.ts [days] [--json]` — the per-layer filter table and Vercel Web Analytics; it reads the Vercel CLI's own auth, so no token is copied into `.env.local`, and it prints aggregates only.
-- `web/scripts/analytics-pull.ts` — Search Console queries, pages, trends, and countries; run at 30 and 90 days to diff rising queries.
-  The OAuth refresh token is per Google account, so the existing DeathNote client with `webmasters.readonly` is reused; a clean worktree without credentials prints a setup notice and exits 0.
-- The three readers share `web/lib/analytics/reader-cli.ts` for the env-file loader, the pooler connection string and the `[days]` argument (guard: `web/tests/reader-cli.test.ts`).
-- **Website traffic** is Vercel Web Analytics and Speed Insights (no GA4); custom events (`download_cta_clicked`, `library_download_cta_clicked`, `download_modal_opened`, `library_download_modal_opened`, `repo_link_clicked`) are not bot-filtered.
+- **Website traffic** is Vercel Web Analytics and Speed Insights (no GA4), read in the Vercel dashboard; custom events (`download_cta_clicked`, `library_download_cta_clicked`, `download_modal_opened`, `library_download_modal_opened`, `repo_link_clicked`) are not bot-filtered, and they were Title Case until 2026-10-22.
   `repo_link_clicked` fires from every public-repository link through `components/site/repo-link.tsx`, with `placement` (`home_callout`, `faq`, `footer`, `demo_settings`) and `target` (`repo`, `contributing`).
-  They were Title Case until 2026-10-22; `LEGACY_PRODUCT_EVENT_NAMES` lets the digest count both spellings until no window reaches back that far.
-  Every custom event goes through `trackProductEvent` in `web/lib/analytics/product-analytics.ts`; its `ProductEventName` union also types the digest's `countFor`, so a renamed event fails typecheck, and `web/tests/product-analytics.test.ts` fails if any other file imports `track` from `@vercel/analytics`.
-- **24-hour ground truth:** Supabase Storage logs show real DMG byte fetches for one day; redirect rows without a fetch are bots.
-- **Deploy cadence:** `vercel ls`, read-only.
+  Every custom event goes through `trackProductEvent` in `web/lib/analytics/product-analytics.ts`, and `web/tests/product-analytics.test.ts` fails if any other file imports `track` from `@vercel/analytics`.
+- **Search** is read in Search Console; no repository script reads it.
+- **Release downloads** show per-asset counts on the GitHub Releases page; a count there is a byte fetch, not an install.
 
-## 4. Owner daily report and notices
-
-`GET /api/cron/growth-digest` is the one owner report per day.
-Vercel Cron calls it at `0 3 * * *` and `0 4 * * *` UTC behind `CRON_SECRET`; `lib/analytics/rollup-schedule.ts` lets through only the firing that is 20:00 in Los Angeles, so the report follows the Pacific clock through daylight saving.
-It covers the last 24 hours; a Pacific Monday adds a `Trend: last 7 days` section and the Pacific 1st adds `Trend: last 30 days`, which replaced the separate weekly and monthly digests.
-It renders `web/emails/growth-digest.tsx` through `web/lib/email/send-helper.tsx` (Resend idempotency plus transient retry) to `GROWTH_DIGEST_TO`, else `DOWNLOAD_NOTIFICATION_TO`; with neither set it sends nothing and returns 503 `RECIPIENT_NOT_CONFIGURED`.
-The idempotency key is the Los Angeles date plus a body fingerprint, so a same-day re-run with moved data does not collide in Resend.
-Any skipped or failed send returns non-200 so Vercel Cron shows the failure; the off-hour firing returns `200 {"due":false}`.
-Previews use `?sample&sample_id=<slug>` (add `sample=all` for both trend sections); they skip the clock gate and carry `[Sample]` subjects and separate idempotency keys.
-A preview call needs the real `CRON_SECRET`, which no env pull returns; without it, call `runGrowthDigestRequest` from `web/` with a one-time local `CRON_SECRET`, and supply `VERCEL_TOKEN`, which `.env.local` lacks, or the Vercel leg reads `not configured`.
-
-The report leads with a `Needs attention` block from `buildIssues` (a failed data leg or a blind hosting filter), and its subject counts Mac downloads, open-source items to triage, and issues; a `not configured` leg (no credentials) is a choice, not an issue.
-The `Open source (GitHub)` section follows Health, so contributions are read before downloads.
-`lib/analytics/growth-source-github.ts` reads the public repository behind `SITE.repoUrl`: stars, forks, open issues and pull requests, new and merged work in the window, community contributors, and a `Triage first` list of up to five open items.
-Community means not the repository owner and not a bot; the owner's own items never enter the triage list or the contributor counts.
-Triage order is a security label, then a ready pull request, then a bug label, then other issues, then drafts; ties go to more comments and reactions, then the longest wait (guard: `web/tests/growth-sources.test.ts`).
-The leg needs no credentials; an optional `GITHUB_TOKEN` only lifts the shared-IP rate limit, and a refused request fails soft into `Needs attention`.
-Everything else stays aggregate: download spine, Vercel analytics, and Search Console; the GitHub section shows only metadata GitHub already publishes (item numbers, titles, and author logins).
-It never includes prompts, code, transcripts, token history, costs, credentials, project paths, raw IPs, or the local usage database.
-Search Console queries and pages rank by clicks, then impressions.
-
-Immediate notices are limited to customer messages: the in-app support report.
-Downloads never email one by one; the daily report counts them.
-Owner-notice idempotency keys come from body-visible event fields plus a hashed identity, never an hourly bucket.
-
-**Production env:** `CRON_SECRET`; `RESEND_API_KEY` with `RESEND_FROM_EMAIL` and the `*_NOTIFICATION_TO` / `GROWTH_DIGEST_TO` overrides; `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`; `VERCEL_TOKEN`; `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REFRESH_TOKEN`, `GSC_SITE_URL`; optional `GITHUB_TOKEN`.
-
-## 5. Operating notes
-
-- A `/growth` review is read-only, never deploys, and saves no report file.
-- `vercel env pull` never returns a Sensitive value: it writes an empty string or a bracketed placeholder (measured for `CRON_SECRET`), so a pulled value is neither the secret nor evidence that it is missing; a `(skipped: … not set)` line means the local shell lacks it.
-- Vercel snapshots env per deployment: after adding or rotating `CRON_SECRET`, ship a fresh `[deploy]` before treating it as live.
-- Read current numbers from the newest owner digest or a fresh reader run, never from this doc.
-
-## 6. SEO and the `/library` hub
+## 2. SEO and the `/library` hub
 
 Organic search through `/library`: its thesis, its page families, and the guardrails that keep it honest.
 The engine is adapted from `zoedate`'s `/library` (crawlable-but-unlinked hub, anti-thin eligibility gate, pure content generators, per-page JSON-LD, gated sitemap) and swaps its geography for a bounded product registry.

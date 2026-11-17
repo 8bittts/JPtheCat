@@ -5,16 +5,6 @@
 	"buildCommand": "node scripts/run-pinned-bun.cjs build",
 	"installCommand": "node scripts/run-pinned-bun.cjs install",
 	"ignoreCommand": "if echo \"$VERCEL_GIT_COMMIT_MESSAGE\" | head -1 | grep -q '\\[deploy\\]'; then exit 1; fi",
-	"crons": [
-		{
-			"path": "/api/cron/growth-digest",
-			"schedule": "0 3 * * *"
-		},
-		{
-			"path": "/api/cron/growth-digest",
-			"schedule": "0 4 * * *"
-		}
-	],
 	"redirects": [
 		{
 			"source": "/:path*",

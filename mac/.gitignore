@@ -17,5 +17,3 @@ build/
 # macOS
 .DS_Store
 
-# Supabase CLI link state (release upload only)
-supabase/

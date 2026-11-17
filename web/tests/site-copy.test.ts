@@ -154,12 +154,12 @@ describe("public launch copy", () => {
 			expect(source).not.toContain("mailto:support@jpthecat.com");
 		}
 
-		// /contact routes support through the real, submittable "Get Support" modal instead of a bare
-		// mailto link — see components/site/contact-support-cta.tsx.
+		// /contact is the one place support is a direct email: its "Get Support" button is a mailto
+		// link, because the site has no support endpoint and sends no email.
 		expect(await Bun.file("app/contact/page.tsx").text()).toMatch(/<ContactSupportCta\b/);
-		expect(await Bun.file("components/site/contact-support-cta.tsx").text()).toContain(
-			"/api/support-report",
-		);
+		const contactCta = await Bun.file("components/site/contact-support-cta.tsx").text();
+		expect(contactCta).toMatch(siteEmailMailtoTemplate);
+		expect(contactCta).not.toContain("/api/");
 
 		expect(sources.find(([file]) => file.endsWith("footer.tsx"))?.[1]).toContain(
 			"SITE.supportSocialUrl",
@@ -586,17 +586,18 @@ describe("public launch copy", () => {
 		for (const path of ["../Casks/jpthecat.rb", "public/stable/jpthecat.rb"]) {
 			const cask = await Bun.file(path).text();
 			expect(cask).toContain(
-				'url "https://api.jpthecat.com/storage/v1/object/public/releases/JPtheCat-#{version}.dmg"',
+				'url "https://github.com/8bittts/JPtheCat/releases/download/v#{version}/JPtheCat-#{version}.dmg"',
 			);
 			expect(cask).toContain('url "https://jpthecat.com/stable/appcast.xml"');
 			expect(cask).toContain("strategy :sparkle, &:short_version");
 		}
 	});
 
-	it("allows the branded release host in the CSP connect policy", async () => {
+	it("keeps the CSP connect policy same-origin", async () => {
 		const proxy = await Bun.file("proxy.ts").text();
 
-		expect(proxy).toContain("connect-src 'self' https://api.jpthecat.com");
+		expect(proxy).toContain(`"connect-src 'self'"`);
+		expect(proxy).not.toContain("api.jpthecat.com");
 	});
 
 	it("installs Vercel Analytics and Speed Insights globally", async () => {
@@ -611,15 +612,9 @@ describe("public launch copy", () => {
 		expect(layout).toContain("<SpeedInsights />");
 		expect(normalizedPrivacy).toContain("Vercel Web Analytics and Speed Insights");
 		expect(normalizedPrivacy).toContain("download and repository link click events");
-		expect(normalizedPrivacy).toContain(
-			"Successful non-bot downloads may send an owner notification",
-		);
-		expect(normalizedPrivacy).toContain("coarse Vercel edge location context");
-		expect(normalizedPrivacy).toContain("postal code");
-		expect(normalizedPrivacy).toContain("never latitude/longitude");
-		expect(normalizedPrivacy).toContain("network/ASN and hosting/anonymizer signals");
-		expect(normalizedPrivacy).toContain("ipapi.is");
-		expect(normalizedPrivacy).toContain("Resend or email provider");
+		expect(normalizedPrivacy).toContain("JP does not record downloads, keeps no download database");
+		expect(normalizedPrivacy).toContain("sends no newsletter or owner notification");
+		expect(normalizedPrivacy).not.toMatch(/Supabase|Resend|ipapi\.is|api\.jpthecat\.com/);
 		// JP is free: the policy no longer describes license, trial, or Stripe data flows.
 		expect(normalizedPrivacy).toContain("makes no license, trial, or purchase calls");
 		expect(normalizedPrivacy).not.toMatch(/Stripe|Checkout Session/);
@@ -628,10 +623,8 @@ describe("public launch copy", () => {
 		);
 		expect(llms).toContain("Vercel Web Analytics and Speed Insights");
 		expect(llms).toContain("CTA click");
-		expect(llms).toContain("no postal code");
-		expect(llms).toContain("never lat/long");
-		expect(llms).toContain("ipapi.is ASN/network");
-		expect(llms).toContain("Owner/admin notices may be sent");
+		expect(llms).toContain("`/download` records nothing");
+		expect(llms).not.toMatch(/ipapi|Resend|owner notice|Owner\/admin/i);
 		expect(llms).toContain("Pricing posture: free.");
 		expect(llms).not.toMatch(/\$12\.99|Stripe|Checkout Session|refund window/);
 		expect(llms).toContain("prompts, code, transcripts, and token history stay on your Mac");

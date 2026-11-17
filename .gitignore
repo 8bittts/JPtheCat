@@ -54,6 +54,4 @@ workstreams/
 
 .vercel
 
-# Supabase CLI scratch (project-ref cache written during functions deploy)
-supabase/.temp/
 

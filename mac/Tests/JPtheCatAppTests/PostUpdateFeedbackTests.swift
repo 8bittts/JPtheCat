@@ -67,9 +67,9 @@ final class PostUpdateFeedbackReportTests: XCTestCase {
       generatedAt: Date(timeIntervalSince1970: 1_760_000_000))
   }
 
-  /// `/api/support-report` rejects a body that does not open with this exact line or runs under 80
-  /// characters — the mac and web sides of that contract must not drift.
-  func testSatisfiesTheSupportReportEndpointContract() {
+  /// Support recognizes a report by this first line, and the body stays a readable size for a mail
+  /// app's compose window.
+  func testOpensWithTheSupportReportLine() {
     let body = report()
     XCTAssertTrue(body.hasPrefix("JP the Cat support report"))
     XCTAssertGreaterThanOrEqual(body.count, 80)

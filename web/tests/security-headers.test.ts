@@ -27,7 +27,7 @@ describe("security headers", () => {
 		);
 	});
 
-	it("pins Node Functions beside the Supabase database", async () => {
+	it("pins Node Functions to one region", async () => {
 		const vercelConfig = (await Bun.file("vercel.json").json()) as {
 			regions?: string[];
 		};
@@ -44,7 +44,8 @@ describe("security headers", () => {
 		expect(csp).toContain("img-src 'self' data: blob:");
 		expect(csp).toContain("media-src 'self' blob: data:");
 		expect(csp).toContain("font-src 'self' data:");
-		expect(csp).toContain("connect-src 'self' https://api.jpthecat.com");
+		expect(csp).toContain("connect-src 'self';");
+		expect(csp).not.toContain("api.jpthecat.com");
 		expect(csp).toContain("manifest-src 'self'");
 		expect(csp).toContain("frame-src 'none'");
 		expect(csp).toContain("object-src 'none'");

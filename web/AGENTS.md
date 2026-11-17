@@ -71,7 +71,7 @@ Many tests are content guardrails (SEO length limits, copy pins, no-fiction/hone
 - `app/layout.tsx` sets `export const dynamic = "force-dynamic"`, so every page renders per request; this is required for the nonce CSP, not something to "optimize" into static generation.
 - `@/*` is the TypeScript path alias for this directory.
 - `lib/site.ts` is the single source of truth for brand name, domain, copy, prices, and the provider list; `lib/homepage-providers.ts` owns the fixed homepage roster, which never narrows `lib/site.ts` or `/library`.
-- `components/sticker/` holds the Sticker Bomb homepage, `components/site/` the shared chrome and the homepage demo, `components/library/` the pSEO blocks, `components/legal/` the three.js scene, and `emails/` the owner/admin React Email templates on `emails/admin-email-shell.tsx`.
+- `components/sticker/` holds the Sticker Bomb homepage, `components/site/` the shared chrome and the homepage demo, `components/library/` the pSEO blocks, and `components/legal/` the three.js scene.
 - `scripts/` holds standalone utilities; Biome allows `console` there and errors on it everywhere else.
 
 `biome.json` formats with tabs, a 100-character line width, and double quotes for JS and JSX.
@@ -82,14 +82,13 @@ Many tests are content guardrails (SEO length limits, copy pins, no-fiction/hone
 This directory is the Vercel project root.
 Install and build run through `scripts/run-pinned-bun.cjs`, which derives and verifies Bun from `packageManager`.
 `ignoreCommand` builds only when the SUBJECT line of the most recent commit carries `[deploy]`; a `[deploy]` written only in a commit body does not build (`tests/vercel-deploy-marker.test.ts` runs the real command).
-Vercel Cron hits `app/api/cron/growth-digest` twice a day and only one firing sends, so keep both `vercel.json` entries or the report skips half the year ([schedule](../_docs/08-growth.md#4-owner-daily-report-and-notices)).
 
 ## Security headers and CORS
 
-`proxy.ts` applies `script-src 'nonce-...' 'strict-dynamic'`, `connect-src 'self' https://api.jpthecat.com`, `object-src 'none'`, `frame-src 'none'`, and `frame-ancestors 'none'` to documents and dynamic routes.
+`proxy.ts` applies `script-src 'nonce-...' 'strict-dynamic'`, `connect-src 'self'`, `object-src 'none'`, `frame-src 'none'`, and `frame-ancestors 'none'` to documents and dynamic routes.
 Static assets and release metadata stay outside the proxy matcher, so cached responses never carry a stale nonce.
 `/stable/:path*` is the only intentionally public-CORS surface; the crawler text routes (`/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest`, `/llms.txt`) are pinned back to `https://jpthecat.com` with `Cross-Origin-Resource-Policy: same-origin` in `vercel.json`, because Vercel otherwise serves them with `Access-Control-Allow-Origin: *`.
-Never add public CORS to the homepage, `/download`, or `/api/support-report`.
+Never add public CORS to the homepage or `/download`.
 
 ## Downloads
 
@@ -97,19 +96,15 @@ Public CTAs may point at `/download`, which fails closed unless `public/stable/v
 
 **Download always starts on first click.**
 `startDownload()` fires a programmatic `<a>` click to `/download` BEFORE the modal opens, and the modal is a non-blocking download-started note (no email field) that never re-triggers the download.
-A download never emails the owner on its own: `/download` only persists the row, and the 8pm Pacific daily report counts it (guard: `tests/download.test.ts`).
-`DownloadCta` links keep `prefetch={false}`, and `/download` prefetch requests (`next-router-prefetch`, `Purpose`/`Sec-Purpose: prefetch`) return 204/no-store with no redirect and no download row.
+`/download` redirects to the current GitHub Release DMG and records nothing; it sends no email (guard: `tests/download.test.ts`).
+`DownloadCta` links keep `prefetch={false}`, and `/download` prefetch requests (`next-router-prefetch`, `Purpose`/`Sec-Purpose: prefetch`) return 204/no-store with no redirect.
 
 
 ## Email
 
-JP sends no customer mail (no license, newsletter, or broadcast).
-Every owner/admin notice uses the spartan `emails/admin-email-shell.tsx`; its tokens, layout, and client-robustness rules are owned by [02-design-system.md](../_docs/02-design-system.md#email--the-owner-ledger).
-**A new owner notice builds an `AdminEmailContent` for `AdminEmail`, with anything wrong in `issues`** (guard: `tests/admin-email-shell.test.tsx`).
-**The headline must be `emailColors.gingerDeep`, NOT ink** — Gmail mobile dark mode force-lightens large near-black inline text to white (guard: `tests/admin-email-shell.test.tsx`).
-Idempotency keys include body-shaping event fields, never an hour bucket, because Resend rejects a reused key whose body changed within 24h.
-Resend tag values are ASCII letters, numbers, underscore, and dash only; today's senders tag with fixed literals and enum values, and a tag built from request data must be reduced to that set first.
-`RESEND_API_KEY` is required in production; `RESEND_FROM_EMAIL` defaults to `JP the Cat <downloads@jpthecat.com>`.
+The site sends no email: no owner notices, reports, newsletter, or broadcast.
+Support is a `mailto:` link to `support@jpthecat.com` on `/contact`, and the app's support report opens the user's own mail app.
+Never add an email sender or a support form endpoint without an explicit operator request and a privacy-policy update in the same change.
 
 ## Accessibility — WCAG 2.1 AA (required)
 
@@ -138,10 +133,7 @@ One `lib/library/eligibility.ts` gate serves both routes and the sitemap.
 
 ## Growth analytics
 
-[_docs/08-growth.md](../_docs/08-growth.md) owns the download spine, the bot-filter layers, and the readers.
-A raw `/download` hit is NOT an install — always report `mac_human_downloads`, never `human_downloads` alone and never `all_hits`.
-The CLI reader and the digest must both take their read-time bot rules from `lib/analytics/growth-download-sql.ts` (guard: `tests/growth-download-sql.test.ts`).
-A `null` hosting flag is "lookup returned nothing", never "clean" ([incident](../_docs/00-foundation.md#download-telemetry)).
+[_docs/08-growth.md](../_docs/08-growth.md) owns the measurement limits: Vercel Web Analytics events only, and no download database.
 
 ## Legal pages and mascot
 

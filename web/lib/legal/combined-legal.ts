@@ -19,12 +19,12 @@ export const POLICY_SECTIONS = [
 	{
 		id: "downloads-and-updates",
 		title: "Downloads and updates",
-		body: "The public DMG, update feed, and release files may be served through Vercel and the Supabase-backed api.jpthecat.com release host. Successful non-bot downloads may send an owner notification through Resend or another email provider with the release filename, download source, referrer, user agent, timestamp, and coarse Vercel edge location context (city, region, country, and timezone; no postal code is kept, and never latitude/longitude). Download redirects are also stored in an INSERT-only Supabase table for aggregate growth review, including your IP address (kept to detect automated and same-network burst downloads), approximate geo fields, network/ASN and hosting/anonymizer signals, and bot rows so bot pressure can be measured. For network intelligence, JP may send the download IP address to ipapi.is to identify the network operator and whether the address appears to be hosting, VPN, proxy, or other anonymous infrastructure. JP does not collect email addresses on download and sends no newsletter. To prevent abuse, support and download requests are rate-limited using a short-lived record of your IP address. Sparkle update checks may request the update feed and release files. The app makes no license, trial, or purchase calls: it is free and does not identify your Mac to JP's servers. No raw hardware identifiers (serial number or platform UUID) ever leave your Mac. Update checks do not include prompts, code, transcripts, token history, computed costs, provider credentials, or local usage database contents. If you turn on Grok plan usage in Live data (off by default), the app uses the sign-in Cursor or Grok Bot already saved on your Mac and sends only that bearer token to api2.cursor.sh to fetch official weekly and billing-cycle percentages. It never uses refresh tokens and never sends prompts, code, transcripts, local usage, or paths. One shared five-minute cadence covers the unified Grok view. Turning it off stops the calls and deletes unified and legacy saved plan readings. Local Grok Build and optional Cursor stop-hook activity stay on your Mac.",
+		body: "The website serves the update feed, and the public DMG and update files are GitHub Release assets on the open-source repository. The /download link redirects you to the current DMG on GitHub, which serves the file under its own privacy terms. JP does not record downloads, keeps no download database, collects no email address on download, and sends no newsletter or owner notification. Sparkle update checks may request the update feed and release files. The app makes no license, trial, or purchase calls: it is free and does not identify your Mac to JP's servers. No raw hardware identifiers (serial number or platform UUID) ever leave your Mac. Update checks do not include prompts, code, transcripts, token history, computed costs, provider credentials, or local usage database contents. If you turn on Grok plan usage in Live data (off by default), the app uses the sign-in Cursor or Grok Bot already saved on your Mac and sends only that bearer token to api2.cursor.sh to fetch official weekly and billing-cycle percentages. It never uses refresh tokens and never sends prompts, code, transcripts, local usage, or paths. One shared five-minute cadence covers the unified Grok view. Turning it off stops the calls and deletes unified and legacy saved plan readings. Local Grok Build and optional Cursor stop-hook activity stay on your Mac.",
 	},
 	{
 		id: "support",
 		title: "Support",
-		body: "Support requests and the optional redacted support report from the app go to JP by email. Support records may include the email address you use to contact us, the app and macOS versions you share, and the messages you send. JP does not sell anything, so there is no checkout and no payment data.",
+		body: "Support is plain email. The contact page and the app's optional redacted support report open your own mail app addressed to support@jpthecat.com; nothing is sent unless you send that message. Support records may include the email address you write from, the app and macOS versions you share, and the messages you send. JP does not sell anything, so there is no checkout and no payment data.",
 	},
 	{
 		id: "ai-providers-are-separate",
@@ -45,18 +45,13 @@ export const POLICY_SECTIONS = [
 
 export const THIRD_PARTIES = [
 	["Vercel", "Website hosting, Web Analytics, Speed Insights, security, and operations."],
-	["Supabase", "Release downloads, update hosting, and download-growth rows on api.jpthecat.com."],
+	[
+		"GitHub",
+		"The open-source repository and the release downloads, including the update files Sparkle fetches.",
+	],
 	[
 		"Sparkle",
 		"The macOS update framework that checks the public update feed and downloads app updates.",
-	],
-	[
-		"Resend or email provider",
-		"Owner download notifications and support email if transactional mail is enabled.",
-	],
-	[
-		"ipapi.is",
-		"Download-network intelligence: ASN/network operator plus hosting, VPN, proxy, or anonymizer signals for owner review.",
 	],
 ] as const;
 

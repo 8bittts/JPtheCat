@@ -2,7 +2,8 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 
 const ARTIFACT_ROOTS = [".next/static", ".next/server/app"] as const;
-const PUBLIC_VALUES = new Set(["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"]);
+// Values published to the browser on purpose; the site ships none today, so every credential is scanned.
+const PUBLIC_VALUES = new Set<string>();
 const SECRET_NAME =
 	/(API_KEY|TOKEN|SECRET|SECRET_KEY|PASSWORD|SERVICE_ROLE_KEY|PRIVATE_KEY|CREDENTIAL|SALT)$/;
 const PLATFORM_PUBLIC = /^(VERCEL_|NEXT_(?!PUBLIC_)|TURBO_|NX_|AWS_(?!SECRET|ACCESS)|__)/;
