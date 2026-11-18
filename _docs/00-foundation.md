@@ -11,8 +11,9 @@ Dates are the evidence in this doc; the owner docs carry none.
 - 2026-07-02: the macOS widget, launch at login, notifications by the book and the pSEO `/library` engine land.
 - 2026-07-03: the full `/library` pSEO site ships, and the remote pricing layer lands.
 - 2026-11: the license, trial and paywall code is removed, and every feature becomes free.
-- 2026-11-06: the source goes public under MIT as a fresh repository with a new root commit, because the old history held customer emails, Stripe IDs, and device hashes; that history lives only in the private `8bittts/JPtheCat-archive`.
+- 2026-11-06: the source goes public under MIT as a fresh repository with a new root commit, because the old history held customer emails, Stripe IDs, and device hashes; that history was kept in the private `8bittts/JPtheCat-archive`.
 - 2026-11-17: releases move from the Supabase `releases` bucket behind `api.jpthecat.com` to GitHub Releases on the public repository (v1.148 to v1.160 backfilled), and the Supabase project is deleted.
+- 2026-11-18: the private `JPtheCat-archive` repository is deleted, so the pre-open-source history and the customer data in it no longer exist on GitHub.
   The download database, the 8pm owner digest and its cron, every owner email, and the support-report endpoint go with it; support became a `mailto:` link and the app's report opens the user's mail app.
 - The rest of the record is the engineering log below: each entry states what broke, the rule now, and the guard that holds it, while the contract it protects lives in its owner doc.
 

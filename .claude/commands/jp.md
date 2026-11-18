@@ -217,7 +217,7 @@ release failure.
   hand-maintained changelog, and no signed-appcast hand edits. Fix `mac/scripts/generate-appcast.sh`
   when the note contract needs to change.
 - **Explicit file staging only** — never `git add .` / `git add -A` (a second agent may have unrelated WIP). Stage the exact files for the change.
-- **The repository is public (MIT).** The release commit and tag push to `github.com/8bittts/JPtheCat`; never force-add the gitignored operator-local paths (`_docs/legacy-backup/`, `brand/generated/`, `brand/reference/`), and never push the private `JPtheCat-archive` history, which the checkout's `pre-push` hook rejects.
+- **The repository is public (MIT).** The release commit and tag push to `github.com/8bittts/JPtheCat`; never force-add the gitignored operator-local paths (`_docs/legacy-backup/`, `brand/generated/`, `brand/reference/`), and never push the deleted pre-open-source history from an old clone, which the checkout's `pre-push` hook rejects.
 - **Default-branch push** — Claude Code: pass `dangerouslyDisableSandbox: true` on the `git push origin main` Bash call (the sandbox heuristic blocks it otherwise). Codex: runs under `--yolo`, so the push proceeds without a special flag.
 - **Web deploys are `[deploy]`-gated** — only a commit message containing `[deploy]` triggers a Vercel build. **Bare `/jp` and `/jp release` always include `[deploy]` (in the release commit) so every release ships and deploys the site**; the WIP commit made in Phase 4-pre deliberately omits `[deploy]`, and `/jp check` never deploys.
 - Commit style: concise, **no AI attribution** (no "Generated with…", no Co-Authored-By).

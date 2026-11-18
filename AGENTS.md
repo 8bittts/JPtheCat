@@ -176,7 +176,7 @@ Never commit secrets, API keys, OAuth tokens, signing keys, notary credentials, 
 **The repository is public; never track the operator-local paths.**
 `_docs/legacy-backup/` (customer data), `brand/generated/`, and `brand/reference/` stay gitignored.
 The tracked runbooks in `.claude/` and `.agents/` are public, so they never hold home paths, account details, or metrics.
-The pre-open-source history lives only in the private `8bittts/JPtheCat-archive`; never push it, rebase it onto, or merge it into the public repository (guard: the local `pre-push` hook rejects any push that contains an archive root commit).
+The pre-open-source history held customer data and was deleted with its private archive repository; never reintroduce it from an old local clone (guard: the local `pre-push` hook still rejects any push that contains the archive root commit).
 
 **Never edit agent-harness config ad hoc; use only the explicit opt-in setup paths. `~/.claude/settings.json` remains read-only.**
 The Claude-limits capture feature (`StatuslineCapture`) only READS `statusLine.command` to find the user's own statusline script and then edits that script, and only after explicit opt-in.
