@@ -4,30 +4,30 @@ IMPORTANT: This file was signed by Sparkle. Any modifications to this file requi
     <channel>
         <title>JPtheCat</title>
         <item>
-            <title>1.161</title>
-            <pubDate>Thu, 19 Nov 2026 15:09:48 -0800</pubDate>
-            <sparkle:version>294</sparkle:version>
-            <sparkle:shortVersionString>1.161</sparkle:shortVersionString>
+            <title>1.162</title>
+            <pubDate>Thu, 19 Nov 2026 15:25:37 -0800</pubDate>
+            <sparkle:version>295</sparkle:version>
+            <sparkle:shortVersionString>1.162</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
             <description><![CDATA[<style>body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;padding:14px 18px;line-height:1.55;color:#1c1b19;background:#fffaf0}h2{font-size:16px;margin:0 0 6px}h3{font-size:13px;margin:14px 0 4px;color:#8a4a17;text-transform:uppercase;letter-spacing:.04em}.lede,.fine{font-size:12px;margin:0 0 10px;color:#6b6254}ul{margin:0 0 8px 18px;padding:0}li{font-size:13px;margin-bottom:5px}</style>
 <h2>Small paws, strict standards. Here are the improvements:</h2>
 <ul>
-<li>Price GPT-6.2 Astra and Sol, Claude Mythos 5.2, Fable and Mythos 5.2 fast mode, and Grok Build's fast Grok 4.7</li>
+<li>Fetch updates and pricing straight from GitHub, so JP no longer depends on JPtheCat.com</li>
 </ul>
 <p class="fine">Built with ❤️ from San Francisco and Honolulu.</p>
 ]]></description>
-            <enclosure url="https://github.com/8bittts/JPtheCat/releases/download/v1.161/JPtheCat-1.161.dmg" length="18090322" type="application/octet-stream" sparkle:edSignature="091HX4KxJ9G3DWA8LR+cfkedMjnCf8G7Aqu9LnkNgsiJpTrG5IdNhePHC8uZGAz7MA2e8j9BLzWvp6FYXeufAw=="></enclosure>
+            <enclosure url="https://github.com/8bittts/JPtheCat/releases/download/v1.162/JPtheCat-1.162.dmg" length="18090365" type="application/octet-stream" sparkle:edSignature="vZ+7YzlMXqLRXK469ylqz9LqDMG9j2u2unyde6xKsrWVx1K+vCY9EZ2WTFA5c1snJhd+dQ8crRKpmKdMZ/jWBw=="></enclosure>
             <sparkle:deltas>
-                <enclosure url="https://github.com/8bittts/JPtheCat/releases/download/v1.161/JPtheCat294-293.delta" sparkle:deltaFrom="293" length="287054" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="v5RjnuE1XZd1x9qT/WxoPh8jdXOs/Q8/TIh8V8Zvtn79vG/VyHgxkVtto+ZAi6J7q0X4lIHQXkJweR2x6G4QCg=="></enclosure>
-                <enclosure url="https://github.com/8bittts/JPtheCat/releases/download/v1.161/JPtheCat294-292.delta" sparkle:deltaFrom="292" length="453702" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="pXbyH7QovKG1PLX5sesby57ZKC2AtsEWlhivHxasRQ+sPA12Dolm5N4/AZBWjFwBGoBePEQtrrTi8HnfIuIICA=="></enclosure>
-                <enclosure url="https://github.com/8bittts/JPtheCat/releases/download/v1.161/JPtheCat294-291.delta" sparkle:deltaFrom="291" length="455414" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="nHvp2Cn5F4oRfsEJXy6vd1P3s9iGJasXf+aAMyQACDbzIsHP6kfYbfwbITjSnAJiyo/oqS8Ii1D0g85uJwUlCg=="></enclosure>
-                <enclosure url="https://github.com/8bittts/JPtheCat/releases/download/v1.161/JPtheCat294-290.delta" sparkle:deltaFrom="290" length="500858" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="P4NcjSqwdfNZwtmhXVgtQe5HAQF/xwyGTimBkqM01U/iyAJJwgiPbOItMSIaeMxHNiHski4Lh3PNumlcksu8Bg=="></enclosure>
-                <enclosure url="https://github.com/8bittts/JPtheCat/releases/download/v1.161/JPtheCat294-289.delta" sparkle:deltaFrom="289" length="509026" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="4FvSTWld7SRSFLOSb5StXSV0m9hYekNINPQChWKG8BPKufMI+Vz5vhIGQEFy1GuMoN86HtIzYLp5660ZgHOHBA=="></enclosure>
+                <enclosure url="https://github.com/8bittts/JPtheCat/releases/download/v1.162/JPtheCat295-294.delta" sparkle:deltaFrom="294" length="45518" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="bqMxrGtQA9Ey595pju1FIjyrlWswjbEC6lwSSk7kWq2VodI28S2ttrbexQE0lJ6NBj++8dmnPmxDbNmhLSTkBw=="></enclosure>
+                <enclosure url="https://github.com/8bittts/JPtheCat/releases/download/v1.162/JPtheCat295-293.delta" sparkle:deltaFrom="293" length="286830" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="1qVlr4Ot3fWXLqrSKolmz26wLasYKn79TUS6svJRcWeqotteMhz3ZRmkucK/RbNNbzbbxaprCoKWo7ZXBxN/Dg=="></enclosure>
+                <enclosure url="https://github.com/8bittts/JPtheCat/releases/download/v1.162/JPtheCat295-292.delta" sparkle:deltaFrom="292" length="456082" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="ZDqkPCGXwoxeCHIbccEFBYJTZoBygQkW0EEqWbbU3mQKdrffZCS30ftf8rceR6ENC4K4lpJH+3GH/AeffRBMBw=="></enclosure>
+                <enclosure url="https://github.com/8bittts/JPtheCat/releases/download/v1.162/JPtheCat295-291.delta" sparkle:deltaFrom="291" length="457318" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="m3glrjXsTNJzVVZXmyoq/VJGkopHbHRBqc5Dr9uRaD9+KPEPaeifbY07hJbd8TrRMibZzyXwjGUx7r0t+2P6Bw=="></enclosure>
+                <enclosure url="https://github.com/8bittts/JPtheCat/releases/download/v1.162/JPtheCat295-290.delta" sparkle:deltaFrom="290" length="499954" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="976432" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="uhvuxXKU2NPKg7a421VbSBnhUChC8iNyFQ6gEdabg50ekgqcbDq+yU25Uzyv/nlkEnIHh9rwaRvlQ8F+HFriBw=="></enclosure>
             </sparkle:deltas>
         </item>
     </channel>
 </rss><!-- sparkle-signatures:
-edSignature: V1a5GyqzB2qSTXiAzboqIeSQDxNvmaIr08Z7AVUOl+T3sFJg941c/UqE1YvU+neTZ5bJMUShBxLVnx4J9ReUCQ==
-length: 3990
+edSignature: izONSR+duTVyXO3vgpigubnIGWytqfmye5odJ9MzdnSQx2PFOCunzzso4tj7kE65GaF+DliX2ZcB4xiY/+gbBA==
+length: 3966
 -->
