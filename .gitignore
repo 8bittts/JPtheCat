@@ -52,3 +52,6 @@ workstreams/
 .vercel
 
 
+
+# Retired website: a local web/ may still hold an operator .env.local and build output; never commit it
+/web/
