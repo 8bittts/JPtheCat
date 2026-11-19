@@ -182,6 +182,64 @@ final class PricingTableTests: XCTestCase {
 		XCTAssertEqual(try XCTUnwrap(calc.cost(model: model, usage: TokenUsage(input: 272_000))), 0.272, accuracy: 1e-9)
 	}
 
+	/// GPT-6.2 Astra and Sol (developers.openai.com/api/docs/pricing, Standard): short and >272K long
+	/// columns for input, output, cached input, 30-minute write, and 12-hour write.
+	func testGPT62RowsMatchOfficialStandardColumns() throws {
+		let expected: [String: [(TokenUsage, Double, Double)]] = [
+			"gpt-6.2-astra": [
+				(TokenUsage(input: 1_000_000), 8, 16), (TokenUsage(output: 1_000_000), 40, 60),
+				(TokenUsage(cacheRead: 1_000_000), 0.4, 0.8),
+				(TokenUsage(cacheCreate5m: 1_000_000), 10, 20), (TokenUsage(cacheCreate1h: 1_000_000), 20, 40),
+			],
+			"gpt-6.2-sol": [
+				(TokenUsage(input: 1_000_000), 2, 4), (TokenUsage(output: 1_000_000), 10, 15),
+				(TokenUsage(cacheRead: 1_000_000), 0.1, 0.2),
+				(TokenUsage(cacheCreate5m: 1_000_000), 2.5, 5), (TokenUsage(cacheCreate1h: 1_000_000), 5, 10),
+			],
+		]
+		for (model, buckets) in expected {
+			for (usage, base, premium) in buckets {
+				XCTAssertEqual(try XCTUnwrap(calc.cost(model: model, usage: usage, forceTier: false)), base, accuracy: 1e-9, model)
+				XCTAssertEqual(try XCTUnwrap(calc.cost(model: model, usage: usage, forceTier: true)), premium, accuracy: 1e-9, model)
+			}
+			XCTAssertEqual(ModelEffort.level(for: model), .high, model)
+		}
+		XCTAssertEqual(try XCTUnwrap(calc.cost(model: "gpt-6.2-sol", usage: TokenUsage(input: 272_000))), 0.544, accuracy: 1e-9)
+		XCTAssertEqual(try XCTUnwrap(calc.cost(model: "gpt-6.2-sol", usage: TokenUsage(input: 272_001))), 1.088004, accuracy: 1e-9)
+	}
+
+	/// Claude Mythos 5.2 has Fable 5.2's pricing (platform.claude.com model page), and both fast modes
+	/// are $16/$80 with the prompt-caching multipliers stacked on top (5m 1.25x, 1h 2x, read 0.025x).
+	func testMythos52AndFable52FastModeRows() throws {
+		let mythos: [(TokenUsage, Double)] = [
+			(TokenUsage(input: 1_000_000), 8), (TokenUsage(output: 1_000_000), 40),
+			(TokenUsage(cacheCreate5m: 1_000_000), 10), (TokenUsage(cacheCreate1h: 1_000_000), 16),
+			(TokenUsage(cacheRead: 1_000_000), 0.2),
+		]
+		for (usage, rate) in mythos {
+			XCTAssertEqual(try XCTUnwrap(calc.cost(model: "claude-mythos-5-2", usage: usage)), rate, accuracy: 1e-9)
+		}
+		for model in ["claude-fable-5-2", "claude-mythos-5-2"] {
+			let fast = ModelIdentity.fastModeID(model)
+			let rates: [(TokenUsage, Double)] = [
+				(TokenUsage(input: 1_000_000), 16), (TokenUsage(output: 1_000_000), 80),
+				(TokenUsage(cacheCreate5m: 1_000_000), 20), (TokenUsage(cacheCreate1h: 1_000_000), 32),
+				(TokenUsage(cacheRead: 1_000_000), 0.4),
+			]
+			for (usage, rate) in rates {
+				XCTAssertEqual(try XCTUnwrap(calc.cost(model: fast, usage: usage)), rate, accuracy: 1e-9, fast)
+			}
+		}
+		XCTAssertEqual(ModelEffort.level(for: "claude-mythos-5-2"), .high)
+	}
+
+	/// Grok Build's locally emitted fast id is Grok 4.7 Fast (docs.x.ai: "Cursor and Grok Build only").
+	func testGrokBuildFastIdBillsAsGrok47Fast() throws {
+		XCTAssertEqual(ModelIdentity.pricingID("grok-4.7-build-fast", aliases: table.aliases), "grok-4.7-fast")
+		XCTAssertEqual(try XCTUnwrap(calc.cost(model: "grok-4.7-build-fast", usage: TokenUsage(input: 200_000))), 0.8, accuracy: 1e-9)
+		XCTAssertEqual(try XCTUnwrap(calc.cost(model: "grok-4.7-build-fast", usage: TokenUsage(output: 1_000_000))), 12, accuracy: 1e-9)
+	}
+
 	func testGPT61SolHasDistinctCacheRatesAndExact272kBoundary() throws {
 		let model = "gpt-6.1-sol"
 		let buckets: [(TokenUsage, Double, Double)] = [

@@ -53,6 +53,7 @@ Promote only when a local turn emits one of these ids.
 - Zen-only GPT rows (GPT-5.5 Pro, GPT-5.4 Pro and Nano, GPT-5, GPT-5.1, GPT-5 Nano): add `-zen` ids from the Zen table.
 - Zen publishes Qwen3.7 Plus and MiniMax M2.7 without Go's 256K tier and cache-write rate; one row serves both routes today.
 - Go bills MiniMax M3 above 512K at $0.60/$2.40/cached $0.12 while Zen lists one flat rate, so a tier needs a Go-only accounting id.
+- Other Zen catalog ids with no row and no local turn yet: `gemini-4-carbon`, `gemini-4-hydrogen`, `gemini-decision-1`, `gpt-6-luna-decision`, `glm-5`, `kimi-k2.5`, `mistral-large-4`, `jev-1.13`, `muse-ember-1.0`; image models (`gpt-image-2.5-sunburst`, `grok-imagine-image-2.0`, `gemini-nano-banana-2.1`) never reach a token row.
 
 ### Dashboard focus after a status-item click on macOS 27
 
