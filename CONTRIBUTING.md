@@ -24,11 +24,9 @@ Run each line from the repository root:
 
 ```sh
 (cd mac && swift build && swift test --parallel)   # native gates
-(cd web && bun install && bun run check:full)         # full web gate
 ```
 
-Use Bun for all JavaScript package work.
-Add or update tests for the behavior you change, and keep both gates green.
+Add or update tests for the behavior you change, and keep the gates green.
 
 ## Pull requests
 
@@ -36,7 +34,7 @@ Add or update tests for the behavior you change, and keep both gates green.
 - Describe what changed and how you verified it, including a screenshot for visible UI work.
 - Write commit subjects in plain user language; customer-facing release notes are built from them.
 
-Releases, signing, notarization, and deploys need owner credentials, so the maintainer runs them.
+Releases, signing, notarization, and update-feed deploys need owner credentials, so the maintainer runs them.
 
 ## License
 

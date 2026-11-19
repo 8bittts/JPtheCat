@@ -5,13 +5,12 @@ import Foundation
 /// for the top chrome and bottom footer buttons. Every cue is gated on the SAME global master as the
 /// meow (`SettingsStore.interactiveSoundsEnabled`), so turning "Interactive sounds" off in Settings
 /// silences the whole set. Players are preloaded and cached (one per cue) so a rapid click never pays
-/// for a fresh decode. The homepage `menubar-demo.tsx` mirrors these cues with the matching
-/// `web/public/ui-*.m4a` files.
+/// for a fresh decode.
 @MainActor
 final class InteractiveSounds {
 	static let shared = InteractiveSounds()
 
-	/// The four packaged cues (`ui-<name>.m4a` in the app Resources, mirrored in `web/public`).
+	/// The four packaged cues (`ui-<name>.m4a` in the app Resources).
 	enum Cue: String, CaseIterable {
 		case toggleOn = "ui-toggle-on"
 		case toggleOff = "ui-toggle-off"
@@ -66,7 +65,6 @@ final class InteractiveSounds {
 
 	/// A dashboard selector row — a provider or the "All providers" aggregate — was clicked. Reuses the
 	/// light top-click cue (selector rows are the card's primary navigation), named so the intent is
-	/// explicit and easy to re-point if a dedicated selector cue ever ships. Mirrored in the homepage
-	/// `menubar-demo.tsx` `playSelectorClick`.
+	/// explicit and easy to re-point if a dedicated selector cue ever ships.
 	func selectorClick() { play(.clickTop) }
 }

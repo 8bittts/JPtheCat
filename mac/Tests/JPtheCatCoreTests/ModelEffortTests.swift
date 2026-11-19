@@ -40,68 +40,10 @@ final class ModelEffortTests: XCTestCase {
 		XCTAssertNil(ModelEffort.level(for: "auto"))
 	}
 
-	func testRawValuesMatchTheWebStringUnion() {
+	func testRawValuesAreStableStrings() {
 		XCTAssertEqual(ModelEffortLevel.low.rawValue, "low")
 		XCTAssertEqual(ModelEffortLevel.medium.rawValue, "medium")
 		XCTAssertEqual(ModelEffortLevel.high.rawValue, "high")
 		XCTAssertEqual(ModelEffortLevel.high.label, "High")
-	}
-
-	// MARK: - Cross-language parity
-
-	/// The Core `ModelEffort.levels` table and the web `MODEL_EFFORT_LEVELS` map in
-	/// `web/lib/library/pricing-registry.ts` MUST stay identical — a divergence means the app and the
-	/// site disagree about a model's effort tier (the exact silent drift this extraction closes).
-	func testCoreTableMatchesWebRegistry() throws {
-		let source = try String(contentsOf: webRegistryURL(), encoding: .utf8)
-		let webMap = try parseWebEffortMap(source)
-
-		let coreMap = ModelEffort.levels.mapValues(\.rawValue)
-		let coreKeys = Set(coreMap.keys)
-		let webKeys = Set(webMap.keys)
-
-		XCTAssertEqual(
-			coreKeys, webKeys,
-			"Model keys diverged.\n  Core-only: \(coreKeys.subtracting(webKeys).sorted())\n  Web-only: \(webKeys.subtracting(coreKeys).sorted())")
-		for key in coreKeys.intersection(webKeys) {
-			XCTAssertEqual(coreMap[key], webMap[key], "Effort tier for '\(key)' differs (Core=\(coreMap[key] ?? "?"), web=\(webMap[key] ?? "?"))")
-		}
-		XCTAssertFalse(webMap.isEmpty, "Parsed an empty web map — the parser (or the source block) changed shape.")
-	}
-
-	// MARK: - Helpers
-
-	private func webRegistryURL() -> URL {
-		// #filePath = mac/Tests/JPtheCatCoreTests/ModelEffortTests.swift → up 3 = mac/, up 1 more = repo root.
-		let macRoot = URL(fileURLWithPath: #filePath)
-			.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-		return macRoot.deletingLastPathComponent()
-			.appendingPathComponent("web/lib/library/pricing-registry.ts")
-	}
-
-	/// Extract the `MODEL_EFFORT_LEVELS` object literal's `"key": "value"` entries.
-	private func parseWebEffortMap(_ source: String) throws -> [String: String] {
-		guard let blockStart = source.range(of: "MODEL_EFFORT_LEVELS")?.upperBound,
-			let braceOpen = source.range(of: "{", range: blockStart..<source.endIndex)?.upperBound,
-			let braceClose = source.range(of: "};", range: braceOpen..<source.endIndex)?.lowerBound
-		else {
-			// A skip here would report the parity suite green precisely when the web symbol is renamed —
-			// the exact drift this guard exists to catch. Fail closed instead.
-			XCTFail(
-				"MODEL_EFFORT_LEVELS literal not found in \(webRegistryURL().path) — the mac↔web effort-parity guard cannot run.")
-			return [:]
-		}
-		let body = String(source[braceOpen..<braceClose])
-		var map: [String: String] = [:]
-		// Keys may be quoted ("glm-5.3-flash") or bare identifiers (hy3) — Biome strips quotes when valid.
-		let entry = try NSRegularExpression(pattern: #"(?:"([^"]+)"|([a-zA-Z_][a-zA-Z0-9_]*))\s*:\s*"(low|medium|high)""#)
-		for match in entry.matches(in: body, range: NSRange(body.startIndex..., in: body)) {
-			let key = match.range(at: 1).location != NSNotFound
-				? String(body[Range(match.range(at: 1), in: body)!])
-				: String(body[Range(match.range(at: 2), in: body)!])
-			guard let valueRange = Range(match.range(at: 3), in: body) else { continue }
-			map[key] = String(body[valueRange])
-		}
-		return map
 	}
 }

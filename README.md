@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="web/public/jpthecat-logo.png" alt="JP the Cat logo" width="112" height="112" />
+<img src="brand/jpthecat-logo.png" alt="JP the Cat logo" width="112" height="112" />
 
 # JP the Cat
 
@@ -33,6 +33,10 @@ Tap source: `https://github.com/8bittts/homebrew-jpthecat`
 
 </div>
 
+<p align="center">
+  <img src="brand/homepage.jpg" alt="JP the Cat overview: the menu-bar dashboard, Advanced Analytics, desktop widgets, 24 themes, privacy, and pricing" width="800" />
+</p>
+
 ---
 
 ## What it is
@@ -45,7 +49,7 @@ JP the Cat answers one question: what are my AI coding agents costing right now,
 - **History that lasts.** A local `usage.sqlite` warehouse outlives provider log rotation; Advanced Analytics and export are included.
 - **Genuinely local.** Prompts, code, transcripts, and the usage database never leave the Mac.
   The optional Grok plan-usage fetch sends only a saved Cursor or Grok Bot access token to its own dashboard API; no refresh tokens or local usage are sent.
-  The website uses disclosed Vercel Web Analytics; Mac app product analytics stay opt-in and off.
+  The app needs no Full Disk Access or Accessibility permission, and its product analytics stay opt-in and off.
 - **No provider pretending.** Only providers marked `live` in `ProviderCatalog` are marketed as supported.
 
 Every feature — dashboard, limit gauges, widget, alerts, analytics, export, and all 24 themes — is free.
@@ -56,7 +60,7 @@ There is no license, trial, or checkout.
 ```
 JPtheCat/
 ├── mac/      macOS app — SwiftPM: JPtheCatCore, JPtheCatApp, JPtheCatWidgetExtension, jpthecat-cli
-├── web/      Marketing and /library pSEO site — Next.js 16 on Vercel
+├── feed/     Static update feed served at jpthecat.com/stable (Sparkle appcast, pricing, cask)
 ├── Casks/    Homebrew cask, pinned to the published DMG
 ├── brand/    Mascot art and generation prompts
 ├── scripts/  Asset generation and repo-level guards
@@ -71,12 +75,7 @@ Run each line from the repository root:
 (cd mac && swift build && swift test --parallel)                               # native gates
 bash mac/scripts/build_and_run.sh                                               # stage and launch the real .app
 (cd mac && swift run jpthecat-cli snapshot --json --provider all --indexed)     # local automation snapshot
-(cd web && bun install && bun run dev:secrets)                                  # http://localhost:4444 — Infisical `dev`
-(cd web && bun run check:full)                                                     # full web gate
 ```
-
-`bun run dev` in `web/` reads a local `.env.local` and needs no Infisical CLI.
-Web secrets live in the Infisical project linked from `.infisical.yaml`; see `web/AGENTS.md`.
 
 `swift run JPtheCat` is not an app-shell smoke test; use the staged `.app`.
 The app also writes `~/Library/Application Support/JPtheCat/latest-snapshot.json` for local integrations; it carries rollups and official windows only, never prompts, transcripts, code, secrets, or file paths.
@@ -86,6 +85,7 @@ The app also writes `~/Library/Application Support/JPtheCat/latest-snapshot.json
 - [`_docs/00-docs-map.md`](_docs/00-docs-map.md) — owner-doc index and authority order.
 - [`AGENTS.md`](AGENTS.md) — the enforceable engineering contract.
 - [`_docs/todos.md`](_docs/todos.md) — the only active backlog.
+- [`PRIVACY.md`](PRIVACY.md) — privacy policy and terms of service.
 
 ## Contributing
 

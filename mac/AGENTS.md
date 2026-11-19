@@ -1,7 +1,7 @@
 # AGENTS.md — jpthecat/mac
 
 The native Swift menu-bar app, its WidgetKit extension, and the release and QA scripts that ship them.
-The repo root's [AGENTS.md](../AGENTS.md) owns the cross-cutting rules (branding, mac/web parity, the provider model, worktrees, release and Sparkle-notes workflow, gate order, privacy) and they are not restated here.
+The repo root's [AGENTS.md](../AGENTS.md) owns the cross-cutting rules (branding, the update feed, the provider model, worktrees, release and Sparkle-notes workflow, gate order, privacy) and they are not restated here.
 Architecture lives in [../_docs/01-architecture.md](../_docs/01-architecture.md) and release mechanics in [../_docs/05-infrastructure.md](../_docs/05-infrastructure.md).
 Paths below are relative to this directory.
 
@@ -45,7 +45,7 @@ A placed widget showing an older release is first a leftover extension process (
 **Least privilege — NO Full Disk Access, NO Accessibility, ever.**
 Sources use exact home-root provider dotfolders, JP's own container/App Group, or the explicitly opted-in Cursor/Grok Bot sign-in stores in Application Support; none requires TCC access.
 Never add an entitlement, TCC usage description, `AXIsProcessTrusted`, `CGEventTap`, or Apple-events surface; never enumerate `$HOME` (providers read exact paths only); a future source inside another app's container needs an App Group or a scoped `NSOpenPanel` bookmark, never blanket FDA.
-This is a shipped marketing claim, guarded by `../web/tests/site-copy.test.ts`.
+This is a public claim in `README.md`.
 
 Every money figure routes through `MoneyFormatter` (Core), never bare `String(format: "$%.2f")` (drops thousands separators); all figures are USD and a conversion is never invented.
 

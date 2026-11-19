@@ -101,9 +101,8 @@ final class ProviderOptInRowTests: XCTestCase {
 		}
 	}
 
-	/// The exact strings `web/tests/site-copy.test.ts` mirrors on the homepage demo toggles. The refactor
-	/// had to be byte-identical in rendered output — this is the mac side of that parity pin.
-	func testLiveLimitCopyStaysByteIdenticalToTheWebMirror() {
+	/// The exact live-limit toggle titles users see.
+	func testLiveLimitCopyStaysExact() {
 		XCTAssertEqual(
 			SettingsBackView.claudeLiveLimits.title(.active, true), "Claude live limits · on")
 		XCTAssertEqual(

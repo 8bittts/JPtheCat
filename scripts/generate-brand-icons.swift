@@ -30,18 +30,11 @@ enum IconError: Error, CustomStringConvertible {
 let repoRoot = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
 let sourceURL = repoRoot.appendingPathComponent("brand/jp-eyes.png")
 
-let alphaOutputs: [(String, IconSpec)] = [
-	("web/public/jpthecat-logo.png", IconSpec(size: 256, opaque: false, backgroundColor: nil, insetScale: 1.0, cornerRadiusRatio: 0.22)),
+let pngOutputs: [(String, IconSpec)] = [
+	("brand/jpthecat-logo.png", IconSpec(size: 256, opaque: false, backgroundColor: nil, insetScale: 1.0, cornerRadiusRatio: 0.22)),
 	("mac/Sources/JPtheCatApp/Resources/jp-menubar.png", IconSpec(size: 256, opaque: false, backgroundColor: nil, insetScale: 1.0, cornerRadiusRatio: 0.22)),
-	("web/app/icon.png", IconSpec(size: 512, opaque: false, backgroundColor: nil, insetScale: 1.0, cornerRadiusRatio: 0.22)),
-	("web/public/icon-512.png", IconSpec(size: 512, opaque: false, backgroundColor: nil, insetScale: 1.0, cornerRadiusRatio: 0.22)),
-	("web/public/icon-192.png", IconSpec(size: 192, opaque: false, backgroundColor: nil, insetScale: 1.0, cornerRadiusRatio: 0.22)),
 ]
 
-let opaqueOutputs: [(String, IconSpec)] = [
-	("web/app/apple-icon.png", IconSpec(size: 180, opaque: true, backgroundColor: .white, insetScale: 1.06, cornerRadiusRatio: 0.22)),
-	("web/public/icon-maskable-512.png", IconSpec(size: 512, opaque: true, backgroundColor: NSColor(calibratedRed: 0xFF / 255.0, green: 0xF6 / 255.0, blue: 0xE6 / 255.0, alpha: 1.0), insetScale: 0.78, cornerRadiusRatio: 0.0)),
-]
 
 let iconsetDir = repoRoot.appendingPathComponent("mac/AppIcon.iconset")
 
@@ -167,7 +160,7 @@ guard let sourceImage = NSImage(contentsOf: sourceURL) else {
 }
 
 do {
-	for (path, spec) in alphaOutputs + opaqueOutputs {
+	for (path, spec) in pngOutputs {
 		let url = repoRoot.appendingPathComponent(path)
 		guard let rep = drawRoundedIcon(from: sourceImage, spec: spec) else {
 			throw IconError.pngEncode(url.path)

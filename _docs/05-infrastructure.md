@@ -1,6 +1,6 @@
 # Infrastructure
 
-The release pipeline, Sparkle vendoring and update UI, release hosting, the Homebrew tap, and web hosting and DNS for JP the Cat.
+The release pipeline, Sparkle vendoring and update UI, release hosting, the Homebrew tap, and the update feed and DNS for JP the Cat.
 
 JP the Cat ships as an unsandboxed, hardened-runtime, Developer ID app with Sparkle 2 auto-update.
 The App Sandbox cannot read the `~/.claude` and `~/.codex` dotfolders the product exists to read, so the Mac App Store is impossible; those dotfolders are not TCC-protected, so the app needs no file-access entitlement and shows no permission prompt.
@@ -21,10 +21,10 @@ One command owns it: `bash mac/scripts/release-jpthecat.sh [version]` (also `/jp
 - **Versions:** `CFBundleVersion` is a monotonic integer floored above the latest published `<sparkle:version>`, because Sparkle compares build numbers; the bump math is covered by `VersionBumpTests`.
 - **Appcast:** `generate-appcast.sh` publishes exactly one `<item>` (`--maximum-versions 1`), feeds the last five DMGs in only to build deltas, and purges Sparkle's never-pruned extraction cache on every run.
 - **Hosting:** each release is a GitHub Release on this public repository, tagged `v<version>`, holding `JPtheCat-<v>.dmg`, `JPtheCat-<v>.sha256`, and that release's Sparkle deltas; `mac/scripts/release-github.sh` owns the repository and the URL shape, and nothing is pruned because older DMGs are the delta sources.
-  The release uploads to a draft, proves the DMG bytes through an authenticated download, pushes the release commit and tag, then publishes the draft while Vercel is still building, so the assets are public before the site points at them (guard: `ReleaseGitHubTests`).
-  `/download` (`web/app/download/route.ts`) validates `version.json` (sha256, release date, trusted `github.com/8bittts/JPtheCat/releases/download/` path) and redirects; it records nothing.
-- **Source:** the public `github.com/8bittts/JPtheCat` repository, whose `main` the Vercel project `jpthecat` (root `web/`) is Git-connected to; the `[deploy]` subject marker gates its builds.
-- **Manifest:** the release rewrites `web/public/stable/{version.json,appcast.xml}`, the README markers, and all three cask copies, then commits `release: JPtheCat vX [deploy]` plus a tag from a dedicated worktree (root `AGENTS.md`).
+  The release uploads to a draft, proves the DMG bytes through an authenticated download, pushes the release commit and tag, then publishes the draft while Vercel is still deploying, so the assets are public before the feed points at them (guard: `ReleaseGitHubTests`).
+  `/download` is a static 302 to `github.com/8bittts/JPtheCat/releases/latest`; it records nothing.
+- **Source:** the public `github.com/8bittts/JPtheCat` repository, whose `main` the Vercel project `jpthecat` (root `feed/`, no framework, no build) is Git-connected to; the `[deploy]` subject marker gates its builds.
+- **Manifest:** the release rewrites `feed/public/stable/{version.json,appcast.xml}`, the README markers, and all three cask copies, then commits `release: JPtheCat vX [deploy]` plus a tag from a dedicated worktree (root `AGENTS.md`).
 
 Invariants:
 
@@ -57,8 +57,10 @@ Post-release proofs:
   `userDriverDelegate: nil` is a regression, because the update alert opens behind other apps.
 - `checkForUpdatesInBackground()` calls `checkForUpdateInformation()` with no UI and publishes `updateAvailable`, which drives the right-click row title and the settings status dot.
 
-## Web, DNS, and Email Routing
+## Update Feed, DNS, and Email Routing
 
-- The web deploy gate and the pinned-Bun build are owned by [web/AGENTS.md](../web/AGENTS.md#deployment-gate); the site reads no environment variable at runtime, and any maintainer variable changes only through Infisical ([web/AGENTS.md](../web/AGENTS.md#infisical)).
+- The website is retired; `feed/vercel.json` is the whole deployment.
+  It serves `feed/public/stable/*` with open CORS, answers 410 on `/api/support-report` (apps up to v1.160 post there and must see a failure), sends `/download` to the latest GitHub Release, and 308-redirects every other path on both hosts to `https://github.com/8bittts/JPtheCat` (guard: `UpdateFeedTests`).
+  It reads no environment variable, and the project holds none.
 - `jpthecat.com` (`A 216.150.1.1`) and `www.jpthecat.com` (`CNAME *.vercel-dns-016.com`) stay DNS-only in Cloudflare behind the Vercel project `jpthecat`, with zone settings normalized to `ssl` `strict`, `always_use_https` `on`, `min_tls_version` `1.2`, `email_obfuscation` `off`, and `DNSSEC` `disabled`.
 - Outbound mail authenticates through DNS-only Resend records (`mail.jpthecat.com -> send.forge.rmta.net`, `resend._domainkey`, `send.jpthecat.com` MX/SPF, and `_dmarc` `p=none`), and inbound mail uses Cloudflare Email Routing (`route1/2/3.mx.cloudflare.net`, subaddressing on, zero custom rules, and catch-all forwarding to the operator inbox).

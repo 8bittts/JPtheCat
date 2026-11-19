@@ -22,10 +22,10 @@ final class ReadmeReleaseMarkerTests: XCTestCase {
 
 		XCTAssertTrue(script.contains(#". "${REPO_ROOT}/scripts/release-readme.sh""#))
 		XCTAssertTrue(script.contains(#"jptc_update_readme_release_markers "$RROOT/README.md" "$VERSION" "$DOWNLOAD_URL""#))
-		XCTAssertTrue(script.contains("mac/Info.plist README.md Casks/jpthecat.rb web/public/stable"))
-		XCTAssertTrue(script.contains("git -C \"$RROOT\" checkout -- mac/Info.plist README.md Casks/jpthecat.rb web/public/stable"))
+		XCTAssertTrue(script.contains("mac/Info.plist README.md Casks/jpthecat.rb feed/public/stable"))
+		XCTAssertTrue(script.contains("git -C \"$RROOT\" checkout -- mac/Info.plist README.md Casks/jpthecat.rb feed/public/stable"))
 		XCTAssertTrue(script.contains("cp \"$RROOT/README.md\" \"$REL_WORKTREE/README.md\""))
-		XCTAssertTrue(script.contains("git -C \"$REL_WORKTREE\" add README.md Casks/jpthecat.rb mac/Info.plist web/public/stable"))
+		XCTAssertTrue(script.contains("git -C \"$REL_WORKTREE\" add README.md Casks/jpthecat.rb mac/Info.plist feed/public/stable"))
 	}
 
 	func testReadmeMarkerHelperRewritesOnlyMarkedBlocks() throws {

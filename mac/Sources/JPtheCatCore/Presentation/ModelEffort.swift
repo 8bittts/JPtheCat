@@ -1,15 +1,13 @@
 import Foundation
 
-/// Reasoning-effort tier a model runs at. Raw values match the web twin's string union
-/// (`"low" | "medium" | "high"` in `web/lib/library/pricing-registry.ts`) so the two stay
-/// comparable. The SwiftUI chip colors for these tiers live App-side (they are presentation, not
+/// Reasoning-effort tier a model runs at. The SwiftUI chip colors for these tiers live App-side (they are presentation, not
 /// classification); this Core type owns only the pure model→tier mapping.
 public enum ModelEffortLevel: String, Sendable, CaseIterable {
 	case low
 	case medium
 	case high
 
-	/// Capitalized display label, identical to the web `modelEffortLevelLabel(...)`.
+	/// Capitalized display label.
 	public var label: String {
 		switch self {
 		case .low: "Low"
@@ -20,13 +18,11 @@ public enum ModelEffortLevel: String, Sendable, CaseIterable {
 }
 
 /// Pure model → reasoning-effort classification, extracted from `DashboardView` so it is testable in
-/// Core and can no longer silently drift from the web twin. The lookup table below MUST stay
-/// byte-for-byte identical (same keys, same tiers) to `MODEL_EFFORT_LEVELS` in
-/// `web/lib/library/pricing-registry.ts` — guarded by `ModelEffortTests`.
+/// Core (guarded by `ModelEffortTests`).
 ///
 /// A model outside the table has NO tier: callers omit the chip rather than show a guessed "Medium".
 public enum ModelEffort {
-	/// Canonical model-id → effort tier. Keep in sync with the web `MODEL_EFFORT_LEVELS` map.
+	/// Canonical model-id → effort tier.
 	public static let levels: [String: ModelEffortLevel] = [
 		"claude-opus-5-5": .high,
 		"claude-opus-5": .high,

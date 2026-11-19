@@ -66,7 +66,7 @@ Promote only with a brand-assets pass in [`02-design-system.md`](02-design-syste
 
 ### Match System appearance
 
-An additive "Match System" option (Sunlit or Midnight from `NSApp.effectiveAppearance`) would need Settings and web demo parity in the same change; never replace named themes.
+An additive "Match System" option (Sunlit or Midnight from `NSApp.effectiveAppearance`) would need a Settings control in the same change; never replace named themes.
 
 ### Increase Contrast theme variants
 
@@ -78,12 +78,6 @@ Custom hex palettes skip the system Increase Contrast variants; promote only if 
 - Promote only if profiling shows real cost on a heavy corpus.
 - Reuse `CostCalculator.cost(model:usage:forceTier:)` and `UsageIndex.sqlLocalDayExpression`, and keep every configured context threshold in the `GROUP BY`.
 - Extend the `MultiWindowSummariesParityTests` oracle pattern before swapping.
-
-### SEO snippet CTR re-check
-
-Due: the 2026-09-02 title and description changes have been live more than 30 days.
-Re-check CTR for `/library/compare/jp-the-cat-vs-tokens-4-breakfast` and `/library/alternatives/codexbar` in Search Console; leave deep-ranked model-compare pages alone.
-No locale or geographic pSEO: search demand is not geo-shaped.
 
 ### Provider Expansion
 
@@ -109,13 +103,11 @@ Copy is ready in [`10-gtm.md`](10-gtm.md).
 - [ ] Recruit a hunter.
 - [ ] Pick a launch date.
 - [ ] Export the six gallery assets.
-- [ ] Re-sync the launch copy with `SITE`, current features, the open-source repository, and the theme count immediately before launch.
+- [ ] Re-sync the launch copy with the README, current features, and the theme count immediately before launch; the launch link is the GitHub repository.
 
 ### Fleet pattern adoption
 
 The target patterns are in `8leeai/_docs/13-starter-kit.md`; each item below is a measured gap against it.
 
-- [ ] Raise the web app's TypeScript to the target set, one flag per slice, fixing by narrowing and never by a non-null assertion: `noUncheckedIndexedAccess` (82 errors), `exactOptionalPropertyTypes` (34) and `noPropertyAccessFromIndexSignature` (68; it also needs Biome's `useLiteralKeys` rule off).
-- [ ] Add `web/.env.example` listing every environment name the web app reads, with a test that fails when the code reads a name the file omits.
 - [ ] Move the untracked hooks in `.git/hooks` into a tracked `.githooks/` with a setup step, keeping the pre-push archive guard; setting `core.hooksPath` before that move would turn the existing hooks off.
 - [ ] Move the remaining `ObservableObject` models in `mac/Sources` to `@Observable`, and write new Swift suites with Swift Testing; the 1,220 XCTest tests stay until a suite is touched.

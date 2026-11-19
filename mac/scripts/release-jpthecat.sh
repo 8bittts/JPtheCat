@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 #
-# release-jpthecat.sh — cut a full JPtheCat release: notarized DMG → GitHub Release → live web deploy.
+# release-jpthecat.sh — cut a full JPtheCat release: notarized DMG → GitHub Release → update-feed deploy.
 #
 #   ./scripts/release-jpthecat.sh            # release the current Info.plist version (first time) or bump patch
 #   ./scripts/release-jpthecat.sh 0.002      # release an explicit version
 #   ./scripts/release-jpthecat.sh --dry-run  # build+notarize+appcast+smoke, but DO NOT publish/tag/push/deploy
 #
 # Pipeline: preconditions → (bump) → build-dmg (notarized) → smoke-test --production →
-# generate-appcast → upload DMG+sha256+deltas to a DRAFT GitHub Release → write web/public/stable/
+# generate-appcast → upload DMG+sha256+deltas to a DRAFT GitHub Release → write feed/public/stable/
 # {version.json, appcast.xml, JPtheCat-X.dmg.sha256, jpthecat.rb} + README markers + Homebrew cask →
 # commit "release: JPtheCat vX [deploy]" + tag → push HEAD+tag → publish the release → verify download.
-# The draft is published seconds after the push; Vercel needs over a minute to build the release
-# commit, so the assets are public before the site and the appcast point at them.
+# The draft is published seconds after the push; Vercel needs a moment to deploy the release
+# commit, so the assets are public before the hosted appcast points at them.
 #
 # [HARDENING] The metadata commit+tag+push is done from a DEDICATED git worktree checked out at
 # the current local HEAD — never this shared checkout — because concurrent agents `git reset --hard
@@ -31,9 +31,9 @@
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"   # = mac/
 RROOT="$(cd "$REPO_ROOT/.." && pwd)"                           # = repo root (defined early: the EXIT trap needs it)
-WEB_STABLE="${RROOT}/web/public/stable"
+FEED_STABLE="${RROOT}/feed/public/stable"
 CASK_FILE="${RROOT}/Casks/jpthecat.rb"
-CASK_STABLE_FILE="${WEB_STABLE}/jpthecat.rb"
+CASK_STABLE_FILE="${FEED_STABLE}/jpthecat.rb"
 HOMEBREW_TAP_URL="${JPTHECAT_HOMEBREW_TAP_URL:-https://github.com/8bittts/homebrew-jpthecat.git}"
 cd "$REPO_ROOT"
 
@@ -58,18 +58,18 @@ fail() { printf "\033[1;31mERROR:\033[0m %s\n" "$1" >&2; exit 1; }
 . "${REPO_ROOT}/scripts/release-readme.sh"
 . "${REPO_ROOT}/scripts/release-github.sh"
 
-[ -d "$WEB_STABLE" ] || fail "web stable dir not found at ${WEB_STABLE}"
+[ -d "$FEED_STABLE" ] || fail "update feed dir not found at ${FEED_STABLE}"
 
 # --- Precondition: release-metadata files must be clean (no half-edited version/manifest) ---
 info "Preconditions"
 DIRTY="$(git -C "$RROOT" status --porcelain -- \
-	mac/Info.plist README.md Casks/jpthecat.rb web/public/stable 2>/dev/null || true)"
+	mac/Info.plist README.md Casks/jpthecat.rb feed/public/stable 2>/dev/null || true)"
 [ -z "$DIRTY" ] || fail "release-metadata files have uncommitted changes — commit/stash first:\n${DIRTY}"
 # DMG build inputs must match HEAD. build-dmg.sh compiles the LIVE working tree, but the release
 # commit stages only the metadata bump — so uncommitted mac/ source or config would ship inside the
 # notarized app yet be ABSENT from the pushed commit (a shipped build silently diverging from HEAD,
 # which no later gate flags). Enforce /jp Phase 4-pre here: commit mac changes first. Scoped to the
-# compiled/bundled inputs, so unrelated web/ or _docs/ WIP from a parallel agent never blocks a release.
+# compiled/bundled inputs, so unrelated feed/ or _docs/ WIP from a parallel agent never blocks a release.
 BUILD_DIRTY="$(git -C "$RROOT" status --porcelain -- \
 	mac/Sources mac/Package.swift mac/Package.resolved \
 	mac/JPtheCat.entitlements mac/JPtheCatWidgetExtension.entitlements \
@@ -81,21 +81,6 @@ git -C "$RROOT" merge-base --is-ancestor origin/main HEAD \
 	|| fail "local HEAD does not include origin/main — rebase or merge before releasing so the isolated worktree cannot ship stale code"
 step "clean metadata + GitHub release repository public and pushable; local HEAD includes origin/main"
 
-# --- Web production gate (react-doctor 100/100 + full quality chain), BEFORE the expensive mac
-# steps. A bare release ALWAYS ships a "[deploy]" commit that promotes the site, and AGENTS.md's
-# production gate forbids deploying the web app without a passing quality chain (doctor 100/100).
-# Fail fast here so a web regression can never ride out on a notarized release. Runs for --dry-run
-# too, so a dry run is a true release-readiness check. ---
-info "Web production gate (bun run check:full)"
-command -v bun >/dev/null 2>&1 || fail "bun CLI not found — required for the web quality gate"
-if [ ! -d "${RROOT}/web/node_modules" ]; then
-	step "restoring pinned web devDependencies (bun install)"
-	( cd "${RROOT}/web" && bun install ) || fail "bun install failed in web/ — cannot run the web quality gate"
-fi
-( cd "${RROOT}/web" && bun run check:full ) \
-	|| fail "web quality gate failed (type-check / biome / tests / knip / react-doctor / build) — fix before releasing"
-step "web quality passed (react-doctor 100/100 + green build)"
-
 # --- Version + build number ---
 CUR_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")"
 CUR_BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")"
@@ -106,7 +91,7 @@ else
 	VERSION="$CUR_VERSION"
 fi
 
-LATEST_PUBLISHED_BUILD="$(jptc_latest_published_build_number "${WEB_STABLE}/appcast.xml")"
+LATEST_PUBLISHED_BUILD="$(jptc_latest_published_build_number "${FEED_STABLE}/appcast.xml")"
 SKIPPED_TAGS=0
 if [ -z "$EXPLICIT_VERSION" ]; then
 	# The source plist can lag behind the latest shipped manifest if a prior release was cut from
@@ -137,10 +122,10 @@ info "Releasing ${APP_NAME} ${TAG} (build ${BUILD_NUMBER})"
 REL_WORKTREE=""
 cleanup_release() {
 	[ -n "$REL_WORKTREE" ] && git -C "$RROOT" worktree remove --force "$REL_WORKTREE" 2>/dev/null || true
-	git -C "$RROOT" checkout -- mac/Info.plist README.md Casks/jpthecat.rb web/public/stable/version.json web/public/stable/appcast.xml 2>/dev/null || true
+	git -C "$RROOT" checkout -- mac/Info.plist README.md Casks/jpthecat.rb feed/public/stable/version.json feed/public/stable/appcast.xml 2>/dev/null || true
 	# Remove a freshly-written (still-untracked) per-version sha256; leave it if it's already tracked.
-	if [ -n "${WEB_SHA_FILE:-}" ] && ! git -C "$RROOT" ls-files --error-unmatch "$WEB_SHA_FILE" >/dev/null 2>&1; then
-		rm -f "$WEB_SHA_FILE"
+	if [ -n "${FEED_SHA_FILE:-}" ] && ! git -C "$RROOT" ls-files --error-unmatch "$FEED_SHA_FILE" >/dev/null 2>&1; then
+		rm -f "$FEED_SHA_FILE"
 	fi
 }
 trap cleanup_release EXIT
@@ -194,9 +179,9 @@ if [ -e "${DELTA_FILES[0]:-}" ]; then
 	done
 fi
 
-# --- Publish web manifest (drives /download + the Sparkle feed) ---
-info "Writing web manifest + appcast"
-cat > "${WEB_STABLE}/version.json" <<JSON
+# --- Publish the update feed (Sparkle appcast, version manifest, checksum, hosted cask) ---
+info "Writing update-feed manifest + appcast"
+cat > "${FEED_STABLE}/version.json" <<JSON
 {
   "version": "${VERSION}",
   "url": "${DOWNLOAD_URL}",
@@ -206,17 +191,17 @@ cat > "${WEB_STABLE}/version.json" <<JSON
   "releaseDate": "${RELEASE_DATE}"
 }
 JSON
-cp build/appcast.xml "${WEB_STABLE}/appcast.xml"
-WEB_SHA_FILE="${WEB_STABLE}/${APP_NAME}-${VERSION}.dmg.sha256"
-cp "$SHA_FILE" "$WEB_SHA_FILE"
+cp build/appcast.xml "${FEED_STABLE}/appcast.xml"
+FEED_SHA_FILE="${FEED_STABLE}/${APP_NAME}-${VERSION}.dmg.sha256"
+cp "$SHA_FILE" "$FEED_SHA_FILE"
 jptc_update_readme_release_markers "$RROOT/README.md" "$VERSION" "$DOWNLOAD_URL"
 perl -0pi -e "s/version \"[^\"]+\"/version \"${VERSION}\"/; s/sha256 \"[a-f0-9]{64}\"/sha256 \"${CHECKSUM}\"/" "$CASK_FILE"
 cp "$CASK_FILE" "$CASK_STABLE_FILE"
-step "web/public/stable/{version.json,appcast.xml,$(basename "$WEB_SHA_FILE"),jpthecat.rb} updated"
+step "feed/public/stable/{version.json,appcast.xml,$(basename "$FEED_SHA_FILE"),jpthecat.rb} updated"
 step "README release markers updated"
 step "Homebrew cask updated"
 
-# --- Commit + tag + push from an ISOLATED worktree (repo root: mac Info.plist + web manifest) ---
+# --- Commit + tag + push from an ISOLATED worktree (repo root: mac Info.plist + update feed) ---
 # The metadata commit is made in a dedicated worktree checked out at the current local HEAD, NOT this
 # shared checkout, so a concurrent hard-reset here cannot discard it. The DMG/appcast are already
 # built + uploaded — only the git side remains.
@@ -228,11 +213,11 @@ git -C "$RROOT" worktree add -q --detach "$REL_WORKTREE" HEAD \
 cp "$PLIST" "$REL_WORKTREE/mac/Info.plist"
 cp "$RROOT/README.md" "$REL_WORKTREE/README.md"
 cp "$CASK_FILE" "$REL_WORKTREE/Casks/jpthecat.rb"
-cp "${WEB_STABLE}/version.json" "$REL_WORKTREE/web/public/stable/version.json"
-cp "${WEB_STABLE}/appcast.xml" "$REL_WORKTREE/web/public/stable/appcast.xml"
-cp "$WEB_SHA_FILE" "$REL_WORKTREE/web/public/stable/$(basename "$WEB_SHA_FILE")"
-cp "$CASK_STABLE_FILE" "$REL_WORKTREE/web/public/stable/jpthecat.rb"
-git -C "$REL_WORKTREE" add README.md Casks/jpthecat.rb mac/Info.plist web/public/stable
+cp "${FEED_STABLE}/version.json" "$REL_WORKTREE/feed/public/stable/version.json"
+cp "${FEED_STABLE}/appcast.xml" "$REL_WORKTREE/feed/public/stable/appcast.xml"
+cp "$FEED_SHA_FILE" "$REL_WORKTREE/feed/public/stable/$(basename "$FEED_SHA_FILE")"
+cp "$CASK_STABLE_FILE" "$REL_WORKTREE/feed/public/stable/jpthecat.rb"
+git -C "$REL_WORKTREE" add README.md Casks/jpthecat.rb mac/Info.plist feed/public/stable
 git -C "$REL_WORKTREE" commit -q -m "release: ${APP_NAME} ${TAG} [deploy]"
 step "release commit staged in isolated worktree"
 
@@ -245,7 +230,7 @@ for i in $(seq 1 5); do
 	step "main advanced — rebasing release onto origin/main (attempt ${i}/5)"
 	git -C "$RROOT" fetch origin main -q
 	git -C "$REL_WORKTREE" rebase origin/main \
-		|| fail "release rebase conflict on Info.plist/web manifest — resolve manually in ${REL_WORKTREE}"
+		|| fail "release rebase conflict on Info.plist/update feed — resolve manually in ${REL_WORKTREE}"
 done
 [ "$pushed" = true ] || fail "could not push release to main after 5 attempts"
 git -C "$REL_WORKTREE" tag -a "$TAG" -m "${APP_NAME} ${VERSION}"
@@ -279,8 +264,8 @@ fi
 
 # Re-sync this scratch checkout to the pushed release: discard the local stamped copies (now committed
 # on origin) and fast-forward main to include the release, so the final-state gate sees a clean tree.
-git -C "$RROOT" checkout -- mac/Info.plist README.md Casks/jpthecat.rb web/public/stable/version.json web/public/stable/appcast.xml web/public/stable/jpthecat.rb 2>/dev/null || true
-rm -f "$WEB_SHA_FILE"
+git -C "$RROOT" checkout -- mac/Info.plist README.md Casks/jpthecat.rb feed/public/stable/version.json feed/public/stable/appcast.xml feed/public/stable/jpthecat.rb 2>/dev/null || true
+rm -f "$FEED_SHA_FILE"
 git -C "$RROOT" merge --ff-only origin/main -q 2>/dev/null || true
 
 # --- Verify: download URL 200. The live appcast changes only when Vercel promotes the
@@ -297,7 +282,7 @@ done
 # --- Final cleanliness gate: no leftovers. The release commit is the LAST write; the tree must be
 # clean of release-metadata changes and there must be no stray release stash. ---
 info "Final state check"
-LEFTOVER="$(git -C "$RROOT" status --porcelain -- mac/Info.plist README.md Casks/jpthecat.rb web/public/stable)"
+LEFTOVER="$(git -C "$RROOT" status --porcelain -- mac/Info.plist README.md Casks/jpthecat.rb feed/public/stable)"
 [ -z "$LEFTOVER" ] || fail "leftover uncommitted release files (should be committed):\n${LEFTOVER}"
 git -C "$RROOT" stash list 2>/dev/null | grep -qi 'Info.plist version bump' \
 	&& fail "a release version-bump stash is still present — inspect \`git stash list\` and drop it" || true
@@ -311,4 +296,4 @@ echo ""
 info "RELEASE COMPLETE: ${APP_NAME} ${TAG}"
 echo "  Download: ${DOWNLOAD_URL}"
 echo "  Checksum: ${CHECKSUM}"
-echo "  Verify the Vercel production deploy promoted to the release commit (see /ship step 9)."
+echo "  Verify the Vercel production deploy of feed/ promoted to the release commit (.claude/commands/jp.md)."

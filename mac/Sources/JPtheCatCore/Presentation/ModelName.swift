@@ -11,8 +11,7 @@ public enum ModelName {
 	/// `grok-4.7-build` → `4.7`, `deepseek-v4-flash-go-peak` → `deepseek-v4-flash`. A free-tier id keeps
 	/// a visible marker (`mimo-v2.5-free` → `mimo-v2.5 free`) because it is unpriced and must not read
 	/// as the paid model. Case is preserved; this is a DISPLAY transform, never a lookup key.
-	/// `web/components/site/menubar-demo-series.ts` `shortModel` follows the same cases
-	/// (`model-identity-cases.json`, guarded on both sides).
+	/// Cases are pinned in `model-identity-cases.json` (`ModelIdentityTests`).
 	public static func short(_ model: String) -> String {
 		var s = ModelIdentity.presentationID(model)
 		let isFree = ModelIdentity.isFreeTier(s) && s.count > ModelIdentity.freeTierSuffix.count

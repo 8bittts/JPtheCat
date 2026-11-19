@@ -23,10 +23,7 @@ final class SettingsCopyTests: XCTestCase {
 		XCTAssertFalse(source.contains(#"JPtheCat will "#))
 	}
 
-	// `title: "Refresh now"`, `title: "Open JP the Cat website"`, `ChromeRefreshButton` and the
-	// `onOpenWebsite:` call site are asserted by scripts/verify-app-demo-parity.sh, which
-	// AppDemoParityGuardTests executes — the single owner, since those are mac/web parity pins.
-	// Only the assertions with no other owner stay here.
+	// The footer's GitHub button is pinned in `DashboardChromePlacementTests`.
 	func testRefreshAndWebsiteAreFooterActionsNotSettingsRows() throws {
 		// Scoped to the settings face's own surface (declaration + any extension of it, wherever they
 		// live): `title: "Quit JP the Cat"` is legitimate in StatusBarController's NSMenuItem, so a
@@ -248,8 +245,7 @@ final class SettingsCopyTests: XCTestCase {
 	}
 
 	// The Settings face no longer carries an in-app "Privacy & data" row (removed to keep the card
-	// tight). The least-privilege posture remains a shipped MARKETING claim on the homepage trust band /
-	// install FAQ / llms.txt, guarded by `web/tests/site-copy.test.ts` — not the app settings face.
+	// tight). The least-privilege posture is stated in mac/AGENTS.md, not on the app settings face.
 	func testSettingsFaceHasNoPrivacyRow() throws {
 		// `typeSurface` throws if `SettingsBackView` itself vanishes, so this can never go vacuous.
 		let source = try AppSourceScanner.typeSurface("SettingsBackView")

@@ -27,7 +27,7 @@ public final class RemotePricingStore: Sendable {
 	private let cacheURL: URL?  // verbatim copy of the last accepted remote `{models:…}` body
 	private let etagURL: URL?  // the ETag that body was served with, for the next conditional GET
 
-	/// Sibling of the Sparkle appcast; Vercel serves `web/public/stable/*` statically.
+	/// Sibling of the Sparkle appcast; Vercel serves `feed/public/stable/*` statically.
 	public static let defaultRemoteURL = URL(string: "https://jpthecat.com/stable/pricing-v1.json")!
 
 	/// Production initializer: real URLSession fetcher + App Support cache.

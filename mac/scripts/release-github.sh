@@ -4,7 +4,7 @@
 #
 # Every release is a GitHub Release on the public repository, tagged v<version>. The DMG, its
 # .sha256 and the Sparkle deltas are assets of that release, so one per-tag prefix serves all of
-# them. The website (/download, version.json, the signed appcast) points at these asset URLs.
+# them. The update feed (version.json, the signed appcast) points at these asset URLs.
 
 JPTC_RELEASE_REPO="${JPTHECAT_RELEASE_REPO:-8bittts/JPtheCat}"
 JPTC_RELEASE_DOWNLOAD_BASE="https://github.com/${JPTC_RELEASE_REPO}/releases/download"
@@ -83,7 +83,7 @@ jptc_prepare_draft_release() {
 			;;
 	esac
 	gh release create "$tag" --repo "$JPTC_RELEASE_REPO" --draft --title "$title" \
-		--notes "Release notes: https://jpthecat.com" >/dev/null || {
+		--notes "Release notes: https://github.com/8bittts/JPtheCat" >/dev/null || {
 		printf 'ERROR: could not create the draft release %s\n' "$tag" >&2
 		return 1
 	}

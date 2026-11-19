@@ -1,0 +1,43 @@
+{
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"framework": null,
+	"installCommand": "",
+	"buildCommand": "",
+	"outputDirectory": "public",
+	"ignoreCommand": "if echo \"$VERCEL_GIT_COMMIT_MESSAGE\" | head -1 | grep -q '\\[deploy\\]'; then exit 1; fi",
+	"routes": [
+		{
+			"src": "/(.*)",
+			"headers": {
+				"Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+				"X-Content-Type-Options": "nosniff",
+				"X-Robots-Tag": "noindex, nofollow"
+			},
+			"continue": true
+		},
+		{
+			"src": "/stable/(.*)",
+			"headers": {
+				"Access-Control-Allow-Origin": "*",
+				"Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+				"Access-Control-Allow-Headers": "Content-Type, Range",
+				"Cross-Origin-Resource-Policy": "cross-origin",
+				"Cache-Control": "public, max-age=0, must-revalidate"
+			},
+			"continue": true
+		},
+		{ "handle": "filesystem" },
+		{ "src": "/stable/(.*)", "status": 404 },
+		{ "src": "/api/support-report/?", "status": 410, "headers": { "Cache-Control": "no-store" } },
+		{
+			"src": "/download/?",
+			"status": 302,
+			"headers": { "Location": "https://github.com/8bittts/JPtheCat/releases/latest", "Cache-Control": "no-store" }
+		},
+		{
+			"src": "/(.*)",
+			"status": 308,
+			"headers": { "Location": "https://github.com/8bittts/JPtheCat" }
+		}
+	]
+}

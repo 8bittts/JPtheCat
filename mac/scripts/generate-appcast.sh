@@ -113,8 +113,7 @@ PREVIOUS_TAG="$(git -C "$RROOT" describe --tags --abbrev=0 --match 'v[0-9]*' 2>/
 # A release whose commits are ALL internal (perf/docs/refactor/chore — stripped by category() below)
 # therefore yields empty notes and FAILS the no-empty-notes gate on purpose: surface a real
 # customer-facing change, or widen the range explicitly with JPTHECAT_NOTES_SINCE_TAG for a corrective
-# re-surface. (The public /release web page keeps its own per-day browsable history; that is a
-# separate human surface, not the Sparkle feed.)
+# re-surface. (GitHub Releases keeps the browsable per-version history.)
 if [ -n "${JPTHECAT_NOTES_SINCE_TAG:-}" ]; then
 	NOTES_BASE_TAG="$JPTHECAT_NOTES_SINCE_TAG"
 	step "Notes base tag override: ${NOTES_BASE_TAG}"
@@ -142,7 +141,7 @@ if [ -n "$NOTES_OVERRIDE" ]; then
 else
 
 # [Regression, fixed 2026-07-10] Scope notes to the NATIVE-APP build inputs (mirrors
-# release-jpthecat.sh's BUILD_DIRTY set): a commit that only touches web/, _docs/, or release tooling
+# release-jpthecat.sh's BUILD_DIRTY set): a commit that only touches feed/, _docs/, or release tooling
 # never changed the shipped app, so it must NEVER appear in the app's Sparkle notes. This PATH gate
 # complements the subject-text category() filter below — the text filter alone let web-only marketing
 # commits ("Swap in high-res landscape … image", "Move … showcase under the accuracy section") and a

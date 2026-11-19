@@ -294,7 +294,7 @@ struct SettingsBackView: View {
       onRefresh: { model.refresh() },
       onOpenAdvancedAnalytics: onOpenAdvancedAnalytics,
       onQuit: { NSApp.terminate(nil) },
-      onOpenWebsite: { Self.open("https://jpthecat.com") },
+      onOpenWebsite: { Self.open(Self.repositoryURL) },
       accessory: { UpdateStatusDot(currentVersion: appVersion) })
   }
 
@@ -351,7 +351,7 @@ struct SettingsBackView: View {
     launchAtLoginStatus = LoginItem.statusDescription()
   }
 
-  static let repositoryURL = "https://github.com/8bittts/JPtheCat"
+  nonisolated static let repositoryURL = "https://github.com/8bittts/JPtheCat"
 
   static func open(_ urlString: String) {
     guard let url = URL(string: urlString) else { return }
@@ -662,7 +662,7 @@ private struct ProviderOptInRow: View {
     case .confirmInstall:
       confirm(descriptor.installAlert, then: descriptor.install)
     case .openSetupDocs:
-      SettingsBackView.open("https://jpthecat.com")
+      SettingsBackView.open(SettingsBackView.repositoryURL)
       refresh()
     case .confirmUninstall:
       confirm(descriptor.uninstallAlert, then: descriptor.uninstall)

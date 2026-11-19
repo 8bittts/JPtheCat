@@ -68,7 +68,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 	/// Help menu item — same destination as the dashboard footer help button.
 	@MainActor
 	@objc func openHelpFromMenu() {
-		SettingsBackView.open("https://jpthecat.com")
+		SettingsBackView.open(SettingsBackView.repositoryURL)
 	}
 }
 

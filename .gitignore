@@ -1,11 +1,8 @@
 # macOS
 .DS_Store
 
-# Node / Next (web/ has its own .gitignore too)
+# Node (no JavaScript project remains; kept so a stray install never lands in git)
 node_modules/
-.next/
-out/
-*.tsbuildinfo
 
 # SwiftPM build output. mac/.gitignore already covers mac/; this bare pattern
 # matches at any depth, so a stray `swift build` from the repo root cannot
@@ -26,7 +23,7 @@ out/
 # Release artifacts are uploaded to storage, never committed
 *.dmg
 
-# Local agent state; the runbooks under .claude/ and .agents/ are tracked
+# Local agent state; the runbooks under .claude/ are tracked
 .claude/scheduled_tasks.lock
 .claude/settings.local.json
 

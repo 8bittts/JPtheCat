@@ -44,8 +44,7 @@ final class AppResourcesTests: XCTestCase {
 	}
 
 	func testBundlesEveryInteractiveSoundCue() {
-		// Each UI cue must be packaged so the toggle/click sounds resolve at runtime (mirrored in
-		// web/public as ui-*.m4a for the homepage demo).
+		// Each UI cue must be packaged so the toggle/click sounds resolve at runtime.
 		for cue in InteractiveSounds.Cue.allCases {
 			XCTAssertNotNil(
 				InteractiveSounds.url(for: cue),

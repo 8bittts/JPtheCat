@@ -1,10 +1,10 @@
 # Design System
 
-Brand thesis, the homepage provider boundary, color, typography, motion, charts and icons, the website, and the brand assets of JP the Cat.
+Brand thesis, color, typography, motion, charts and icons, and the brand assets of JP the Cat.
 
 **The cat that counts your agent tokens.**
 Naming and domain casing are owned by root `AGENTS.md` ("Identity & Branding").
-Exact values live in code: `web/app/globals.css` for the site, `mac/Sources/JPtheCatApp/Theme.swift` (`JPTheme`) and `mac/Sources/JPtheCatApp/JPAppDesignTokens.swift` (`JPAppColor`, `JPAppFont`, `JPAppSpacing`) for the app.
+Exact values live in code: `mac/Sources/JPtheCatApp/Theme.swift` (`JPTheme`) and `mac/Sources/JPtheCatApp/JPAppDesignTokens.swift` (`JPAppColor`, `JPAppFont`, `JPAppSpacing`) for the app.
 Native surface contracts live in [12-ui-surface-invariants.md](12-ui-surface-invariants.md).
 
 ## 1. Thesis
@@ -19,50 +19,35 @@ Native surface contracts live in [12-ui-surface-invariants.md](12-ui-surface-inv
 
 Not a hacker terminal (no pixel fonts, scanlines, god-rays, film grain, or dithering), not a notch spectacle, not a neon AI-SaaS gradient, not a dense trading terminal.
 
-**Brand fidelity:** start every design from the live homepage or app and resolve each color in its established role; the incident behind the rule is [00-foundation.md#brand-fidelity](00-foundation.md#brand-fidelity).
-
-## Homepage provider boundary
-
-The homepage is a fixed curated presentation of All providers, Claude, Codex, Grok, Muse Spark, Cursor, and OpenCode Go, in that order.
-All providers is an aggregate control, not a vendor or a catalog entry.
-The six provider identities apply to homepage copy, marquee, FAQ, demo selection, analytics, Live Data, and menu-format examples.
-Do not add providers to the homepage when the native app or `/library` gains support.
-Keep the existing homepage layout, dimensions, typography, color roles, controls, motion, and responsive behavior; native geometry experiments do not change homepage geometry.
-Shared controls retain semantic parity for units, provenance, badges, actions, and themes.
-The frozen homepage Cursor illustration stays token-based and non-aggregable; OpenCode Go stays a measured, non-aggregable gateway.
-The native unified Grok source/accounting contract is owned by [03-data.md](03-data.md#unified-grok-plan-usage-and-cursor-local-activity); a homepage illustration never creates another native provider.
-Demo aggregate and composition figures sum only represented aggregable rows, with no hidden-provider contribution or gateway double counting.
-The full native catalog, CLI, widget eligibility, and `/library` remain independent of this boundary.
-`web/lib/homepage-providers.ts` owns the allowlist; `web/tests/homepage-providers.test.tsx` pins it.
+**Brand fidelity:** start every design from the app (or `brand/homepage.jpg`, the retired site's last full-page screenshot) and resolve each color in its established role; the incident behind the rule is [00-foundation.md#brand-fidelity](00-foundation.md#brand-fidelity).
 
 ## 2. Color
 
-Light is canonical and designed first; the app's dark themes are faithful inversions, and the marketing site is light-only.
+Light is canonical and designed first; the app's dark themes are faithful inversions.
 
 **Core roles.** `paper` (warm cream canvas), `paper2` (recessed wells), `card` (raised near-white cream, never pure `#FFFFFF`), `ink` / `inkSoft` / `inkFaint` (primary, secondary, tertiary text), `line` / `lineStrong` (hairlines, edges), `track` (empty meter groove).
 
 **Accent.** Three distinct shipped tokens, never interchangeable:
-- `--color-ginger` `#df7a2e` — the accent itself (wordmark dot, active state, sparkline stroke).
-- `--color-ginger-deep` `#a84d14` — accent-colored *text*.
-- `--color-cta` `#a84f16` with `--color-cta-deep` and `--color-cta-text` — the CTA button fill and its label.
+- `ginger` `#df7a2e` — the accent itself (wordmark dot, active state, sparkline stroke).
+- `gingerDeep` `#a84d14` — accent-colored *text*.
+- `cta` `#a84f16` with `ctaDeep` and `ctaText` — the CTA button fill and its label.
 The accent steps off Anthropic terracotta toward amber-honey, because JP is multi-provider.
 
 **Status.** `sage` = healthy headroom and `official` provenance; `honey` = approaching limit and `notional`/`est.` provenance; `coral` = near or over limit.
 Provenance is carried by sage and honey badges; there is no separate estimate hue.
 
-**Provider colors** (`--color-p-*`, `JPAppColor.tintHex(for:)`) appear only as a dot, a sparkline stroke, a thin rail, or the icon chip behind a white glyph — never as text.
+**Provider colors** (`JPAppColor.tintHex(for:)`) appear only as a dot, a sparkline stroke, a thin rail, or the icon chip behind a white glyph — never as text.
 Status color drives the gauge; provider color stays on identity.
 Accent, status, and provider color are three channels and never mix.
 
 **Gradient.** The one shipped gradient is the warm `honey`→`ginger` ribbon (estimate gauge); everything else is flat.
 
-**Interactive rollover (hard).** Every clickable control has a visible warm hover: Sticker Bomb word CTAs use `.sb-btn`, and the support modal's secondary action uses `.sb-btn-ghost`; icon controls (modal close, mobile-nav summary, FAQ toggle) turn `hover:border-ginger` + `hover:text-ginger-deep` over a `hover:bg-paper-2` wash.
 
 ### App themes
 
 `JPTheme.all` is the catalog: Sunlit Ledger (light) and Midnight Ledger (dark) show inline in Settings; the rest (`inMoreThemes: true`) live in the More themes window.
 Every theme is free.
-Adding a theme is data in `mac/Sources/JPtheCatApp/Theme.swift`; color resolution and the pickers need no view changes, and the web demo catalog regenerates (`web/components/site/demo-themes.ts`).
+Adding a theme is data in `mac/Sources/JPtheCatApp/Theme.swift`; color resolution and the pickers need no view changes.
 Palette roles per theme: `paper`, `paper2`, `card`, `ink`, `inkSoft`, `inkFaint`, `line`, `lineStrong`, `track`, `ginger`, `gingerDeep`, `sage`, `sageSoft`, `sageDeep`, `honey`, `creamDeep`, `gold`, `cta`, `ctaDeep`, `ctaText`, `coral`.
 Derived helpers in `JPAppColor`: `trackFill` draws every groove (never `paper2`, which collapses onto the card in dark themes); `barFillOpacity` keeps a fill distinct from its track; `providerTint(_:)` lifts a too-dark brand tint on dark cards, while the icon chip keeps the raw tint; `ctaGradient` is the one accent-button gradient with `ctaText` on it (never `.white` on bright ginger).
 Every theme passes the WCAG-AA gate in `ThemeTests` and must make a recognizable choice: no `paper == card` recolor and no near-copy of another pack.
@@ -80,25 +65,10 @@ The warm palette's failure mode is two semantically different roles that look id
 |---|---|
 | App UI | SF Pro Text |
 | App numbers | SF Mono / `monospacedDigitSystemFont` |
-| Website body (Sticker Bomb) | Space Grotesk (`--sb-font-body`) |
-| Website display (Sticker Bomb) | Bagel Fat One (`--sb-font-display`) |
-| Website asides (Sticker Bomb) | Gaegu (`--sb-font-hand`) |
 
 Every number, percentage, and dollar uses tabular numerals so digits never jitter.
-Letter spacing is `0` everywhere on marketing surfaces; no negative tracking and no inline `text-[…]` arbitrary sizes on public routes (guard: `web/tests/sticker-typography.test.ts`).
 App roles live in `mac/Sources/JPtheCatApp/JPAppDesignTokens.swift`; add a role there before using a new size.
 Money uses only `metricHero`, `metric`, and `metricSmall` ([12-ui-surface-invariants.md](12-ui-surface-invariants.md#typography)); `metricCaption` is reserved for non-money metric annotations.
-
-**Web normalization contract.** Public marketing routes (homepage Sticker Bomb shell, `/contact`, `/library` and nested pages, combined `/terms`, 404, download and support modals) use **`web/app/sticker.css` `sb-*` type roles only** — pick a role by meaning, never a one-off pixel size.
-- Page chrome: `sb-page-kicker`, `sb-page-title`, `sb-page-title--doc`, `sb-page-lede`, `sb-page-meta`, `sb-h2`, `sb-lede`.
-- Prose: `sb-body`, `sb-body--measure`, `sb-meta`, `sb-small`, `sb-section-title` (+ `--sm` / `--xs`), `sb-text-link`, `sb-eyebrow`, `sb-money-figure`.
-- Hand accents: `sb-hand` (+ `--lg` / `--xl`), `sb-hand-accent`, `sb-accent`, `sb-cap`.
-- Footer: `sb-footer-brand`, `sb-footer-body`, `sb-footer-support`, `sb-footer-legal`, `sb-footer-signoff`.
-- Dialogs on marketing surfaces: `sb-dialog-title`, `sb-dialog-body`, `sb-dialog-fine`, `sb-ui-title`, `sb-ui-copy`, `sb-ui-label`; forms `sb-form-label`, `sb-form-control`, `sb-form-panel`.
-- Layout widths: `sb-shell`, `reading-shell`; `<dialog>` geometry stays on `dialog-panel` in `globals.css`, with `dialog-panel-sb` for Sticker Bomb surfaces.
-- Palette: cream dot-grid canvas (`--sb-bg`), ink outlines, ginger/orange CTAs (`--sb-orange`, `--sb-orange-ink`, `--sb-honey`, `--sb-yellow`, `--sb-pink`). No mint/seafoam panel fills on public routes (guard: `web/tests/sticker-typography.test.ts`).
-The homepage **demo card** keeps Sunlit Ledger compact roles in `globals.css` (`ui-*`, `demo-*`, `compact-*`) — native parity, not the Sticker Bomb marketing scale.
-A class, custom property or keyframe exists in either stylesheet only while a component uses it (guard: `web/tests/stylesheet-dead-rules.test.ts`); add the rule in the change that applies it.
 
 ## 4. Motion
 
@@ -107,47 +77,17 @@ Calm and physical; motion confirms, never decorates.
 - Idle heartbeats are slow (the all-providers pulse is a 28s round trip) and share one radar-ping with the chart end dot.
 - Gauges fill by width only; height never animates.
 - Threshold crossings may get one gentle pulse; when nothing changes, nothing moves.
-- Reduce Motion collapses everything to static states on both platforms: tickers, marquees, card floats, pulse riders, and face-enter.
+- Reduce Motion collapses everything to static states: tickers, pulse riders, and face-enter.
 - Never animate a wrapper that contains live controls; animate decorative layers instead.
-The homepage mascot meows on hover or focus only after a real user activation unlocks audio, and the global logo stays silent.
 
 ## 5. Charts and icons
 
 Charts are quiet and number-first: no gridlines beyond one hairline baseline, no boxed legends, 2px sparkline strokes with one endpoint dot, flat bars, and the literal figure beside every chart.
 Gauges read as a temperature ramp: sage below 70%, honey at 70–89%, coral at 90% and above.
 SF Symbols are the base glyph set; the JP badge is the emotional brand mark and is never replaced with a generic gauge.
-Provider marks are self-hosted with a source note in `web/public/provider-icons/SOURCE-NOTES.md`; a geometric monogram is only a fallback.
-Cursor marks remain used by the frozen homepage and native hook setup, and legacy Cursor/Grok Bot marks remain available for older widget snapshots and cached pages; retiring a public catalog row does not invalidate those assets.
+Provider marks are bundled SVGs in the app and widget Resources; a geometric monogram is only a fallback.
+Cursor marks remain used by native hook setup, and legacy Cursor/Grok Bot marks remain available for older widget snapshots; retiring a public catalog row does not invalidate those assets.
 No emoji in chrome, navigation, badges, or provider identity; the first-run empty state may use one paw print.
-
-## 6. Homepage demo mirror
-
-`web/components/site/menubar-demo.tsx` is a marketing counterpart of the native card, not a second source of truth.
-- It starts at the rounded card: no faux menu-bar strip and no outer JP + `Settings` + dollar-pill title bar above it.
-- The desktop card is 384px at most and shrinks to the viewport; theme variables are scoped to the card and its dialogs.
-- Chrome maps the native 32pt row to a 32px (`h-8`) row with 26px icon slots and a 4px settings gap; footer Help opens `SITE.url`.
-- It mirrors app-owned controls: the timeframe picker, settings chrome, footer quick actions, update dot, widget guidance, theme picker, and notional labels.
-`web/components/site/advanced-analytics-demo.tsx` mirrors the native deep-dive within the browser: 960px maximum width, 252px sidebar, intrinsic height with a viewport cap, a 14px chrome inset (no fake traffic-light gutter), and the native geometry tokens.
-Its Events / Tokens / $ measure drives the heatmap, peak callout, and table order; the timeframe control is real state; it opens a genuine modal `<dialog>`; CSV stays visibly disabled with an app-only explanation.
-Run `scripts/verify-app-demo-parity.sh` whenever either side changes.
-
-## 7. Website
-
-The site is light-only, server-rendered per request for the nonce CSP, and fonts self-host through `next/font`.
-- **Texture without dark crutches:** the Sticker Bomb canvas is a cream dot grid with ink outlines and offset shadows; the demo surfaces keep Sunlit Ledger ruling and paper grain; no decorative orbs or blobs.
-- **Navigation** has no download button; links are root-relative homepage anchors.
-- **Homepage scroll order:** after the hero and provider marquee, the interactive `#demo` (`Go on, poke her.`) precedes `#how` (Four small jobs) so visitors reach the product mirror first; guard: `web/tests/site-copy.test.ts`.
-- **Open source:** `#open-source` sits between `#honest` and `#download`, built only from `sb-h2`, `sb-lede`, and `sb-cta-row`; it, the `open-source` FAQ entry, and the footer line link `SITE.repoUrl` and `SITE.contributingUrl` (guard: `web/tests/site-copy.test.ts`).
-- **One real download path:** every homepage download button (hero, pricing, and FAQ in `web/components/sticker/home.tsx`) and the `/library` CTAs start the download through `DownloadCta` with `prefetch={false}`.
-  Homebrew is a quiet secondary callout under those controls, never a conversion CTA.
-- **Footer:** `sb-shell` width, `Ping @8bit for support` (X link), one legal credit line `Built with: YEN · Bitcoin Email · Terms` (colon + spaced middots; inline nav, not flex — guard: `FOOTER_CREDITS_VISIBLE` / `web/tests/site-copy.test.ts`), copyright line, the `Free and open source (MIT).` line linking the repository, and the real JP photo with `Hi, I'm JP.`; no Contact link, no bare support email, no bottom-only `@8bit`.
-
-### Legal pages
-
-Combined `/terms` opens on the full-width three.js snow-globe scene (`web/components/legal/`), then switches to plain, scan-friendly content built from homepage roles: a one-line H1 and subhead, the shared "On this page" list, and headed paragraphs.
-- Constraints: strict nonce CSP with 100% procedural geometry plus the one self-hosted mascot image (no GLTF, HDRI, eval, CDN, or workers); three.js loads client-only; Reduce Motion or no WebGL shows the static SVG poster with no rAF.
-- Verify every visual change with a headless screenshot.
-- `/privacy` permanently redirects to `/terms#privacy-policy`; the Vercel-telemetry disclosure sentences in that privacy section are load-bearing (`web/tests/site-copy.test.ts`).
 
 ## Brand assets
 
@@ -160,21 +100,17 @@ Naming rules live in root `AGENTS.md`; how assets are used is in the sections ab
 |---|---|
 | `brand/jp-cat-yellow-icon-2048.png` | Master source: hand-drawn tortoiseshell JP face on the gold badge. Never overwrite. |
 | `brand/jp-cat-yellow-icon-2048-transparent.png` | Transparent badge for compositing (1000×1000 despite the name); not the master. |
-| `brand/jp-eyes.png` | The eyes-and-nose close-up: the single source for favicons, the site logo, the menu-bar mark, and the app icon. |
-| `brand/jp-the-cat.jpeg` | Real-photo master; `web/public/jp-the-cat.jpeg` is the footer copy (`SITE.photo`). |
-| `web/public/jpthecat-logo.png` | Site logo (`SITE.logo` / `BrandMark`); byte-identical to the menu-bar mark. |
-| `web/public/og.jpg` | Open Graph / Twitter card (1200×630), Sticker Bomb dot-grid + Bagel Fat One wordmark; regenerate with `web/scripts/generate-og-image.mjs`. Guard: `web/tests/social-assets.test.ts`. |
-| `web/app/icon.png`, `web/public/icon-512.png`, `web/public/icon-192.png` | Rounded-square web icons (`purpose: any`); the first two are byte-identical. |
-| `web/public/icon-maskable-512.png` | PWA `maskable` icon: face in safe zone on full-bleed Sticker Bomb cream (`#fff6e6`). Regenerate with `web/scripts/generate-web-icons.mjs` (or `./scripts/generate-brand-icons.sh` on macOS). Never point `maskable` at `icon-512.png`. |
-| `web/app/apple-icon.png` | 180×180, full-bleed and OPAQUE, because iOS composites transparency over black. |
-| `web/app/favicon.ico` | Multi-resolution browser favicon. |
+| `brand/jp-eyes.png` | The eyes-and-nose close-up: the single source for the README logo, the menu-bar mark, and the app icon. |
+| `brand/jp-the-cat.jpeg` | Real-photo master. |
+| `brand/jpthecat-logo.png` | README logo; byte-identical to the menu-bar mark. |
+| `brand/homepage.jpg` | The retired website's full-page screenshot (1600px wide), shown in the README. |
 | `mac/Sources/JPtheCatApp/Resources/jp-menubar.png` | Menu-bar mark, drawn full-size inside the pill with a radial feather; the loading-only mark is hard-clipped to a circle. |
 | `mac/AppIcon.icns` | App icon (`CFBundleIconFile`). |
-| `web/public/dmg-bg.png` | DMG background source (1440×900, opaque sRGB); `mac/scripts/dmg-resources/background{,@2x}.png` derive from it. |
+| `brand/dmg-bg.png` | DMG background source (1440×900, opaque sRGB); `mac/scripts/dmg-resources/background{,@2x}.png` derive from it. |
 
 The DMG Finder layout is part of the brand and is frozen in `mac/scripts/dmg-resources/README.md`, enforced by `mac/scripts/verify-dmg-layout.sh`.
 
-Regenerate the icon family from `brand/jp-eyes.png` with `./scripts/generate-brand-icons.sh`: it redraws the rounded PNGs, the opaque Apple and maskable icons, `mac/AppIcon.iconset`, and `mac/AppIcon.icns`, and keeps both byte-identical pairs identical.
+Regenerate the icon family from `brand/jp-eyes.png` with `./scripts/generate-brand-icons.sh`: it redraws the README logo, the menu-bar mark, `mac/AppIcon.iconset`, and `mac/AppIcon.icns`, and keeps the logo and menu-bar mark byte-identical.
 
 ### Canonical JP appearance
 
@@ -188,33 +124,29 @@ Illustrations may simplify JP into big round eyes, pink cheeks, sketchy outlines
 
 | Path | Purpose |
 |---|---|
-| `web/public/meow.m4a` | Canonical JP sound (AAC/M4A); production code points here. |
-| `mac/Sources/JPtheCatApp/Resources/jp-meow.m4a` | The app's alert and Test-meow sound, byte-identical to `web/public/meow.m4a`. |
-| `web/public/meow-1.mp3`, `web/public/meow-2.mp3` | Backup candidates; never the default. |
-| `ui-*.m4a` (app Resources and `web/public/`) | Four UI cues generated by `mac/scripts/generate-ui-sounds.py` into both trees. |
+| `mac/Sources/JPtheCatApp/Resources/jp-meow.m4a` | Canonical JP sound (AAC/M4A): the app's alert and Test-meow sound. |
+| `ui-*.m4a` (app Resources) | Four UI cues generated by `mac/scripts/generate-ui-sounds.py`. |
 
 The cues share a loudest-window RMS of −15 dBFS; the captured meow is normalized to about −23 LUFS so it sits just under them (played at volume 1.0 against the cues' 0.6).
-To swap the canonical meow, normalize, copy to both trees, and confirm identical hashes (guard: `web/tests/ui-sound-assets.test.ts`):
+To swap the canonical meow, normalize and copy it into the app Resources:
 
 ```sh
 ffmpeg -i SOURCE.m4a -af loudnorm=print_format=json -f null -   # read input_i (LUFS)
 GAIN=$(python3 -c 'print(-23 - (INPUT_I))')
 ffmpeg -y -i SOURCE.m4a -af "volume=${GAIN}dB" -ar 48000 -ac 2 -c:a aac -b:a 128k -profile:a aac_low OUT.m4a
-cp OUT.m4a web/public/meow.m4a && cp OUT.m4a mac/Sources/JPtheCatApp/Resources/jp-meow.m4a
-shasum -a 256 web/public/meow.m4a mac/Sources/JPtheCatApp/Resources/jp-meow.m4a   # must match
+cp OUT.m4a mac/Sources/JPtheCatApp/Resources/jp-meow.m4a
 ```
 
 ### Mascot animation
 
 The canonical loop is v4: JP sits, gently licks a dark paw, and rests, with transparency outside the white circular badge.
-The web and app ship only its transparent poster still; the video masters stay in the operator-local, gitignored `brand/generated/`.
+The app ships only a still derived from its transparent poster; the video masters stay in the operator-local, gitignored `brand/generated/`.
 The yellow badge and white ring are artwork; only the corners outside the badge are transparent.
 
 | Path | Purpose |
 |---|---|
 | `brand/generated/jp-cat-paw-lick-purr-v4-start.png` | Corrected still, used as both the start and end image (local-only) |
 | `brand/generated/transparent/jp-paw-lick-purr-v4-transparent.mov` | ProRes 4444 alpha master (local-only) |
-| `web/public/jp-paw-lick-purr-poster.webp` | Transparent poster, used by the `/terms` scene and its static fallback |
 | `mac/Sources/JPtheCatApp/Resources/jp-first-run-peek.png` | First-run app derivative of the poster |
 | `brand/jp-cat-paw-lick-purr-v4-still.prompt.txt`, `brand/jp-cat-paw-lick-purr-v4.prompt.txt` | Exact still and video prompts |
 
@@ -235,10 +167,9 @@ python3 -m venv /tmp/jp-alpha-venv
   --input brand/generated/jp-paw-lick-purr-v4-source.mp4 --output-stem jp-paw-lick-purr-v4-transparent \
   --circle-center-x 320 --circle-center-y 320 --circle-radius 292 --feather 2.5
 
-# 3. Publish the poster and its app derivative
-ffmpeg -y -i brand/generated/transparent/jp-paw-lick-purr-v4-transparent.mov -vf "scale=640:640" -frames:v 1 /tmp/jp-cat-v4-poster.png
-cwebp -q 86 /tmp/jp-cat-v4-poster.png -o web/public/jp-paw-lick-purr-poster.webp
-sips -s format png web/public/jp-paw-lick-purr-poster.webp --out mac/Sources/JPtheCatApp/Resources/jp-first-run-peek.png
+# 3. Publish the app still
+ffmpeg -y -i brand/generated/transparent/jp-paw-lick-purr-v4-transparent.mov -vf "scale=640:640" -frames:v 1 \
+  mac/Sources/JPtheCatApp/Resources/jp-first-run-peek.png
 ```
 
 `scripts/animate_jp_higgsfield.py` is the Python API fallback for environments using `HF_KEY` or `HF_API_KEY`/`HF_API_SECRET` instead of the CLI login.

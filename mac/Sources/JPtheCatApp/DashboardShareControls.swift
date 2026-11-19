@@ -89,7 +89,7 @@ private struct SocialSharePopover: View {
 					.padding(.horizontal, JPAppSpacing.settingsRowX)
 					.padding(.vertical, JPAppSpacing.settingsRowY)
 					.background(JP.paper.opacity(0.72), in: RoundedRectangle(cornerRadius: JPAppRadius.card, style: .continuous))
-					.accessibilityLabel("Put JPtheCat.com on the clipboard")
+					.accessibilityLabel("Put the JP the Cat GitHub link on the clipboard")
 				}
 				.buttonStyle(.plain)
 			}
@@ -147,7 +147,7 @@ private struct SocialShareDestination: Identifiable {
 	let systemImage: String
 	let url: URL
 
-	static let siteURL = "https://jpthecat.com"
+	static let siteURL = SettingsBackView.repositoryURL
 	private static let shareText = "JP the Cat counts what Claude Code, Codex, Grok, and Muse Spark cost while keeping prompts on your Mac. The cat that counts your agent tokens."
 	private static let xShareText = "\(shareText) @8bit"
 
@@ -161,7 +161,7 @@ private struct SocialShareDestination: Identifiable {
 		SocialShareDestination(
 			id: "facebook",
 			title: "Facebook",
-			subtitle: "Shares the JP the Cat homepage",
+			subtitle: "Shares the JP the Cat GitHub page",
 			systemImage: "person.2",
 			url: shareURL("https://www.facebook.com/sharer/sharer.php", query: ["u": siteURL])),
 		SocialShareDestination(

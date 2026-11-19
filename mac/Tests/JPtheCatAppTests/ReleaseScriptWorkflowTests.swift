@@ -11,7 +11,7 @@ import XCTest
 /// invariants are now either self-enforcing under `set -euo pipefail` (each script `fail()`s on its
 /// own), executed for real (`VersionBumpTests` runs the arithmetic through `/bin/bash`), or migrated
 /// to a test that checks the actual value — `SingleInstanceGuardTests` parses `Info.plist`, and
-/// `site-copy.test.ts` reads both published Homebrew casks.
+/// `UpdateFeedTests` reads both published Homebrew casks.
 final class ReleaseScriptWorkflowTests: XCTestCase {
 	func testReleaseScriptFloorsBuildNumberAbovePublishedAppcast() throws {
 		let source = try String(
@@ -20,7 +20,7 @@ final class ReleaseScriptWorkflowTests: XCTestCase {
 
 		XCTAssertTrue(source.contains(#". "${REPO_ROOT}/scripts/release-versioning.sh""#))
 		XCTAssertTrue(source.contains("jptc_latest_published_build_number"))
-		XCTAssertTrue(source.contains(#"LATEST_PUBLISHED_BUILD="$(jptc_latest_published_build_number "${WEB_STABLE}/appcast.xml")""#))
+		XCTAssertTrue(source.contains(#"LATEST_PUBLISHED_BUILD="$(jptc_latest_published_build_number "${FEED_STABLE}/appcast.xml")""#))
 		XCTAssertTrue(source.contains(#"BUILD_NUMBER="$(jptc_release_build_number "$CUR_BUILD" "$LATEST_PUBLISHED_BUILD" "$SKIPPED_TAGS")""#))
 
 		let currentBuild = try XCTUnwrap(source.range(of: "CUR_BUILD="))

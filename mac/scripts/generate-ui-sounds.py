@@ -10,8 +10,7 @@ sine-based blips with gentle raised-cosine envelopes (no harsh transients):
   ui-click-bottom a softer, lower thock    (bottom footer buttons)
 
 Writes .wav next to this script, then muxes each to AAC .m4a with ffmpeg into
-both the app Resources and the web/public folder so the app and homepage share
-one voice. Re-run whenever the sound design changes.
+the app Resources. Re-run whenever the sound design changes.
 
 NORMALIZATION: every cue is scaled to ONE shared perceptual level before encode
 (see `normalize`). The target is a matched loudest-window RMS — not a matched
@@ -22,8 +21,7 @@ shape: `ui-click-top` stays the crisp higher tick, `ui-click-bottom` the softer
 lower thock — only their overall level is matched to the toggles. The captured
 mascot `jp-meow.m4a`/`meow.m4a` is a separate one-time asset (no generator); it
 is loudness-normalized to ~-23 LUFS by hand so it sits coherently just under the
-cues (a gentle mascot flourish, not a punchy functional cue). Keep both copies
-of every file byte-identical (guarded by web/tests/ui-sound-assets.test.ts).
+cues (a gentle mascot flourish, not a punchy functional cue).
 """
 import math
 import os
@@ -34,7 +32,6 @@ import wave
 SR = 44100
 HERE = os.path.dirname(os.path.abspath(__file__))
 APP_RES = os.path.join(HERE, "..", "Sources", "JPtheCatApp", "Resources")
-WEB_PUB = os.path.join(HERE, "..", "..", "web", "public")
 
 # --- Loudness normalization targets (one shared level for all four cues) ---
 # Loudest-window RMS target in dBFS. -15 matches the toggles' natural level and
@@ -175,15 +172,14 @@ def build():
         samples = normalize(samples)
         wav = os.path.join(HERE, name + ".wav")
         write_wav(wav, samples)
-        for dest_dir in (APP_RES, WEB_PUB):
-            m4a = os.path.join(dest_dir, name + ".m4a")
-            subprocess.run(
-                ["ffmpeg", "-y", "-i", wav, "-c:a", "aac", "-b:a", "128k", m4a],
-                check=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            print("wrote", os.path.relpath(m4a, os.path.join(HERE, "..", "..")))
+        m4a = os.path.join(APP_RES, name + ".m4a")
+        subprocess.run(
+            ["ffmpeg", "-y", "-i", wav, "-c:a", "aac", "-b:a", "128k", m4a],
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        print("wrote", os.path.relpath(m4a, os.path.join(HERE, "..", "..")))
         os.remove(wav)
 
 

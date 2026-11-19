@@ -116,7 +116,7 @@ Every row in `pricing-default.json` has a disposition and a first-party source; 
 Rates are standard global list prices and exclude account discounts, service-tier or region premiums, tool fees, and cache storage.
 A missing cache field means no published rate; the calculator's fallback multiplier for it is an estimate, never a verified rate.
 A promotional rate with no documented replacement keeps its current value; never invent an expiry increase.
-The bundled JSON, `web/public/stable/pricing-v1.json`, and the web mirror change together.
+The bundled JSON and `feed/public/stable/pricing-v1.json` change together, byte-for-byte (`UpdateFeedTests`).
 
 Sources: [A] [Anthropic pricing](https://platform.claude.com/docs/en/about-claude/pricing) and per-model pages, [O] [OpenAI pricing](https://developers.openai.com/api/docs/pricing), [G] [Google Gemini pricing](https://ai.google.dev/gemini-api/docs/pricing), [X] [xAI pricing](https://docs.x.ai/developers/pricing), [Z] [OpenCode Zen](https://opencode.ai/docs/zen/), [GO] [OpenCode Go](https://opencode.ai/docs/go/), [M] [Meta Model API](https://dev.meta.ai/products/meta-model-api), [C] [Cursor Composer 2.5](https://cursor.com/changelog/composer-2-5).
 

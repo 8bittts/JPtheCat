@@ -4,7 +4,6 @@ As-built architecture of the native app, from local agent usage logs to real or 
 
 When this doc and the code disagree, the code wins.
 UI contracts live in [12-ui-surface-invariants.md](12-ui-surface-invariants.md); provider log formats and pricing evidence in [03-data.md](03-data.md); release and signing in [05-infrastructure.md](05-infrastructure.md).
-The web app is owned elsewhere: its layout, proxy, and per-request rendering in [web/AGENTS.md](../web/AGENTS.md#layout-and-conventions), and its `/library` routes in [08-growth.md](08-growth.md#page-families).
 
 ## 1. Targets and shell
 
@@ -65,7 +64,7 @@ The rules that keep this correct are in `mac/AGENTS.md`; the incidents are in [0
 ## 6. Pricing
 
 `PricingTable` resolves in three layers:
-1. Bundled `mac/Sources/JPtheCatCore/Resources/pricing-default.json`, a curated table with LiteLLM field names, maintained with the `jp-models` skill.
+1. Bundled `mac/Sources/JPtheCatCore/Resources/pricing-default.json`, a curated table with LiteLLM field names, checked against local logs and first-party prices before every release (`/jp` Phase 2).
 2. `RemotePricingStore` fetches `https://jpthecat.com/stable/pricing-v1.json` at launch and every 24 hours with an ETag; only a compatible `pricing_revision` merges over the bundle, remote winning per key.
 3. An unknown model keeps `cost = nil` and shows as unpriced, never silently dropped.
 

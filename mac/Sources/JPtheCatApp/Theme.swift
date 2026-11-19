@@ -4,7 +4,7 @@ import SwiftUI
 /// A named color theme — the foundation for the theme system. **Adding a theme is a data
 /// change, not a code change:** append a `JPTheme` to `JPTheme.all` (mark `inMoreThemes: true` to list it under
 /// "More themes") and every UI surface picks it up, because all colors resolve from the *active* theme via
-/// `JPAppColor`. Palette roles mirror `web/app/globals.css` so the app and site stay one product.
+/// `JPAppColor`. Palette roles follow the brand palette in `_docs/02-design-system.md`.
 struct JPTheme: Identifiable, Equatable {
   let id: String  // stable key: persisted
   let name: String  // display name

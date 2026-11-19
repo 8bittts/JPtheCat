@@ -78,10 +78,7 @@ final class TokenFormatterParityTests: XCTestCase {
 		XCTAssertEqual(ProviderBasis.of(rawID: "opencodego").badge, "gateway")
 	}
 
-	/// [CRITICAL] `DashboardView.selectorBadge(for:)`'s `.available` arm must stay a LITERAL ternary —
-	/// `scripts/verify-app-demo-parity.sh` pins that exact line as the mac/web badge-parity anchor, so
-	/// it cannot be rewritten as `ProviderBasis.of(rawID:).badge` without updating the script in the
-	/// same change. This guard is what stops the surviving literals from drifting away from Core's
+	/// `DashboardView.selectorBadge(for:)`'s literal badge words must match Core's `ProviderBasis`
 	/// vocabulary. The dashboard intentionally presents non-aggregable `.estimate` rows as `local`
 	/// because that word describes the visible data source without implying an official quota estimate.
 	func testSelectorBadgeWordsMatchProviderBasis() throws {

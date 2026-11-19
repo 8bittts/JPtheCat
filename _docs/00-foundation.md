@@ -15,6 +15,7 @@ Dates are the evidence in this doc; the owner docs carry none.
 - 2026-11-17: releases move from the Supabase `releases` bucket behind `api.jpthecat.com` to GitHub Releases on the public repository (v1.148 to v1.160 backfilled), and the Supabase project is deleted.
 - 2026-11-18: the private `JPtheCat-archive` repository is deleted, so the pre-open-source history and the customer data in it no longer exist on GitHub.
   The download database, the 8pm owner digest and its cron, every owner email, and the support-report endpoint go with it; support became a `mailto:` link and the app's report opens the user's mail app.
+- 2026-11-19: the website retires. `jpthecat.com` keeps only the static update feed (`feed/`) and redirects everything else to the GitHub repository, whose README becomes the home page; the privacy policy and terms move to `PRIVACY.md`, and the separate `jp-models` skill folds into `/jp` as a pre-release model-price check.
 - The rest of the record is the engineering log below: each entry states what broke, the rule now, and the guard that holds it, while the contract it protects lives in its owner doc.
 
 ## Decisions
@@ -22,7 +23,7 @@ Dates are the evidence in this doc; the owner docs carry none.
 - **The name is `JP the Cat`.** Every user-facing surface reads the spaced name and `JPtheCat` survives only as a code identifier, an artifact filename or the domain; `AGENTS.md` carries the rule and its guards.
 - **Local-first and private.** Prompts, code, transcripts, credentials and local usage databases never leave the Mac, and the app holds no Full Disk Access or Accessibility grant; the two opt-in plan-usage fetches are the disclosed exceptions ([04-security.md](04-security.md)).
 - **Never fabricate a quota.** A provider without a trustworthy official window shows tokens and says the quota is unavailable; the honest tri-state headroom and the capture-age rule came out of two reverted gates recorded in the log below.
-- **The homepage is a fixed curated presentation**, not the native catalog; native layout experiments and provider additions never expand it ([02-design-system.md](02-design-system.md)).
+- **No website.** A Next.js site, the `/library` pSEO pages, and an interactive homepage demo cost a parity script, a second test suite, and a web gate on every release, for traffic that never converted measurably; the README and GitHub Releases replace them, and `/stable/*` stays because every installed copy reads it.
 - **Sparkle release notes are customer-facing only** and cover the latest release only; an all-internal release aborts rather than publishing empty notes ([05-infrastructure.md](05-infrastructure.md)).
 - **Worktrees live under `workstreams/`**, because concurrent agents and automation reset the shared checkout and have destroyed uncommitted work there.
 - **No CI.** `.github/workflows/ci.yml` exists but is disabled on purpose; the local gates are the gates ([09-quality.md](09-quality.md)).
@@ -49,7 +50,7 @@ Three guards failed that check on first write (`PackageResourceBundleTests`, `te
 
 **A presence pin proves a string exists, not that the product uses it.**
 `design-system-normalization.test.ts` asserted seven role classes were "defined" and `site-copy.test.ts` pinned the marquee speed on `.animate-marquee`; no component applied any of them, so both tests guarded dead CSS, and the first also passed on a rule that sat inside a comment.
-A pin now names the rule the component applies and reads comment-stripped CSS, and `web/tests/stylesheet-dead-rules.test.ts` fails on any class, custom property or keyframe that nothing uses.
+A pin must name the rule the product applies, never only that the rule exists.
 
 **A dead-code scanner that cannot run reports nothing, which reads as clean.**
 `periphery scan` exited on a missing index store once SwiftPM's default backend moved it to `.build/out`, and 30 findings accumulated behind it; `mac/.periphery.yml` now pins the path.
@@ -116,21 +117,21 @@ Guards: `PlanTierKeychainReadTests`, `ClaudeRateLimitTests.testDecodedSnapshotCl
 **Pricing coverage is emitted-ID coverage.**
 Audits found rows copied from the wrong sibling (`gpt-5.6-luna` and `terra` at Sol's rates, a 5x overcount), documented aliases missing, and hyphenated snapshot dates the Claude-only normalizer missed.
 Spot-check family-specific rates, aliases, and snapshots; a list-presence test would not have caught Luna.
-The `.agents/skills/jp-models/scripts/audit_model_coverage.py` inventories locally emitted ids, and `OpenCodeGoProviderTests.testEveryRoutedAccountingIDIsAnExactPriceRow` covers the accounting ids gateways derive.
+`mac/scripts/audit_model_coverage.py` inventories locally emitted ids before every release (`/jp` Phase 2), and `OpenCodeGoProviderTests.testEveryRoutedAccountingIDIsAnExactPriceRow` covers the accounting ids gateways derive.
 
 **A new generation is a distinct row until its rates prove otherwise.**
 Fable 5.2, Fable 5.1, and Mythos 5.1 bill cache reads at 0.025x input and Opus 5.5 at 0.05x, so normalizing a new generation onto the previous row overbills the largest token class.
 Fable 5.2 is $8/$40, not Fable 5.1's $10/$50.
 Grok 4.7 Fast is 2x below 200K and 1.5x once the prompt exceeds 200K, so its boundary is exclusive while direct Grok 4.7 stays inclusive.
 `grok-4.6` differs from `grok-4.5` only in its cached rate, and `gpt-6.1-sol` halves GPT-6 Sol's cached input.
-Costs are computed at query time from the stored raw model id, so a new row reprices existing turns without a `parserRevision` bump, and a web deploy of `pricing-v1.json` reaches installed apps through `RemotePricingStore`.
+Costs are computed at query time from the stored raw model id, so a new row reprices existing turns without a `parserRevision` bump, and a feed deploy of `pricing-v1.json` reaches installed apps through `RemotePricingStore`.
 Guards: per-model `PricingTableTests`, `MultiWindowSummariesParityTests`.
 
 **One model identity pipeline.**
 Seven normalizers disagreed on `[1m]`, snapshot dates, vendor prefixes, aliases, free tiers, and gateway suffixes, so one Go row listed a model twice and an alias showed a guessed effort chip.
-`ModelIdentity` (Core) and `web/lib/model-identity.ts` are the one pipeline: pricing keeps accounting suffixes, display and grouping drop them, aliases are data in `pricing-default.json`, and an unclassified model shows no effort chip.
+`ModelIdentity` (Core) is the one pipeline: pricing keeps accounting suffixes, display and grouping drop them, aliases are data in `pricing-default.json`, and an unclassified model shows no effort chip.
 `PricingTable.aliasDefects` validates the bundled map and the remote feed.
-Guards: `ModelIdentityTests` and `web/tests/model-identity.test.ts` over `web/tests/fixtures/model-identity-cases.json`.
+Guard: `ModelIdentityTests` over `mac/Tests/JPtheCatCoreTests/Fixtures/model-identity-cases.json`.
 
 **Some premiums are not in the model id.**
 Claude fast mode doubles every rate but logs the same `message.model`; only `usage.speed == "fast"` says so, so the parser appends `-fast-mode` (never bare `-fast`, which real ids end in).
@@ -154,12 +155,7 @@ Resumed rollouts emit token counts before the first `turn_context`; `CodexProvid
 **Pricing revisions protect corrected bundles.**
 A cached revision-1 remote table restored Sonnet 5.5's old cache-read rate over the corrected bundle at launch.
 A bundled correction advances `pricing_revision` and `RemotePricingStore.minimumPricingRevision` together, which also rejects the stale ETag.
-`web/public/stable/pricing.json` stays byte-identical to the v1.125 table for older apps that ignore context thresholds; new builds read `/stable/pricing-v1.json` (guard: `remote-pricing-endpoint-parity.test.ts`).
-
-**Library calculators must price like `CostCalculator`.**
-They once claimed a flat 0.1x cache read, ignored cache writes, never applied the 200K tier, and dropped GPT models from the Codex calculator.
-The tier applies per request, so only the single-request calculator uses it; per-MTok rates keep up to six decimals (`usdPerMTok`).
-Guard: `web/tests/library-calculators.test.ts` over `web/lib/library/calculator-math.ts`.
+`feed/public/stable/pricing.json` stays byte-identical to the v1.125 table for older apps that ignore context thresholds; new builds read `/stable/pricing-v1.json` (guard: `UpdateFeedTests`).
 
 ### Providers
 
@@ -376,28 +372,12 @@ The notes filter treats anything unmatched as customer-facing, so every leak arr
 
 Guards: `ReleaseNotesWorkflowTests.testTheExactSubjectThatLeakedIntoV1096IsInternal`, `testPlainEnglishCommentAndDocGroomingNeverReachesUsers`, `testDocRuleDoesNotSwallowRealFeatureNotes`.
 
-### Web
+### Website (retired)
 
 #### Brand fidelity
 
 The transactional email shipped an invented bright-gold top bar and a gold square behind the mascot for two rounds; both hexes were real palette values, so the change type-checked and passed review.
 A homepage side-by-side caught it, which is why gold is mascot-only and every design starts from the shipped surface.
-
-#### Hook crash in site-copy tests
-
-`web/tests/site-copy.test.ts` renders some components as raw calls (`Hero()`), which throws once the component adopts a hook.
-Before adding a hook to such a component, convert its call site to `createElement(Component, props)`; it bit `Nav` and `StickyPriceBar`.
-
-#### Responsive overflow
-
-- `md:whitespace-nowrap` beside a `md:` font-size jump overflowed only at 768–808px, invisible at 375px and desktop; pair the jump with `xl:whitespace-nowrap`, and sweep a width range, drilling into each section's `scrollWidth`.
-- A permanent `position: fixed` bar read as "space below the footer" while document height was correct; hide it once the real CTA's `getBoundingClientRect().bottom <= window.innerHeight`.
-  `IntersectionObserver` re-shows it after the target scrolls past.
-
-#### Vercel READY is not the gate
-
-A WCAG target-size failure once deployed "green", because Vercel's build runs only `next build`, not the tests, knip, or react-doctor.
-`web/AGENTS.md` carries the rule to run `bun run check:full` locally before any web-touching push.
 
 #### Download telemetry
 
@@ -410,14 +390,6 @@ A WCAG target-size failure once deployed "green", because Vercel's build runs on
   Fix: parse both ipapi.is shapes and keep absent flags `null`, print `network_flagged / network_flaggable` beside every headline and raise a digest issue on any gap, persist `is_mac` at write time and lead with `mac_human_downloads`, stamp `exclusion` before redaction (migration `0011`), and add the scanner markers to the UA denylist.
   The whole download spine, with these guards, was removed on 2026-11-17 (Timeline); the lesson stands for any future download counter: a raw redirect is not an install.
 
-#### Web design normalization
+#### Reviewed and kept
 
-Dialogs repeated private type sizes, radii, and widths; `web/app/globals.css` now owns named roles.
-The dialog backdrop is a fixed warm-ink token, because Midnight turns `--color-ink` light.
-Sharing a component between two files on one import chain closed a cycle; hoist it to a leaf module (`ticker-band.tsx`).
-
-Reviewed and kept — do not re-flag:
-- `/library` `FaqList` is an always-expanded `<dl>`, unlike the homepage accordion.
-- `SplitFlapCharacter`'s theme-independent shadow and highlight stay legible on every theme; a theme-aware change must re-render Midnight and stay freeze-safe.
-
-The homepage demo re-renders continuously, so synthetic clicks go stale and its `<dialog>` popups do not open under non-gesture events; dispatch a real `MouseEvent` and read the card's inline `--color-card`.
+Do not re-flag: `SplitFlapCharacter`'s theme-independent shadow and highlight stay legible on every theme; a theme-aware change must re-render Midnight and stay freeze-safe.

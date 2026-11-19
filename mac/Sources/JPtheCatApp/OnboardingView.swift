@@ -89,7 +89,7 @@ struct OnboardingView: View {
 					.font(JPAppFont.bodyStrong)
 					.foregroundStyle(JP.ink)
 					.fixedSize(horizontal: false, vertical: true)
-				Text("Website analytics stay on the website. The app reads only local usage sources.")
+				Text("The app reads only local usage sources.")
 					.font(JPAppFont.caption)
 					.foregroundStyle(JP.inkFaint)
 					.fixedSize(horizontal: false, vertical: true)

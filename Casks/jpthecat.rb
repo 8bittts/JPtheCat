@@ -5,7 +5,7 @@ cask "jpthecat" do
   url "https://github.com/8bittts/JPtheCat/releases/download/v#{version}/JPtheCat-#{version}.dmg"
   name "JP the Cat"
   desc "Menu bar AI coding cost meter"
-  homepage "https://jpthecat.com/"
+  homepage "https://github.com/8bittts/JPtheCat"
 
   livecheck do
     url "https://jpthecat.com/stable/appcast.xml"

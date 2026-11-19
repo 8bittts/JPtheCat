@@ -46,8 +46,7 @@ final class DashboardChromePlacementTests: XCTestCase {
 			source.range(of: "DashboardBackLink(action: onClose)"),
 			"the settings chrome row must stay in one source (\(host.name))")
 
-		// ORDER is what this file owns — verify-app-demo-parity.sh uses order-blind `grep -Fq`, so it
-		// cannot express these. `ChromeRefreshButton` absence is asserted there (:66) and not repeated.
+		// ORDER is what this file owns.
 		XCTAssertLessThan(cycle.lowerBound, layout.lowerBound)
 		XCTAssertLessThan(layout.lowerBound, pin.lowerBound)
 		XCTAssertLessThan(pin.lowerBound, widget.lowerBound)
@@ -116,7 +115,7 @@ final class DashboardChromePlacementTests: XCTestCase {
 		XCTAssertLessThan(quit.lowerBound, share.lowerBound)
 		XCTAssertTrue(footer.contains(#"helpText: "Refresh now""#))
 		XCTAssertTrue(footer.contains(#"helpText: "Quit JP the Cat""#))
-		XCTAssertTrue(footer.contains(#"helpText: "Open JP the Cat website""#))
+		XCTAssertTrue(footer.contains(#"helpText: "Open JP the Cat on GitHub""#))
 	}
 
 	/// Both faces share the exact same footer icon set — Settings previously omitted Refresh and the
@@ -148,7 +147,7 @@ final class DashboardChromePlacementTests: XCTestCase {
 		XCTAssertTrue(source.contains(#"Text("Tell others about JP")"#))
 		XCTAssertTrue(source.contains(#"title: "X / Twitter""#))
 		XCTAssertTrue(source.contains(#"@8bit"#))
-		XCTAssertTrue(source.contains(#"static let siteURL = "https://jpthecat.com""#))
+		XCTAssertTrue(source.contains(#"static let siteURL = SettingsBackView.repositoryURL"#))
 		XCTAssertTrue(source.contains(#"NSPasteboard.general"#))
 	}
 }

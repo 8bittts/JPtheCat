@@ -282,7 +282,7 @@ pass "live feed target ${LATEST_VERSION} build ${LATEST_BUILD}"
 info "Download old public install (${OLD_DMG})"
 old_dmg_path="$TMPDIR/$OLD_DMG"
 fetch_url "$(jptc_release_asset_url "$OLD_VERSION" "$OLD_DMG")" "$old_dmg_path"
-sha_file="../web/public/stable/${OLD_DMG}.sha256"
+sha_file="../feed/public/stable/${OLD_DMG}.sha256"
 if [ ! -f "$sha_file" ]; then
 	fetch_url "https://jpthecat.com/stable/${OLD_DMG}.sha256" "$TMPDIR/${OLD_DMG}.sha256"
 	sha_file="$TMPDIR/${OLD_DMG}.sha256"

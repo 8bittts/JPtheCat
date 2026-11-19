@@ -143,7 +143,7 @@ enum JPAppSpacing {
 // MARK: - Color
 
 /// Canonical app palette — every color resolves from the ACTIVE `JPTheme` (`ThemeManager.shared`),
-/// so switching theme re-colors the whole app. Roles mirror `web/app/globals.css` "Sunlit Ledger";
+/// so switching theme re-colors the whole app. Roles follow the "Sunlit Ledger" palette;
 /// `typealias JP = JPAppColor` keeps the short `JP.paper` call site. SwiftUI reads the `Color`
 /// accessors (re-read when an observing view re-renders on a theme change — the `DashboardView` root
 /// observes `ThemeManager`); AppKit chrome reads the `*NS` `NSColor` accessors and redraws on the

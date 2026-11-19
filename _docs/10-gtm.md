@@ -1,6 +1,6 @@
 # Go-To-Market
 
-The Product Hunt launch package and the website funnel for JP the Cat; paste-ready copy is re-synced with the site before use.
+The Product Hunt launch package and the public copy surfaces for JP the Cat; paste-ready copy is re-synced with the README before use.
 
 > [NOTE] §2–§5 are verbatim customer-facing paste copy.
 > They are exempt from the internal no-emoji style rule; the two emojis there are deliberate.
@@ -9,7 +9,7 @@ Ready-to-paste launch copy. **Every claim here is honesty-gated to what actually
 Codex, Grok, Muse Spark, OpenCode Zen, and OpenCode Go are the `live` providers; non-Claude dollars are *notional*
 list-price; the 64-provider catalog is roadmap, not shipped breadth).
 
-Source of truth for the numbers: `web/lib/site.ts` (`SITE`), `mac/Sources/JPtheCatApp/Theme.swift`
+Source of truth for the numbers: `README.md`, `mac/Sources/JPtheCatApp/Theme.swift`
 (24 themes), `ProviderCatalog.all` (64 entries, pinned by `ProviderCatalogTests`) and the privacy posture in
 `_docs/04-security.md`. If any of those change, re-sync this file before launching.
 
@@ -110,7 +110,7 @@ Source of truth for the numbers: `web/lib/site.ts` (`SITE`), `mac/Sources/JPtheC
 > No. It's free: every feature, no account, no trial.
 
 **"Open source?"**
-> Yes. The Mac app and website code is MIT-licensed at github.com/8bittts/JPtheCat, and contributions are welcome.
+> Yes. The Mac app is MIT-licensed at github.com/8bittts/JPtheCat, and contributions are welcome.
 > The JP the Cat name, logo, and mascot art stay reserved.
 > The trust model is still least-privilege and local-only, and a network monitor will show it stay quiet.
 
@@ -139,10 +139,11 @@ backlog — never a second copy here.
 ---
 
 *Recruiting a hunter and choosing the date are human-gated. The copy is launch-ready and
-honesty-gated to shipped scope; re-sync against `SITE` + the theme count before going live.*
+honesty-gated to shipped scope; re-sync against the README + the theme count before going live.*
 
-## 7. Website funnel
+## 7. Public surfaces
 
-- Pages: the single-page homepage plus `/terms`, `/contact`, `/download`, and the `/library` hub. `/privacy` redirects to `/terms#privacy-policy`, and retired paths (`/pricing`, `/buy`, `/release-notes`, `/changelog`, `/release`, `/thanks`, `/confirmed`) redirect in one hop (`web/next.config.ts`).
-- Every download CTA goes through `DownloadCta` → `/download`; the download section links `SHA256` to the checksum derived from `public/stable/version.json`.
-- The FAQ keeps the order free tools → providers → notch apps (`web/tests/site-copy.test.ts`).
+- The launch link is the GitHub repository; `JPtheCat.com` redirects there, so either works in copy.
+- The README is the landing page: pitch, overview image (`brand/homepage.jpg`), stable version, DMG link, and the Homebrew path.
+- Sparkle release notes are the in-app channel; root `AGENTS.md` owns their contract.
+- `PRIVACY.md` is the public privacy policy and terms.

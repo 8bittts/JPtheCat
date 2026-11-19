@@ -1,5 +1,5 @@
 ---
-description: Build, verify, sign, notarize, and publish the JPtheCat macOS app — the /zip-style release workflow for this repo.
+description: Build, verify, sign, notarize, and publish the JPtheCat macOS app, after checking every locally emitted model has a verified price.
 ---
 
 # /jp — JPtheCat build & release
@@ -7,217 +7,179 @@ description: Build, verify, sign, notarize, and publish the JPtheCat macOS app �
 > This file is the one copy of the `/jp` workflow.
 > The global Codex command and the Codex `jp` skill are short pointers to it, so a change lands here only.
 
-The release workflow for JPtheCat, modeled on `/yen-zip` (YEN) and `build-dockishOS`. JP the Cat is
-**free** (no license, trial, or purchase flow) — customer-facing Sparkle notes and the public site
-never resurrect paid-era copy. JPtheCat has two shippable surfaces: the **macOS app** (`mac/`,
-SwiftPM) and the **marketing site** (`web/`, Next.js on Vercel). `/jp` owns the **macOS**
-build→verify→sign→notarize→DMG→appcast→release pipeline.
+JP the Cat is free (no license, trial, or purchase flow); customer-facing Sparkle notes never resurrect paid-era copy.
+The marketing website is retired: `jpthecat.com` redirects to the GitHub repository, except `jpthecat.com/stable/*`, which `feed/` serves as the update channel every installed copy reads (Sparkle appcast, remote pricing, Homebrew livecheck).
+`/jp` owns the whole release: model-price check → mac gates → notarized DMG → signed appcast → GitHub Release → `feed/public/stable/*` + `Casks/jpthecat.rb` → `release: … [deploy]` commit + tag → push → feed promotion check.
 
-**Bare `/jp` ALWAYS does a full release — every single time.** It commits ALL current working-tree
-changes first (one non-`[deploy]` WIP commit), then runs `release-jpthecat.sh`: web quality gate →
-notarized DMG → production smoke gate → signed appcast → draft GitHub Release upload (DMG+sha256+deltas) →
-`web/public/stable/*` + `Casks/jpthecat.rb` → `release: … [deploy]` commit + tag → push → Vercel
-promotion check. It ships and deploys the website too, every time. This is outward-facing and hard
-to undo — that is the intended behavior of a bare
-`/jp` invoke. Use `/jp check` (below) when you only want gates without shipping.
+Bare `/jp` always does a full release.
+It commits every current working-tree change first (one non-`[deploy]` WIP commit), then runs the phases below.
+This is outward-facing and hard to undo; that is the intended behavior of a bare `/jp`.
+Use `/jp check` when you want the gates without shipping.
 
 Run everything from the repo root (`git rev-parse --show-toplevel`).
 
----
-
 ## Modes
 
-| Invocation | Behavior | Status |
-|---|---|---|
-| `/jp` | **Full release (default).** Commit ALL working-tree changes → `release-jpthecat.sh`: web quality gate → notarized DMG → smoke → appcast → draft GitHub Release upload → `web/public/stable/*` + `Casks/jpthecat.rb` → `release: … [deploy]` commit + tag → push → publish the release → verify. Ships mac + web. | ✅ **works now** |
-| `/jp release` | Explicit alias for the bare-`/jp` full release above. | ✅ **works now** |
-| `/jp check` | **Full green check** (old default): mac (build + test + staged-app verify + CLI smoke) **and** web (`bun run check:full`). No shipping. | ✅ works now |
-| `/jp local` | Build + launch the local Dock-visible `.app` and confirm the bundle shape (`mac/scripts/build_and_run.sh --verify`). | ✅ works now |
-| `/jp cli` | Build + run `jpthecat-cli --json` (today/7d cost readout). | ✅ works now |
+| Invocation | Behavior |
+|---|---|
+| `/jp` | Full release (default): Phases 1 to 5. |
+| `/jp release` | Alias for bare `/jp`. |
+| `/jp check` | Phases 1 to 3 only. No commit, no shipping. |
+| `/jp models` | Phase 2 only: the model-price check and any pricing fix, landed as a normal commit. |
+| `/jp local` | Build and launch the local Dock-visible `.app` (`mac/scripts/build_and_run.sh --verify`). |
+| `/jp cli` | Build and run `jpthecat-cli --json` (today/7d cost readout). |
 
-`/jp` / `/jp release` = commit-all-WIP then `mac/scripts/release-jpthecat.sh` (all four scripts exist and are verified). It ships
-BOTH surfaces atomically: the mac DMG goes to the `v<version>` GitHub Release on the public `8bittts/JPtheCat` repository, `Casks/jpthecat.rb` is pinned to the same version + SHA-256, and the `[deploy]` release commit
-promotes the site (the `/download` route + Sparkle feed both read `web/public/stable/`). It is
-outward-facing and hard to undo (a published tag/release + a live deploy) — run it deliberately.
+Dry run any time without publishing: `bash mac/scripts/release-jpthecat.sh --dry-run` (builds, notarizes, smokes and signs the appcast, then reverts; no tag, release, push, or deploy).
 
-**Dry run** any time without publishing: `bash mac/scripts/release-jpthecat.sh --dry-run` (runs the
-web quality gate, then builds + notarizes + smokes + signs the appcast, then reverts — no
-tag/release/push/deploy).
-
----
-
-## Process
-
-### Phase 1 — Preflight (fail fast)
+## Phase 1 — Preflight
 
 ```bash
-cd "$(git rev-parse --show-toplevel)"/mac && swift build 2>&1 | tail -10
+cd "$(git rev-parse --show-toplevel)"/mac && swift build
 ```
 
-If the build fails, stop — every downstream phase fails at the same step, slower.
+If the build fails, stop; every later phase fails at the same step, slower.
 
-### Phase 2 — Mac gates
+## Phase 2 — Model-price check (blocking)
+
+Every release confirms that each model the user's agents emit today has a verified list price, so a release never ships knowing a model renders as unpriced.
+
+1. Run the inventory and keep its JSON as evidence:
+   ```bash
+   python3 -I mac/scripts/audit_model_coverage.py --repo . > "$TMPDIR/jp-model-audit.json"; echo "exit=$?"
+   ```
+   Exit 0 means every emitted id resolves to a price row, 1 means at least one `missing_prices` entry, and 2 means the scan read nothing, which is a failure, never a pass.
+   The script reads only model-identifying JSON fields from the Claude, Codex, Grok, Cursor and OpenCode roots; never print prompts, messages, code, tokens, auth data, or raw log contents.
+   Its `undecorated`/`normalized`/`is_free_tier`/`fast_mode_id` mirror `ModelIdentity` exactly; change both sides together.
+   OpenCode turns live in the legacy `message` table and the session-v2 `session_message` table; `scan_evidence.opencode_message_tables_read` must name every table the store has.
+2. Check for new models the local tools can emit that no log shows yet: read each live provider's first-party model and pricing pages (below) and compare against `pricing-default.json`.
+   A model newly offered in Claude Code, Codex, Grok Build, Cursor, or OpenCode gets a row before the release, not after a user reports it.
+3. Classify every gap before editing:
+   - A non-empty emitted id absent from the table is a pricing candidate.
+   - An empty Codex id means attribution was absent at that event; backfill only from the same rollout's later model declaration, else leave it unpriced ("unknown Codex model").
+   - Provider-prefixed, dated, selector-suffixed (`[1m]`), or alias ids usually need an `aliases` entry or `ModelIdentity` normalization, not a duplicate row.
+   - Synthetic or test ids are not coverage gaps; free-tier ids stay deliberately unpriced.
+4. Verify each candidate against first-party docs only:
+   - Claude: `platform.claude.com/docs` model and pricing pages.
+   - OpenAI/Codex: the OpenAI developer-docs MCP, else `developers.openai.com` / `platform.openai.com`.
+   - Others: the vendor's own model and pricing pages. Summarizing fetch tools truncate long tables (OpenCode Zen and Go list 90+ rows), so download the raw page and parse every row.
+   - Check gateway-specific rates, time-of-day rates, cache writes, and each context threshold; a matching name alone does not establish a rate.
+   - `missing_prices: []` proves only that every id resolves to some row. When a vendor changed prices since the last release, diff each affected row's input, output, cached, cache-write, and tier values too.
+5. Fix at the root, then mirror:
+   - Add or adjust rows in `mac/Sources/JPtheCatCore/Resources/pricing-default.json` with documented rates only, and copy it byte-for-byte to `feed/public/stable/pricing-v1.json` (`UpdateFeedTests`).
+   - Never touch the frozen legacy `feed/public/stable/pricing.json`; an incompatible schema change needs a new versioned URL.
+   - Update `ModelName.swift`/`ModelEffort.swift` and `mac/Tests/JPtheCatCoreTests/Fixtures/model-identity-cases.json` when the model appears in those surfaces; bump a provider's `parserRevision` when indexed rows need re-reading.
+   - A new price tier must be proven on the grouped SQL scan too (`MultiWindowSummariesParityTests`).
+   - Add regression tests for the exact emitted ids and an official-rate spot check; record the source research in `_docs/03-data.md`.
+6. Re-run the inventory until every remaining `missing_prices` id is a deliberate, documented gap: listed under "Pricing re-checks" in `_docs/todos.md` with the reason no first-party rate exists (for example `cursor-grok-4.6-high-fast`).
+   An undocumented missing id blocks the release.
+   Commit the pricing change on its own before the release commit, and name every deliberately unpriced id in the release report.
+   Never guess a price, equate subscription usage with API spend, or turn an unknown model into `$0.00`.
+
+Adding or promoting a whole provider is not a release step; follow [`_docs/11-adding-a-provider.md`](../../_docs/11-adding-a-provider.md).
+
+## Phase 3 — Mac gates
 
 ```bash
 cd "$(git rev-parse --show-toplevel)"/mac
-swift test                                    # GATE: all JPtheCatCore tests green
-bash scripts/build_and_run.sh --verify        # GATE: staged .app is Dock-visible, links AppKit
+swift test --parallel                          # GATE: 0 failures
+swift build -c release
+bash scripts/build_and_run.sh --verify         # GATE: staged .app is Dock-visible, links AppKit
 swift run -c release jpthecat-cli --json | head -30   # smoke: prints today/7d cost
 ```
 
-Gates:
-- **Tests** must be 0 failures.
-- **Staged app** must print `LSUIElement = false ✓` and `links AppKit ✓`.
-- The **CLI** must emit valid JSON with a non-negative `today.cost_usd`.
+- Tests must report 0 failures; redirect the full output to a file rather than piping it through `tail`.
+- The staged app must print `LSUIElement = false ✓` and `links AppKit ✓`.
+- The CLI must emit valid JSON with a non-negative `today.cost_usd`.
 
-### Phase 3 — Web gate (only when the commit touches `web/`)
+## Phase 4 — Commit all working-tree changes (bare `/jp`)
 
-```bash
-cd "$(git rev-parse --show-toplevel)"/web && bun run check:full
-```
-
-`check:full` = biome → type-check → `bun test` → knip → **react-doctor (must be 100/100)** → build.
-**Production gate:** never deploy the web app without react-doctor at 100/100 (see `AGENTS.md`).
-
-### Phase 4-pre — Commit ALL working-tree changes (bare `/jp` / `/jp release`)
-
-A bare `/jp` release **commits everything in the working tree first**, so no WIP is left behind and
-the built DMG matches HEAD. **The release script now enforces this for the DMG build inputs** — its
-preconditions fail fast if `mac/Sources`, `mac/Package.swift`, the entitlements/Info plists, the app
-icon, or `mac/tools` have uncommitted changes, so the notarized app can never silently diverge from
-HEAD; unrelated `web/`/`docs` WIP from a parallel agent does not block the release. Stage the exact
-modified + untracked files (list them from
-`git status --porcelain` — do NOT `git add .`/`-A`, a parallel agent may hold unrelated WIP; here
-"all changes" means every path git already shows as dirty/untracked) into one **non-`[deploy]`** WIP
-commit, then run the release. The release script adds its own `release: … [deploy]` commit on top and
-pushes both:
+The release script refuses to build when `mac/Sources`, `mac/Package.swift`, the entitlements or Info plists, the app icon, or `mac/tools` hold uncommitted changes, so the notarized app always matches `HEAD`.
+Stage the exact modified and untracked paths that `git status --porcelain` lists (never `git add .` or `-A`; a parallel agent may hold unrelated WIP) into one non-`[deploy]` commit:
 
 ```bash
-cd "$(git rev-parse --show-toplevel)"
 git add <every path from git status --porcelain>
-git commit -m "<summary of WIP>"                            # NO [deploy] — release commit carries that
+git commit -m "<summary of WIP>"      # no [deploy]; the release commit carries it
 ```
 
-### Phase 4a — Ship & deploy web (MANDATORY, every release)
-
-The release script runs this **every single time**, before the mac steps:
+## Phase 5 — Release and publish
 
 ```bash
-cd "$(git rev-parse --show-toplevel)"/web && bun run check:full   # GATE: 100/100 doctor + green build
-# release-jpthecat.sh then makes the release commit + push:
-#   git commit -m "release: JPtheCat vX [deploy]"           # [deploy] is REQUIRED — it triggers Vercel
-#   git push origin main                                    # pass dangerouslyDisableSandbox:true on this call
+cd "$(git rev-parse --show-toplevel)"/mac && ./scripts/release-jpthecat.sh [version]
 ```
 
-Then **verify promotion** (poll the Vercel API until production == the pushed short-SHA in READY
-state, as in `/ship` step 7). A release is not "shipped" until production shows the new commit.
+`release-jpthecat.sh` builds the signed, notarized, stapled DMG, smokes it, signs the appcast, uploads DMG + sha256 + deltas to a draft GitHub Release, writes `feed/public/stable/{version.json,appcast.xml,JPtheCat-<ver>.dmg.sha256,jpthecat.rb}`, updates the README markers and `Casks/jpthecat.rb`, syncs the public Homebrew tap, then commits `release: JPtheCat vX [deploy]`, tags, pushes, and publishes the release.
+The push to `main`: on Claude Code pass `dangerouslyDisableSandbox: true` on that Bash call; Codex under `--yolo` needs nothing.
 
-### Phase 4b — Mac DMG release (WORKS NOW)
-
-`release-jpthecat.sh` orchestrates the whole thing; the sub-scripts can also be run individually:
+The sub-scripts can run on their own:
 
 ```bash
-cd "$(git rev-parse --show-toplevel)"/mac
 ./scripts/build-dmg.sh            # signed + notarized + stapled DMG (Developer ID + JPtheCat-Notarization profile)
 ./scripts/build-dmg.sh --local    # signed, skip notarization (fast)
 ./scripts/build-dmg.sh --unsigned # ad-hoc (no Developer ID; bootstrapping)
-./scripts/smoke-test.sh --production   # verify the notarized DMG (Gatekeeper + deep codesign + checksum)
+./scripts/smoke-test.sh --production   # Gatekeeper + deep codesign + checksum
 ./scripts/generate-appcast.sh     # signed appcast.xml (headless EdDSA, GitHub Release enclosure URLs)
-./scripts/release-jpthecat.sh [ver] [--dry-run]   # full: web quality → DMG → smoke → appcast → draft GitHub Release → stable files + cask → web [deploy] → publish
 ```
 
-Verified gates (all green on a real run): sign **inner→outer, never `--deep`** (Sparkle XPC/Updater →
-framework → app last); notarize the **DMG** via the `JPtheCat-Notarization` keychain profile;
-`stapler staple` + `spctl -a -t open` + `spctl -a -t exec` → `source=Notarized Developer ID`; appcast
-enclosure EdDSA-signed with `length=` matching the DMG bytes and the URL pointing at `https://github.com/8bittts/JPtheCat/releases/download/v<version>/` (`mac/scripts/release-github.sh` owns the repository and the URL shape).
-Resource bundles go to `Contents/Resources` ONLY (a copy in the `.app` root breaks codesign sealing).
+Then verify the feed went live; a release is not shipped until this passes:
 
----
+1. The Vercel project `jpthecat` (root directory `feed/`) promoted a production deployment for the pushed release SHA, in READY state, not CANCELED.
+2. `curl -sS https://jpthecat.com/stable/version.json` shows the new version, and `curl -sS https://jpthecat.com/stable/appcast.xml` lists it.
+3. `curl -sSI https://jpthecat.com/` answers 308 to `https://github.com/8bittts/JPtheCat`.
 
-## Artifacts (release mode)
+Signing rules: sign inner to outer, never `--deep` (Sparkle XPC/Updater → framework → app last); notarize the DMG through the `JPtheCat-Notarization` keychain profile; `spctl` must report `source=Notarized Developer ID`; the appcast enclosure is EdDSA-signed with `length=` matching the DMG bytes and points at `https://github.com/8bittts/JPtheCat/releases/download/v<version>/` (`mac/scripts/release-github.sh` owns the repository and URL shape).
+Resource bundles go to `Contents/Resources` only; a copy in the `.app` root breaks codesign sealing.
 
-- `mac/build/local-run/JPtheCat.app` (local) · `mac/build/JPtheCat-<ver>.dmg` + `.sha256` (release)
-  · `web/public/stable/JPtheCat-<ver>.dmg.sha256` (public checksum linked from the site)
-  · `Casks/jpthecat.rb` (Homebrew cask pinned to the same public DMG version + SHA-256)
-- Notarized: `*.notary-submission.json`, "Notarization ticket stapled" in the output
-- The release script prints the GitHub Release download URL
+## Artifacts
 
----
+- `mac/build/local-run/JPtheCat.app` (local) and `mac/build/JPtheCat-<ver>.dmg` + `.sha256` (release).
+- `feed/public/stable/JPtheCat-<ver>.dmg.sha256`, `version.json`, `appcast.xml`, `jpthecat.rb`: the published manifest of what shipped.
+- `Casks/jpthecat.rb`: the Homebrew cask pinned to the same version and SHA-256.
+- Notarization: `*.notary-submission.json` and "Notarization ticket stapled" in the output.
 
-## One-time setup (for `/jp release`) — DONE on this machine
-
-Both are already configured here (team `GRNGR33Z8A`); listed for reference / a fresh machine:
+## One-time setup (done on this machine)
 
 ```bash
-# 1. Notary profile in the keychain (name overridable via JPTHECAT_NOTARY_PROFILE) — DONE
+# Notary profile in the keychain (name overridable via JPTHECAT_NOTARY_PROFILE)
 xcrun notarytool store-credentials JPtheCat-Notarization \
   --apple-id YOUR_APPLE_ID --team-id GRNGR33Z8A --password APP_SPECIFIC_PASSWORD
 
-# 2. Dedicated Sparkle EdDSA key (keychain account `jpthecat`; public key already in Info.plist) — DONE
+# Dedicated Sparkle EdDSA key (keychain account `jpthecat`; public key already in Info.plist)
 ./mac/tools/sparkle/bin/generate_keys --account jpthecat
 
-# 3. Export that key for HEADLESS appcast signing (no keychain GUI prompt during release) — DONE
+# Export that key for headless appcast signing
 mkdir -p ~/.config/jpthecat
 ./mac/tools/sparkle/bin/generate_keys -x ~/.config/jpthecat/sparkle_ed25519_priv.key --account jpthecat
-chmod 600 ~/.config/jpthecat/sparkle_ed25519_priv.key   # OUTSIDE the repo; never commit
+chmod 600 ~/.config/jpthecat/sparkle_ed25519_priv.key   # outside the repo; never commit
 ```
 
 `gh` must be signed in with push access to the public `8bittts/JPtheCat` repository; the release preflight fails closed otherwise.
 
-Do not create or update `mac/CHANGELOG.md`. Git commit history is the changelog; the release flow
-generates comprehensive Sparkle update notes from meaningful commit history. The notes should sound
-like JP: cute, concise, and seriously opinionated about real changes. Empty or generic notes are a
-release failure.
-
----
+Do not create `mac/CHANGELOG.md`; git history is the changelog.
+The release flow generates the Sparkle notes from commit history in JP's voice: cute, concise, opinionated about real changes, and never empty or generic (root `AGENTS.md` owns the notes contract).
 
 ## Common failure modes
 
 | Symptom | Likely cause |
 |---|---|
-| `swift build` fails immediately | Compile error — fix before any release step. |
-| menubar shows `$0.00` | `Bundle.module` (pricing) didn't resolve in the staged app — confirm `JPtheCat_JPtheCatCore.bundle` sits next to the binary in `Contents/MacOS/`. |
-| react-doctor < 100 | Web prod gate — fix or add a justified `web/doctor.config.json` exception before any deploy. |
-| `No Developer ID found` | No Developer ID cert in the login keychain — add one or use `--unsigned`. |
-| Signing retry loops / `stapler` fails | Apple timestamp/notary propagation is slow — the scripts auto-retry (5× sign, 10× staple). |
-| `Notary submission unknown: unknown` with an empty `*.notary-submission.json` | `notarytool submit --wait --output-format json` returned success without a local JSON body. `build-dmg.sh` must recover the matching submission through `notarytool history/info`, then staple/validate the actual DMG before publishing. |
-| Sparkle says no update after a release | `CFBundleVersion` did not increase above the latest published appcast `<sparkle:version>` — `release-jpthecat.sh` must floor the next build at published build + 1, not just local Info.plist + 1. |
-| `App can't be opened` on a clean machine | Sparkle `Updater.app` symlink dropped, or `CFBundleVersion` not a monotonic integer. |
-
----
+| `swift build` fails immediately | Compile error; fix before any release step. |
+| Model audit exits 1 | A locally emitted model has no price row; price it or document it as a deliberate gap (Phase 2). |
+| Model audit exits 2 | No log root was read; check the roots before trusting any result. |
+| Menu bar shows `$0.00` | `Bundle.module` (pricing) did not resolve in the staged app; confirm `JPtheCat_JPtheCatCore.bundle` sits next to the binary in `Contents/MacOS/`. |
+| `No Developer ID found` | No Developer ID cert in the login keychain; add one or use `--unsigned`. |
+| Signing retry loops or `stapler` fails | Apple timestamp or notary propagation is slow; the scripts retry (5× sign, 10× staple). |
+| `Notary submission unknown: unknown` with an empty `*.notary-submission.json` | `build-dmg.sh` must recover the submission through `notarytool history/info`, then staple and validate the DMG before publishing. |
+| Sparkle offers no update after a release | `CFBundleVersion` did not rise above the published `<sparkle:version>`; the release script floors the next build at published build + 1. |
+| Live `version.json` still shows the old version | The feed deploy was canceled or never built; check that the release commit subject carries `[deploy]` and is the tip commit. |
 
 ## Safety
 
-- **Release publishes the download — never the local app.** `/jp release` builds into `mac/build/`,
-  uploads the DMG to its GitHub Release, and deploys the web manifest; it MUST NOT install to `/Applications`
-  or otherwise touch the user's installed copy. Existing installs upgrade themselves through Sparkle
-  (users click "Check for Updates" or the scheduled check fires) — that is the whole point of the
-  update feed. Do not add an install/relaunch step to the release path. (Verifying a build locally is
-  a separate action: `build_and_run.sh` stages to `build/local-run/`, still not `/Applications`.)
-- **No leftovers — the release commit lands in an ISOLATED worktree, never the shared checkout.**
-  `release-jpthecat.sh` stamps `mac/Info.plist` (version/build) in the shared checkout only as scratch
-  for the build, then makes the `release: … [deploy]` commit + tag + push from a **dedicated git
-  worktree checked out at the current local `HEAD` after proving `HEAD` contains `origin/main`**
-  (with a fetch+rebase+retry push) so a concurrent `git reset --hard origin/main` on the shared tree
-  can't discard the in-flight release (it has before), while local pre-release commits are included.
-  An EXIT trap **always tears down that worktree and reverts the shared-checkout stamp**, and the shared
-  checkout is re-synced (ff to the pushed release), so a failed OR successful run never leaves a stray
-  version bump behind. The pipeline ends with a **final-state gate** that asserts the working tree is
-  clean of `Info.plist`/`Casks/jpthecat.rb`/`web/public/stable/*` changes and that no release-bump stash remains. If you
-  ever see a `preserve … Info.plist version bump` stash, it's stale — drop it (`git stash drop`).
-  Regression guard: `ReleaseNotesWorkflowTests.testReleaseIsolatesCommitInAWorktreeWithRebaseRetry`.
-- **Three distinct copies, by design** (so you can test a build locally without disturbing the
-  installed app): `/Applications/JPtheCat.app` = the *installed/user* version (only Sparkle updates
-  it); `mac/build/JPtheCat.app` = the *freshly built* local version kept after a successful build for
-  local testing; `web/public/stable/{version.json,appcast.xml,JPtheCat-<ver>.dmg.sha256}` plus
-  `Casks/jpthecat.rb` = the *published manifest/install metadata* of the release (the "saved copy" of what shipped). A successful build/release writes the manifest to
-  `public/stable` and keeps the local build in `mac/build/` — and **never touches `/Applications`.**
-- **Never commit `mac/build/` or `.build/`** — gitignored; release artifacts go to GitHub Releases, not the tree.
-- **Release notes are part of the release gate** — no vague "Improvements and fixes" fallback, no
-  hand-maintained changelog, and no signed-appcast hand edits. Fix `mac/scripts/generate-appcast.sh`
-  when the note contract needs to change.
-- **Explicit file staging only** — never `git add .` / `git add -A` (a second agent may have unrelated WIP). Stage the exact files for the change.
-- **The repository is public (MIT).** The release commit and tag push to `github.com/8bittts/JPtheCat`; never force-add the gitignored operator-local paths (`_docs/legacy-backup/`, `brand/generated/`, `brand/reference/`), and never push the deleted pre-open-source history from an old clone, which the checkout's `pre-push` hook rejects.
-- **Default-branch push** — Claude Code: pass `dangerouslyDisableSandbox: true` on the `git push origin main` Bash call (the sandbox heuristic blocks it otherwise). Codex: runs under `--yolo`, so the push proceeds without a special flag.
-- **Web deploys are `[deploy]`-gated** — only a commit message containing `[deploy]` triggers a Vercel build. **Bare `/jp` and `/jp release` always include `[deploy]` (in the release commit) so every release ships and deploys the site**; the WIP commit made in Phase 4-pre deliberately omits `[deploy]`, and `/jp check` never deploys.
-- Commit style: concise, **no AI attribution** (no "Generated with…", no Co-Authored-By).
+- Release publishes the download, never the local app: it must not install to `/Applications` or relaunch the installed copy; existing installs update through Sparkle.
+- The release commit lands from an isolated worktree at the current local `HEAD` after proving `HEAD` contains `origin/main`, with fetch, rebase and retry on push; an EXIT trap reverts the shared-checkout `Info.plist` stamp, and a final-state gate fails on leftover `Info.plist`, cask, or `feed/public/stable/*` changes (`ReleaseNotesWorkflowTests.testReleaseIsolatesCommitInAWorktreeWithRebaseRetry`).
+  A `preserve … Info.plist version bump` stash is stale; drop it.
+- Three copies by design: `/Applications/JPtheCat.app` (installed, only Sparkle updates it), `mac/build/JPtheCat.app` (fresh local build), and `feed/public/stable/*` + `Casks/jpthecat.rb` (published manifest).
+- Never commit `mac/build/` or `.build/`; release artifacts go to GitHub Releases.
+- Never hand-edit the signed appcast; fix `mac/scripts/generate-appcast.sh` when the notes contract changes.
+- Stage explicit files only, never `git add .` or `-A`.
+- The repository is public (MIT): never force-add `_docs/legacy-backup/`, `brand/generated/`, or `brand/reference/`, and never push the deleted pre-open-source history from an old clone (the `pre-push` hook rejects it).
+- Feed deploys are `[deploy]`-gated: only a tip commit whose subject contains `[deploy]` builds; the Phase 4 WIP commit omits it, and `/jp check` never deploys.
+- Commit style: concise, with no AI attribution.

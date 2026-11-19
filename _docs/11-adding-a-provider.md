@@ -1,8 +1,8 @@
 # Adding a Provider
 
-The playbook for adding or promoting a provider, from research to the homepage: parsing, accounting, native presentation, and web parity.
+The playbook for adding or promoting a provider, from research to release: parsing, accounting, pricing, and native presentation.
 
-The `$jp-models` skill (`.agents/skills/jp-models/SKILL.md`) is the condensed checklist built from this doc.
+Pricing a new model for an existing provider is a release step, not a provider addition: `/jp` Phase 2 (`.claude/commands/jp.md`) runs the model-price check.
 `ProviderCatalog.swift` owns catalog metadata, root `AGENTS.md` owns the public support boundary, and [03-data.md](03-data.md) records each source format.
 Reuse the existing block for every step; the most recent full builds to grep as templates are Grok and Muse Spark (`grok`, `muse`, `museSpark`), and a missing entry after your change is the tell that a surface was dropped.
 
@@ -17,7 +17,7 @@ Reuse the existing block for every step; the most recent full builds to grep as 
 
 Visibility, aggregation, widget eligibility, pricing, and quota are separate decisions; document each.
 Nemotron, MiMo, Big Pickle, and DeepSeek are local accounting rows (`ProviderCatalog.localAccountingIDs`): summed and shown, never marketed.
-Promotion is a deliberate decision, not something that falls out of a working parser; tier 4 changes what the site may say (`web/tests/no-fiction.test.ts`, `library-honesty.test.ts`).
+Promotion is a deliberate decision, not something that falls out of a working parser; tier 4 changes what the README and Sparkle notes may say.
 
 ### OpenCode-derived rows: one store, one reader, one pricing rule
 
@@ -60,7 +60,7 @@ Three things sit outside the table:
 A provider whose models are unpriced shows tokens, never a dead `$0.00`.
 `ProviderRow.isFullyUnpriced` is true only when there is activity and no priced model; a mixed row stays dollar-based with the "Unpriced models omitted" note.
 `ProviderRow.tokenSeries` is the token twin of `series`, and every dollar call site (hero, selector amount, chart, legend, detail metrics, trend strip) branches on it.
-`TokenFormatter.compact(_:suffix:)` is the one formatter for dashboard, tooltip, and widget (guards: `TokenFormatterTests`, `TokenFormatterParityTests`, `WidgetTokenFormatParityTests`); the homepage twin is `formatTokenCount` in `menubar-demo-series.ts`.
+`TokenFormatter.compact(_:suffix:)` is the one formatter for dashboard, tooltip, and widget (guards: `TokenFormatterTests`, `TokenFormatterParityTests`, `WidgetTokenFormatParityTests`).
 
 ## Step 5 — Dashboard rows and widgets
 
@@ -103,31 +103,15 @@ Add the row as a `ProviderOptInDescriptor`; never copy `ProviderOptInRow`.
 
 ## Step 9 — Brand mark and tint
 
-- Three synced copies of the white glyph: `mac/Sources/JPtheCatApp/Resources/provider-<id>.svg`, `mac/Sources/JPtheCatWidgetExtension/Resources/provider-<id>.svg`, and `web/public/provider-icons/<slug>.svg` with a line in `SOURCE-NOTES.md`.
+- Two synced copies of the white glyph: `mac/Sources/JPtheCatApp/Resources/provider-<id>.svg` and `mac/Sources/JPtheCatWidgetExtension/Resources/provider-<id>.svg`.
 - Marks load through `NSImage` (`JPResourceBundle`/`WidgetAssets`), never `Image(name:bundle:)`.
-- Tints: `JPAppColor` (`JPAppDesignTokens.swift`), `--color-p-<id>` in `web/app/globals.css`, and `viz.light`/`viz.dark` in `menubar-demo-series.ts`; dark-mode lift comes only from `ProviderTintLegibility.legibleHex(...)`.
+- Tints: `JPAppColor` (`JPAppDesignTokens.swift`); dark-mode lift comes only from `ProviderTintLegibility.legibleHex(...)`.
 - Related sources: Grok Build / Cursor / Grok Bot consolidate into one `.grok` row everywhere; legacy source IDs remain private warehouse keys and configuration aliases. Never add separate public rows. A Grok subscription weekly and a Grok Bot weekly are different plans and both render. Do not draw the same pool twice.
 
-## Step 10 — Homepage
-
-The [homepage boundary](02-design-system.md#homepage-provider-boundary) is fixed: a provider addition adds no homepage row, analytics checkbox, Live Data control, marquee item, or FAQ chip.
-`web/lib/homepage-providers.ts` owns that roster; the parity script keeps positive checks for both the full native set and the homepage set.
-
-## Step 11 — `/library`
-
-`/library` reads `web/lib/site.ts` `PROVIDER_DEFINITIONS` and the pricing mirror, so it is the surface most often under-updated.
-1. Set the provider's `status` in `PROVIDER_DEFINITIONS`; `live` is derived from it and set only on a real promotion.
-2. `liveProviderIds()` in `web/lib/library/provider-registry.ts` must return exactly the live set; add a `PROVIDER_SLUG_OVERRIDES` entry for an id that is not URL-safe.
-   The track page gate (`live` or two sources) decides whether a page exists; `live` decides what it may claim.
-3. Mirror new price rows into `pricing-data.ts` and `pricing-registry.ts` with display names, effort, and vendor family.
-4. Confirm the provider passes `eligibility.ts`, the one gate shared by routes and the sitemap.
-5. Grep an existing live provider's id across `web/lib/library/` and match every hit in content and registries.
-6. On a promotion, update the `liveProviderIds()` assertion in `library-honesty.test.ts` and the no-fiction rules in the same change.
-Owner doc: [08-growth.md](08-growth.md).
-
-## Step 12 — Docs
+## Step 10 — Docs and README
 
 Active work goes in `_docs/todos.md`; source formats in `03-data.md`; a reusable lesson in `00-foundation.md`; this file changes only when the pattern itself changes.
+On a tier-4 promotion, update the provider list in `README.md`, `PRIVACY.md` if the data flow changed, and root `AGENTS.md` (Providers) in the same change.
 
 ## Tests a new provider needs
 
@@ -138,7 +122,6 @@ Active work goes in `_docs/todos.md`; source formats in `03-data.md`; a reusable
 - Without an official quota: token rotation, zero-token omission, and a normal attention border.
 - An enablement row: detection `false` on a clean fixture and marker-block round trips against a temp file, never the user's shell rc.
 - Catalog, tray, widget, and resources: `ProviderCatalogTests`, `AnalyticsProviderCoverageTests`, `WidgetExtensionPackagingTests` / `WidgetAllProvidersPresentationTests`, `AppResourcesTests`.
-- Web: `menubar-demo-series.test.ts`, `analytics-demo-layout.test.ts`, `analytics-demo-figures.test.ts`, the `library-*` tests, `no-fiction.test.ts`, and `site-copy.test.ts`.
 
 ## Pricing revisions
 

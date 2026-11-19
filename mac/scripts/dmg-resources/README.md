@@ -18,8 +18,8 @@ Finder background assets and frozen layout spec for the JPtheCat installer DMG.
 
 | File | Dimensions | Source |
 | --- | --- | --- |
-| `background.png` | 720x450 | 1x downsample of `../../../web/public/dmg-bg.png` |
-| `background@2x.png` | 1440x900 | Copy of `../../../web/public/dmg-bg.png` |
+| `background.png` | 720x450 | 1x downsample of `../../../brand/dmg-bg.png` |
+| `background@2x.png` | 1440x900 | Copy of `../../../brand/dmg-bg.png` |
 
 The source image is an opaque 72 dpi PNG. Keep the center visually quiet so the Finder icons and
 labels remain readable.
@@ -28,8 +28,8 @@ labels remain readable.
 
 ```bash
 cd mac
-sips -z 450 720 ../web/public/dmg-bg.png --out scripts/dmg-resources/background.png
-cp ../web/public/dmg-bg.png scripts/dmg-resources/background@2x.png
+sips -z 450 720 ../brand/dmg-bg.png --out scripts/dmg-resources/background.png
+cp ../brand/dmg-bg.png scripts/dmg-resources/background@2x.png
 sips -g pixelWidth -g pixelHeight -g dpiWidth -g dpiHeight -g hasAlpha \
   scripts/dmg-resources/background.png \
   scripts/dmg-resources/background@2x.png

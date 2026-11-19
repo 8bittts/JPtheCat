@@ -4,10 +4,7 @@ Settled contracts for the shipped macOS dashboard, windows, menu bar, alerts, an
 
 The incidents behind them are in [00-foundation.md](00-foundation.md).
 
-Dashboard, settings, and analytics have curated homepage counterparts in `web/components/site/menubar-demo.tsx` and `advanced-analytics-demo.tsx`.
-The [homepage boundary](02-design-system.md#homepage-provider-boundary) fixes their roster and design independently of native geometry; shared units, provenance, badges, actions, and themes retain semantic parity.
-The Application Menu and the dashboard layout toggle are native-only and have no demo mirror.
-`scripts/verify-app-demo-parity.sh` + `AppDemoParityGuardTests` prove structural parity only, never that a new prop was threaded through — compare the changed surface side by side.
+The website and its interactive demos are retired; these contracts describe the native app only.
 
 ## Dashboard Selector UI
 
@@ -47,7 +44,7 @@ A row with `sourceSections` (OpenCode) shows its scope note and usage sentence o
 ### Compact label badges
 
 Effort, basis, availability, quota provenance, estimate, onboarding, analytics, and widget label badges share `LabelBadgeMetrics`: 17pt outer height and 5pt horizontal insets, independent of text, font, or border.
-Native labels apply `labelBadgeLayout()` before their background and inset border; the widget uses the same metrics, and the web demos mirror them through `.demo-badge` with border-box sizing.
+Native labels apply `labelBadgeLayout()` before their background and inset border; the widget uses the same metrics.
 A border must never add to a badge's outer height.
 Effort tones are one map on both platforms: Low and Medium sit on paper behind a `line` hairline, and High uses the honey wash, honey border, and `ginger-deep` text (`ProviderDetailView`, web `components/site/effort-tone.ts`).
 Menu-bar readouts, icon chips, buttons, theme swatches, and larger marketing or library badges keep their own roles.
@@ -58,7 +55,7 @@ Guard: `LabelBadgeLayoutTests`.
 AppKit-owned, SwiftUI-hosted window with two fixed-width layouts, intrinsic height, no internal scrolling, and no blank tail.
 `DashboardLayout` owns the widths: one column is 384pt and two columns is 768pt, the default.
 `DashboardLayoutButton` in the chrome of both faces cycles them; `SettingsStore` persists the choice under `JPtheCat.dashboard.layout`, and `DashboardView` injects it through `\.dashboardLayout`.
-A layout never changes accounting, row order, badges, or which information appears; the homepage keeps its fixed 384px single-column card.
+A layout never changes accounting, row order, badges, or which information appears.
 
 In two columns, the selector uses two equal 366pt columns, a 12pt gap, and 2pt row spacing; All providers and the selected detail span the full card.
 Provider detail places 5-hour and 7-day gauges in two columns, each reset attached to its gauge; a monthly window spans the width above that pair, and a single available short or weekly window spans the width with no empty column.
@@ -91,7 +88,7 @@ Both faces share ONE footer (`DashboardCardFooter`): freshness caption, Refresh,
 Every footer icon shares the same 18x18 hit target (`DashboardFooterActionButton`, `AdvancedAnalyticsFooterButton`, `UpdateDotButton`); the 26x26 `chromeControlSize` is a top-chrome size only.
 `DashboardFreshness` is display-only: `TimelineView` may tick the label but never starts a refresh, stale begins after 5 minutes without a successful refresh, a failed refresh reads `Refresh failed · updated <age>`, and freshness stays out of `DashboardView.surfaceSizingKey`.
 The footer JP mark opens the share popover headed `Tell others about JP`; X / Twitter copy appends `@8bit`.
-The `Built with YEN` credit belongs on the website footer, never the native app.
+The `Built with YEN` credit never appears in the native app.
 
 The basis-label ticker band (`BasisLabelChip`/`TickerTapeText`) is locked to 18pt height with shared motion across the aggregate and provider focus.
 Every Settings boolean uses `SettingsToggleRow` with a fixed trailing switch slot; chevron rows are only for navigation and one-shot commands such as Test meow.
@@ -149,9 +146,9 @@ Every tile is selectable; there is no lock or upsell (web: `ThemesPopup`).
 
 The Settings face is intrinsic-height with NO scrolling (guard: `DashboardSizingTests`).
 Fold small disclosures into an existing section rather than adding a header.
-The Appearance picker is ONE compact row (2 free themes + "More themes"), and "Live data" is ONE `Providers & live limits` row opening the Live Data window; never re-inline either list (web: `NavRow` opening `LiveDataPopup`).
-Support is ONE General-section `Support report` row (no honey promo card at the top of the face; web demo: `NavRow` opening the redacted support modal).
-The `Open source` row follows it and opens the public repository (`SettingsBackView.repositoryURL`; web demo: `NavRow` opening `SITE.repoUrl`).
+The Appearance picker is ONE compact row (2 free themes + "More themes"), and "Live data" is ONE `Providers & live limits` row opening the Live Data window; never re-inline either list.
+Support is ONE General-section `Support report` row (no honey promo card at the top of the face).
+The `Open source` row follows it and opens the public repository (`SettingsBackView.repositoryURL`); the footer project button and Help → JP the Cat Help open the same URL.
 
 The provider opt-in rows (Claude live limits, Grok live limits, Copilot OTel, Cursor hook) are ONE `ProviderOptInRow` driven by `ProviderOptInDescriptor` values; add a descriptor, never copy the row.
 `ProviderOptInIntent.resolve(requested:isOn:state:)` lets only `.installable` reach the install alert; `reconcileStaleCapture` stays optional (Claude and Grok only).
@@ -217,8 +214,8 @@ Never a shared cross-provider max and never zero-anchored; the 0.15 headroom flo
 Source of truth: `SparklineScale.fractions(_:)` (Core, pure); guard `SparklineScaleTests`.
 The widget's `MiniSparkline` keeps its own glance-tuned path.
 
-The native `By model` grid shows every model used in the window, ordered by total tokens; the homepage keeps its compact version-first order through `orderModelLinesForDisplay`, and Core `ModelName.sortsBeforeForCompactDisplay` keeps the canonical order for other consumers.
-Guards: `ProviderDetailLayoutTests`, `ModelNameTests`, `ModelVersionOrderTests`, `menubar-demo-series.test.ts`.
+The native `By model` grid shows every model used in the window, ordered by total tokens; Core `ModelName.sortsBeforeForCompactDisplay` keeps the canonical compact order for other consumers.
+Guards: `ProviderDetailLayoutTests`, `ModelNameTests`, `ModelVersionOrderTests`.
 
 `SplitFlapCharacter`'s `.black`/`.white` shadow and highlight are intentionally theme-independent; any change re-renders Midnight via the `JP_RENDER=1` harness and stays theme-freeze-safe.
 
@@ -259,10 +256,10 @@ Apple correctness:
 - The meow plays through `AVAudioPlayer`, because `UNNotificationSound` cannot play `.m4a`.
 - `bannerDenialWarrants(...)` surfaces "Turn on in System Settings" when notifications are denied OR the alert style is `.none`; it is a read, never a re-request.
 
-`web/public/meow.m4a` is the canonical JP sound, and `mac/Sources/JPtheCatApp/Resources/jp-meow.m4a` stays byte-identical to it; the global logo link stays silent.
-Four synthesized UI cues are shared 1:1 between app and web: `ui-toggle-on`/`ui-toggle-off` and `ui-click-top`/`ui-click-bottom`.
-`mac/scripts/generate-ui-sounds.py` regenerates them into both trees, normalized to one loudest-window RMS level (never peak-normalized), and every cue is gated on `SettingsStore.interactiveSoundsEnabled` (web: `demoUISoundsEnabled`).
-Guards: `AppResourcesTests.testBundlesEveryInteractiveSoundCue`, `web/tests/ui-sound-assets.test.ts`.
+`mac/Sources/JPtheCatApp/Resources/jp-meow.m4a` is the canonical JP sound.
+Four synthesized UI cues ship in the app: `ui-toggle-on`/`ui-toggle-off` and `ui-click-top`/`ui-click-bottom`.
+`mac/scripts/generate-ui-sounds.py` regenerates them, normalized to one loudest-window RMS level (never peak-normalized), and every cue is gated on `SettingsStore.interactiveSoundsEnabled`.
+Guard: `AppResourcesTests.testBundlesEveryInteractiveSoundCue`.
 
 ## Typography
 
@@ -317,5 +314,4 @@ Re-render every face at its exact size via the `ImageRenderer` harness (`JP_REND
 Provider detail shows the last-reported Codex credit balance and its capture time separately from subscription windows.
 Credits are neither dollars nor subscription percentages, and never affect the selector gauge, menu bar, widget, alerts, headroom, or aggregate cost.
 A depleted weekly allowance can coexist with available credits, and a missing five-hour window stays absent; a window's position in the payload does not define its duration.
-The homepage uses labeled sample credits with the same units and disclosure.
-Guards: `CodexCreditsTests`, `CodexCreditsPresentationTests`, `menubar-demo-series.test.ts`.
+Guards: `CodexCreditsTests`, `CodexCreditsPresentationTests`.

@@ -105,7 +105,7 @@ struct DashboardView: View {
 					},
 					onRefresh: { model.refresh() },
 					onQuit: { NSApp.terminate(nil) },
-					onOpenWebsite: { SettingsBackView.open("https://jpthecat.com") })
+					onOpenWebsite: { SettingsBackView.open(SettingsBackView.repositoryURL) })
 					.frame(width: layout.width, alignment: .top)
 					.clipped()
 					.transition(.opacity)
@@ -485,9 +485,8 @@ struct DashboardView: View {
 	/// per-call-site `row.notional` ternary — the badge vocabulary has exactly one home. The inner
 	/// switch is exhaustive on purpose: a NEW `ProviderBasis` case must make an explicit decision here
 	/// instead of inheriting some other basis's word.
-	/// Parity anchors: `scripts/verify-app-demo-parity.sh` pins the `.real`/`.notional` badge lines
-	/// against the web demo's own badge vocabulary, and
-	/// `TokenFormatterParityTests.testSelectorBadgeWordsMatchProviderBasis` fails if the two diverge.
+	/// `TokenFormatterParityTests.testSelectorBadgeWordsMatchProviderBasis` fails if these words drift
+	/// from `ProviderBasis`.
 	private func selectorBadge(for row: DashboardViewModel.ProviderRow) -> String? {
 		switch row.availability {
 		case .stale: return "stale"
@@ -546,7 +545,7 @@ struct DashboardView: View {
 				onRefresh: { model.refresh() },
 				onOpenAdvancedAnalytics: { onOpenAdvancedAnalytics?() },
 				onQuit: { NSApp.terminate(nil) },
-				onOpenWebsite: { SettingsBackView.open("https://jpthecat.com") },
+				onOpenWebsite: { SettingsBackView.open(SettingsBackView.repositoryURL) },
 				// Mirrors the Settings face's own accessory exactly — the update notification was
 				// previously only visible after opening Settings.
 				accessory: { UpdateStatusDot(currentVersion: appVersion) })
@@ -607,8 +606,8 @@ struct DashboardCardFooter<Accessory: View>: View {
 			}
 			DashboardFooterActionButton(
 				systemImage: "questionmark.circle",
-				helpText: "Open JP the Cat website",
-				accessibilityLabel: "Open JP the Cat website",
+				helpText: "Open JP the Cat on GitHub",
+				accessibilityLabel: "Open JP the Cat on GitHub",
 				action: onOpenWebsite)
 			accessory()
 			// Quit sits immediately before the JP mark (bottom-right-most), not between Refresh/Help.
@@ -1044,7 +1043,7 @@ struct SelectorRow: View {
 
 	var body: some View {
 		// Selector rows (each provider + "All providers") play the light click cue like every other
-		// dashboard button, gated by the shared interactive-sounds master. Mirrored on the homepage demo.
+		// dashboard button, gated by the shared interactive-sounds master.
 		//
 		// [Layout note] The "local" badge (Copilot/Cursor) needs to be independently tappable (opens an
 		// explainer popover) while the REST of the row still selects the provider on any other click,

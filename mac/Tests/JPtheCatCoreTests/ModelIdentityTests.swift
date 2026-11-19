@@ -2,9 +2,8 @@ import XCTest
 
 @testable import JPtheCatCore
 
-/// One model-id pipeline serves pricing, effort, display, and grouping. These tests read the SAME
-/// fixture as `web/tests/model-identity.test.ts`, so the app and the website cannot label, group, or
-/// classify an emitted id differently.
+/// One model-id pipeline serves pricing, effort, display, and grouping. These tests read the shared
+/// `Fixtures/model-identity-cases.json` table, which the model-coverage audit script also mirrors.
 final class ModelIdentityTests: XCTestCase {
 	private struct Fixture: Decodable {
 		struct Case: Decodable {
@@ -180,11 +179,9 @@ final class ModelIdentityTests: XCTestCase {
 	}
 
 	private func loadFixture() throws -> Fixture {
-		// #filePath = mac/Tests/JPtheCatCoreTests/ModelIdentityTests.swift → up 3 = mac/, up 1 = repo root.
-		let repoRoot = URL(fileURLWithPath: #filePath)
-			.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+		let url = URL(fileURLWithPath: #filePath)
 			.deletingLastPathComponent()
-		let url = repoRoot.appendingPathComponent("web/tests/fixtures/model-identity-cases.json")
+			.appendingPathComponent("Fixtures/model-identity-cases.json")
 		return try JSONDecoder().decode(Fixture.self, from: Data(contentsOf: url))
 	}
 }

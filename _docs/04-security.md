@@ -1,7 +1,7 @@
 # Security
 
 The privacy invariant, the permissions posture, Keychain access rules and update-feed trust for JP the Cat; `AGENTS.md` carries the rules as hard requirements and this doc explains the posture.
-The web app's side is owned elsewhere: response headers, the nonce CSP, and CORS in [web/AGENTS.md](../web/AGENTS.md#security-headers-and-cors), the built-bundle secret scan in [web/AGENTS.md](../web/AGENTS.md#commands), and secrets in [web/AGENTS.md](../web/AGENTS.md#infisical); the site keeps no database.
+The website is retired; the static update feed (`feed/vercel.json`) holds no secrets, runs no code, and keeps no data.
 
 ## Privacy invariant
 
@@ -30,7 +30,7 @@ JP requests neither Full Disk Access nor Accessibility, and must never start.
 - **Nothing it reads is TCC-protected.** Sources read exact home-root provider dotfolders, JP's own container/App Group, and the opted-in sign-in stores documented in `03-data.md`; no recursive home-directory walk is needed.
 - **It controls no other app:** no `AXUIElement`, `CGEventTap`, synthesized input, or Apple events in shipped code; the only `osascript` is build-time DMG layout.
 - **Full Disk Access breaks on every update,** because macOS pins the grant to a code signature and Sparkle ships a new one each release.
-- **Trust:** "no Full Disk Access, no Accessibility, reads only your own AI-tool logs" is a shipped marketing claim (`web/tests/site-copy.test.ts`).
+- **Trust:** "no Full Disk Access, no Accessibility, reads only your own AI-tool logs" is a public claim in `README.md` and `PRIVACY.md`.
 - **Never enumerate `$HOME`.** TCC attributes access up the chain, so a recursive walk can trip Desktop, Documents, or Downloads prompts; providers read exact paths only.
 - **What JP does need:** `UNUserNotificationCenter` `.alert` authorization (opt-in), the `SMAppService` login item, and Developer ID signing.
 - **A future source inside another app's container** is TCC-protected; prefer an App Group (apps we own), then an `NSOpenPanel` security-scoped bookmark, never Full Disk Access.

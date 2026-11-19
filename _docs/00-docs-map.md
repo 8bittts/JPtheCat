@@ -1,21 +1,21 @@
 # JP the Cat Documentation Map
 
-Calm, light-themed macOS menu-bar app showing AI coding-agent spend and rate-limit headroom, with a Next.js marketing and pSEO site, GitHub Releases downloads, and a Homebrew tap.
-Agent routing lives in `AGENTS.md` with `mac/AGENTS.md` and `web/AGENTS.md`; this index follows the fleet documentation standard that `/docs` audits against.
+Calm, light-themed macOS menu-bar app showing AI coding-agent spend and rate-limit headroom, with GitHub Releases downloads, a static update feed at `jpthecat.com/stable`, and a Homebrew tap; the website is retired and the GitHub README is the public home page.
+Agent routing lives in `AGENTS.md` with `mac/AGENTS.md`; this index follows the fleet documentation standard that `/docs` audits against.
 
 ## Owner docs
 
 | Doc                            | Owns                                                                                                              |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
 | `00-foundation.md`             | History, decisions, and the engineering log of incidents behind the rules in `AGENTS.md`                          |
-| `01-architecture.md`           | Native targets, data flow, providers, the normalized record, indexing, pricing, rate limits, persistence, widget; the web app's layout and routes are owned by `web/AGENTS.md` and `08-growth.md` |
-| `02-design-system.md`          | Brand thesis, homepage provider boundary, color, typography, motion, charts and icons, website, brand assets        |
-| `03-data.md`                   | Provider log formats and the model-price evidence ledger; the website keeps no data                                |
-| `04-security.md`               | Privacy invariant, Keychain rules, harness configuration, permissions posture, update-feed trust; web headers, CSP, CORS and secrets are owned by `web/AGENTS.md` |
-| `05-infrastructure.md`         | Release pipeline, Sparkle vendoring, update UI at runtime, release hosting, the Homebrew tap, web hosting and DNS; the web deploy gate and env posture are owned by `web/AGENTS.md` |
-| `08-growth.md`                 | Measurement limits and the `/library` pSEO strategy                                          |
+| `01-architecture.md`           | Native targets, data flow, providers, the normalized record, indexing, pricing, rate limits, persistence, widget |
+| `02-design-system.md`          | Brand thesis, color, typography, motion, charts and icons, brand assets                                           |
+| `03-data.md`                   | Provider log formats and the model-price evidence ledger                                                          |
+| `04-security.md`               | Privacy invariant, Keychain rules, harness configuration, permissions posture, update-feed trust                 |
+| `05-infrastructure.md`         | Release pipeline, Sparkle vendoring, update UI at runtime, release hosting, the Homebrew tap, the update feed and DNS |
+| `08-growth.md`                 | Measurement limits and where growth happens now that the website is retired                                      |
 | `09-quality.md`                | Gates by target, guards, release verification                                                                      |
-| `10-gtm.md`                    | Product Hunt launch package and the website funnel                                                                 |
+| `10-gtm.md`                    | Positioning and the public copy surfaces (README, GitHub, Sparkle notes, launch copy)                             |
 | `11-adding-a-provider.md`      | Provider add and promotion playbook                                                                                |
 | `12-ui-surface-invariants.md`  | Settled native UI contracts                                                                                        |
 | `todos.md`                     | The only backlog; active work only                                                                                 |
@@ -23,22 +23,22 @@ Agent routing lives in `AGENTS.md` with `mac/AGENTS.md` and `web/AGENTS.md`; thi
 ## Not applicable
 
 - `06-payments.md`: the app is free with no payment, licensing, or trial surface; public positioning is owned by `10-gtm.md` and retired licensing history by `00-foundation.md`.
-- `07-email.md`: the site sends no email; support is a `mailto:` link to `support@jpthecat.com`, and the rule is owned by `web/AGENTS.md`.
+- `07-email.md`: nothing sends email; support is the app's `mailto:` report to `support@jpthecat.com` (`SupportReportClient`), and inbound routing is in `05-infrastructure.md`.
 
 ## Other surfaces
 
 | Path                                                 | Notes                                                                                        |
 | ---------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `AGENTS.md`, `mac/AGENTS.md`, `web/AGENTS.md`        | The enforceable contract and its directory-scoped rules                                      |
+| `AGENTS.md`, `mac/AGENTS.md`                         | The enforceable contract and its directory-scoped rules                                      |
 | `README.md`                                          | Public overview; its version-badge and download-link blocks are generated, never hand-edited |
+| `PRIVACY.md`                                         | Public privacy policy and terms of service, ported from the retired site                     |
 | `CONTRIBUTING.md`, `LICENSE`                         | Contributor gates and hard rules; MIT license for the code, with JP's name and mascot art reserved in `README.md` |
 | `legacy-backup/`                                     | Operator-local, gitignored archive of the retired paid era; holds customer data, never public |
-| `.claude/commands/jp.md`                             | The `/jp` build and release runbook, mirrored 1:1 with the operator's Codex command          |
-| `.agents/skills/jp-models/SKILL.md`                  | Model and provider coverage checklist, linked from `.claude/skills/jp-models`                |
-| `web/public/stable/appcast.xml`                      | Sparkle-signed feed; regenerated by `mac/scripts/generate-appcast.sh`, never hand-edited     |
+| `.claude/commands/jp.md`                             | The `/jp` build and release runbook, including the pre-release model-price check             |
+| `feed/`                                              | Static Vercel deployment serving `/stable/*` and redirecting the rest of the domain to GitHub |
+| `feed/public/stable/appcast.xml`                     | Sparkle-signed feed; regenerated by `mac/scripts/generate-appcast.sh`, never hand-edited     |
 | `Casks/jpthecat.rb`                                  | Homebrew Cask, kept in sync with the public tap by the release script                        |
 | `mac/scripts/dmg-resources/README.md`                | Frozen DMG Finder layout, enforced by `mac/scripts/verify-dmg-layout.sh`                     |
-| `web/public/provider-icons/SOURCE-NOTES.md`          | Source and license notes for the self-hosted provider marks                                  |
 
 ## Authority order
 
@@ -46,5 +46,5 @@ Code, scripts and tests, then the owner doc, then `AGENTS.md`, then `README.md`.
 
 ## Known doc drift
 
-- `10-gtm.md` launch copy must be re-synced with `web/lib/site.ts` before use.
-- The `_comment` field of the served `web/public/stable/pricing.json` cites a `_docs/04-pricing-and-limits.md` that no longer exists; the served pricing file is not edited in a documentation pass.
+- `10-gtm.md` launch copy must be re-synced with the README before use.
+- The `_comment` field of the served `feed/public/stable/pricing.json` cites a `_docs/04-pricing-and-limits.md` that no longer exists; the served pricing file is not edited in a documentation pass.
