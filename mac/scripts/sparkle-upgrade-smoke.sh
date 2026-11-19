@@ -17,8 +17,11 @@ APP_NAME="JPtheCat"
 OLD_VERSION="${1:-1.148}"
 OLD_DMG="JPtheCat-${OLD_VERSION}.dmg"
 . "scripts/release-github.sh"
-MANIFEST_URL="https://jpthecat.com/stable/version.json"
-APPCAST_URL="https://jpthecat.com/stable/appcast.xml"
+# The feed is served from this repository by GitHub; old installs (v1.161 and older) still request
+# jpthecat.com/stable/*, which Cloudflare redirects to these same files.
+FEED_BASE="https://raw.githubusercontent.com/8bittts/JPtheCat/main/feed/public/stable"
+MANIFEST_URL="${FEED_BASE}/version.json"
+APPCAST_URL="${FEED_BASE}/appcast.xml"
 INSTALLED_APP="/Applications/JPtheCat.app"
 TMPDIR=""
 APP=""
@@ -284,7 +287,7 @@ old_dmg_path="$TMPDIR/$OLD_DMG"
 fetch_url "$(jptc_release_asset_url "$OLD_VERSION" "$OLD_DMG")" "$old_dmg_path"
 sha_file="../feed/public/stable/${OLD_DMG}.sha256"
 if [ ! -f "$sha_file" ]; then
-	fetch_url "https://jpthecat.com/stable/${OLD_DMG}.sha256" "$TMPDIR/${OLD_DMG}.sha256"
+	fetch_url "${FEED_BASE}/${OLD_DMG}.sha256" "$TMPDIR/${OLD_DMG}.sha256"
 	sha_file="$TMPDIR/${OLD_DMG}.sha256"
 fi
 expected_sha="$(awk '{print $1}' "$sha_file")"

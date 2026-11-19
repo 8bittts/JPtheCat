@@ -8,7 +8,7 @@ import XCTest
 /// bundled→remote merge semantics.
 final class RemotePricingStoreTests: XCTestCase {
 	func testDefaultFeedIsIsolatedFromLegacyContextSemantics() {
-		XCTAssertEqual(RemotePricingStore.defaultRemoteURL.absoluteString, "https://jpthecat.com/stable/pricing-v1.json")
+		XCTAssertEqual(RemotePricingStore.defaultRemoteURL.absoluteString, "https://raw.githubusercontent.com/8bittts/JPtheCat/main/feed/public/stable/pricing-v1.json")
 	}
 
 	func testBundledFeedMeetsTheCurrentPricingRevision() throws {

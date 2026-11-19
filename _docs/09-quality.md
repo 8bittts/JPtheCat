@@ -8,7 +8,7 @@ Root `AGENTS.md` (Gates) declares the gate for each target as a hard rule; this 
 
 - **Mac:** `swift test --parallel` from `mac/` is the whole automated suite; `.github/workflows/ci.yml` stays disabled on purpose.
 - **Update feed:** `UpdateFeedTests` runs inside the mac suite.
-  It holds `feed/public/stable/pricing-v1.json` byte-identical to the bundled pricing table, pins the frozen legacy `pricing.json` digest, keeps both cask copies identical with their URL template and Sparkle livecheck, keeps the README install path, and checks that `feed/vercel.json` serves `/stable/*` before its GitHub redirect and keeps the 410 support endpoint.
+  It holds `feed/public/stable/pricing-v1.json` byte-identical to the bundled pricing table, pins the frozen legacy `pricing.json` digest, keeps both cask copies identical with their URL template and Sparkle livecheck, keeps the README install path, and checks that the app's baked feed and pricing URLs point at committed files on `main`.
 - **Release:** `/jp` adds the pre-release model-price check (`mac/scripts/audit_model_coverage.py`); see `.claude/commands/jp.md`.
 
 ## Guards

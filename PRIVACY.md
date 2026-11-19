@@ -19,14 +19,14 @@ Prompts, code, transcripts, token history, computed costs, local usage database 
 ### No website tracking
 
 JP the Cat has no marketing website.
-JPtheCat.com only serves the app's update feed and sends every other visit to this GitHub repository.
+JPtheCat.com is only a set of Cloudflare redirects: update requests from older app versions go to the update files in this repository, and every other visit goes to this GitHub repository.
 It runs no analytics, sets no cookies, and records no download events.
 
 ### Downloads and updates
 
 The public DMG and update files are GitHub Release assets on this open-source repository, and GitHub serves them under its own privacy terms.
 JP keeps no download database, collects no email address on download, and sends no newsletter or owner notification.
-Sparkle update checks request the update feed and release files, and the app fetches its public pricing table from the same feed.
+Sparkle update checks request the update feed from GitHub (raw.githubusercontent.com) and the release files from GitHub Releases, and the app fetches its public pricing table from the same feed.
 The app makes no license, trial, or purchase calls: it is free and does not identify your Mac to JP's servers.
 No raw hardware identifiers (serial number or platform UUID) ever leave your Mac.
 Update checks do not include prompts, code, transcripts, token history, computed costs, provider credentials, or local usage database contents.
@@ -64,8 +64,8 @@ We do not knowingly collect children's personal information.
 
 | Service | Role |
 |---|---|
-| Vercel | Hosts the update feed at JPtheCat.com and the redirect to GitHub. |
-| GitHub | The open-source repository and the release downloads, including the update files Sparkle fetches. |
+| Cloudflare | Answers JPtheCat.com and redirects it to GitHub; routes support@JPtheCat.com mail. |
+| GitHub | The open-source repository, the update feed, and the release downloads Sparkle fetches. |
 | Sparkle | The macOS update framework that checks the public update feed and downloads app updates. |
 
 ## Terms of service

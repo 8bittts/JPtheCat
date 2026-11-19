@@ -5,7 +5,7 @@ What JP the Cat can measure, and where growth happens now that the website is re
 ## 1. Measurement
 
 JP the Cat is free and app usage stays local, so there is no product analytics and no website analytics.
-`jpthecat.com` serves only the update feed and redirects every other visit to the GitHub repository; it runs no analytics and records nothing.
+`jpthecat.com` is only Cloudflare redirects to GitHub; it runs no analytics and records nothing.
 Never add a download counter, a growth database, or an owner report without an explicit operator request and a `PRIVACY.md` update in the same change.
 
 - **Repository traffic** is GitHub's Insights → Traffic view (views, unique visitors, referrers, clones), kept for 14 days; read it with `gh api repos/8bittts/JPtheCat/traffic/views` and `.../traffic/popular/referrers`.

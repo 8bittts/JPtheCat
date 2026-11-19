@@ -13,7 +13,7 @@ MAC_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$MAC_ROOT"
 
 APP_NAME="JPtheCat"
-MANIFEST_URL="https://jpthecat.com/stable/version.json"
+MANIFEST_URL="https://raw.githubusercontent.com/8bittts/JPtheCat/main/feed/public/stable/version.json"
 DMG_PATH=""
 EXPECTED_SHA=""
 EXPECTED_VERSION=""

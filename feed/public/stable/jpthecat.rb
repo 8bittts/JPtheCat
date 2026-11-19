@@ -8,7 +8,7 @@ cask "jpthecat" do
   homepage "https://github.com/8bittts/JPtheCat"
 
   livecheck do
-    url "https://jpthecat.com/stable/appcast.xml"
+    url "https://raw.githubusercontent.com/8bittts/JPtheCat/main/feed/public/stable/appcast.xml"
     strategy :sparkle, &:short_version
   end
 

@@ -35,7 +35,7 @@
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUFeedURL</key>
-	<string>https://jpthecat.com/stable/appcast.xml</string>
+	<string>https://raw.githubusercontent.com/8bittts/JPtheCat/main/feed/public/stable/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>tcid9LQfvmrz7xJn23+o/fD1Ui+k19JfWsEhW/giXGY=</string>
 	<key>SURequireSignedFeed</key>

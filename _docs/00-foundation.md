@@ -16,6 +16,7 @@ Dates are the evidence in this doc; the owner docs carry none.
 - 2026-11-18: the private `JPtheCat-archive` repository is deleted, so the pre-open-source history and the customer data in it no longer exist on GitHub.
   The download database, the 8pm owner digest and its cron, every owner email, and the support-report endpoint go with it; support became a `mailto:` link and the app's report opens the user's mail app.
 - 2026-11-19: the website retires. `jpthecat.com` keeps only the static update feed (`feed/`) and redirects everything else to the GitHub repository, whose README becomes the home page; the privacy policy and terms move to `PRIVACY.md`, and the separate `jp-models` skill folds into `/jp` as a pre-release model-price check.
+  The same day the Vercel feed project is paused and then retired: the feed moves to raw.githubusercontent.com, `jpthecat.com` becomes Cloudflare redirect rules for apps up to v1.161, and v1.162 bakes in the GitHub URLs so the domain can lapse once those apps update.
 - The rest of the record is the engineering log below: each entry states what broke, the rule now, and the guard that holds it, while the contract it protects lives in its owner doc.
 
 ## Decisions

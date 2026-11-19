@@ -1,7 +1,7 @@
 # Security
 
 The privacy invariant, the permissions posture, Keychain access rules and update-feed trust for JP the Cat; `AGENTS.md` carries the rules as hard requirements and this doc explains the posture.
-The website is retired; the static update feed (`feed/vercel.json`) holds no secrets, runs no code, and keeps no data.
+The website is retired; the update feed is static files in this repository, and `jpthecat.com` is only Cloudflare redirects, so no server runs code or keeps data.
 
 ## Privacy invariant
 

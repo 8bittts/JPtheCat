@@ -3,7 +3,7 @@ import Foundation
 /// The middle layer of the three-layer pricing resolution (bundled → **remote ETag override** →
 /// unpriced). Model prices drift (a provider cuts rates, a new snapshot ships); rather than force an
 /// app update for every table change, JP conditionally fetches a small `pricing-v1.json` published
-/// alongside the Sparkle appcast (`https://jpthecat.com/stable/pricing-v1.json`) and overlays it on the
+/// alongside the Sparkle appcast (`feed/public/stable/pricing-v1.json`, served from this repository's `main` by raw.githubusercontent.com) and overlays it on the
 /// bundled defaults.
 ///
 /// Contract, in priority order — the store is **fail-closed** at every step:
@@ -27,8 +27,9 @@ public final class RemotePricingStore: Sendable {
 	private let cacheURL: URL?  // verbatim copy of the last accepted remote `{models:…}` body
 	private let etagURL: URL?  // the ETag that body was served with, for the next conditional GET
 
-	/// Sibling of the Sparkle appcast; Vercel serves `feed/public/stable/*` statically.
-	public static let defaultRemoteURL = URL(string: "https://jpthecat.com/stable/pricing-v1.json")!
+	/// Sibling of the Sparkle appcast; GitHub serves `feed/public/stable/*` from `main`. Apps up to
+	/// v1.161 read `jpthecat.com/stable/*`, which a Cloudflare redirect rule sends to the same files.
+	public static let defaultRemoteURL = URL(string: "https://raw.githubusercontent.com/8bittts/JPtheCat/main/feed/public/stable/pricing-v1.json")!
 
 	/// Production initializer: real URLSession fetcher + App Support cache.
 	public convenience init(url: URL = RemotePricingStore.defaultRemoteURL) {

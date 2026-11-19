@@ -60,7 +60,7 @@ There is no license, trial, or checkout.
 ```
 JPtheCat/
 ├── mac/      macOS app — SwiftPM: JPtheCatCore, JPtheCatApp, JPtheCatWidgetExtension, jpthecat-cli
-├── feed/     Static update feed served at jpthecat.com/stable (Sparkle appcast, pricing, cask)
+├── feed/     Update feed served from GitHub (Sparkle appcast, pricing, cask); never move its files
 ├── Casks/    Homebrew cask, pinned to the published DMG
 ├── brand/    Mascot art and generation prompts
 ├── scripts/  Asset generation and repo-level guards

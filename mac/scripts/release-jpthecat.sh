@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# release-jpthecat.sh — cut a full JPtheCat release: notarized DMG → GitHub Release → update-feed deploy.
+# release-jpthecat.sh — cut a full JPtheCat release: notarized DMG → GitHub Release → GitHub-hosted update feed.
 #
 #   ./scripts/release-jpthecat.sh            # release the current Info.plist version (first time) or bump patch
 #   ./scripts/release-jpthecat.sh 0.002      # release an explicit version
@@ -9,9 +9,9 @@
 # Pipeline: preconditions → (bump) → build-dmg (notarized) → smoke-test --production →
 # generate-appcast → upload DMG+sha256+deltas to a DRAFT GitHub Release → write feed/public/stable/
 # {version.json, appcast.xml, JPtheCat-X.dmg.sha256, jpthecat.rb} + README markers + Homebrew cask →
-# commit "release: JPtheCat vX [deploy]" + tag → push HEAD+tag → publish the release → verify download.
-# The draft is published seconds after the push; Vercel needs a moment to deploy the release
-# commit, so the assets are public before the hosted appcast points at them.
+# commit "release: JPtheCat vX" + tag → push HEAD+tag → publish the release → verify download.
+# The feed is the committed feed/public/stable/* served by raw.githubusercontent.com from main, so it
+# goes live at the push; the draft is published seconds later, inside raw's 5-minute cache window.
 #
 # [HARDENING] The metadata commit+tag+push is done from a DEDICATED git worktree checked out at
 # the current local HEAD — never this shared checkout — because concurrent agents `git reset --hard
@@ -23,7 +23,7 @@
 # [INVARIANT] Publishes the DOWNLOAD only — it MUST NOT install to /Applications or relaunch the
 # user's installed app. Existing installs upgrade themselves via Sparkle. Do not add an install step.
 #
-# This is OUTWARD-FACING and hard to undo (a published tag + a live deploy). Requires:
+# This is OUTWARD-FACING and hard to undo (a published tag + a live feed). Requires:
 #   - Developer ID cert + notary profile JPtheCat-Notarization (build-dmg.sh handles verification)
 #   - exported Sparkle key at ~/.config/jpthecat/sparkle_ed25519_priv.key (generate-appcast.sh)
 #   - gh signed in with push access to the public 8bittts/JPtheCat repository
@@ -218,11 +218,11 @@ cp "${FEED_STABLE}/appcast.xml" "$REL_WORKTREE/feed/public/stable/appcast.xml"
 cp "$FEED_SHA_FILE" "$REL_WORKTREE/feed/public/stable/$(basename "$FEED_SHA_FILE")"
 cp "$CASK_STABLE_FILE" "$REL_WORKTREE/feed/public/stable/jpthecat.rb"
 git -C "$REL_WORKTREE" add README.md Casks/jpthecat.rb mac/Info.plist feed/public/stable
-git -C "$REL_WORKTREE" commit -q -m "release: ${APP_NAME} ${TAG} [deploy]"
+git -C "$REL_WORKTREE" commit -q -m "release: ${APP_NAME} ${TAG}"
 step "release commit staged in isolated worktree"
 
 # --- Push main with fetch+rebase+retry so a parallel commit on origin/main can't abort the release
-# (Vercel builds on [deploy]). Tag only AFTER the commit lands, since a rebase changes its SHA. ---
+# (the push publishes the feed). Tag only AFTER the commit lands, since a rebase changes its SHA. ---
 info "Push"
 pushed=false
 for i in $(seq 1 5); do
@@ -237,8 +237,7 @@ git -C "$REL_WORKTREE" tag -a "$TAG" -m "${APP_NAME} ${VERSION}"
 git -C "$REL_WORKTREE" push origin "$TAG"
 step "pushed HEAD + ${TAG}"
 
-# --- Publish the draft release on the pushed tag. Vercel is still building the release commit, so
-# the assets go public before /download, version.json and the appcast point at them. ---
+# --- Publish the draft release on the pushed tag, seconds after the feed commit lands on main. ---
 info "Publish GitHub Release ${TAG}"
 gh release edit "$TAG" --repo "$JPTC_RELEASE_REPO" --draft=false --latest >/dev/null \
 	|| fail "could not publish the draft release ${TAG}; publish it now: gh release edit ${TAG} --repo ${JPTC_RELEASE_REPO} --draft=false --latest"
@@ -246,7 +245,7 @@ step "published release ${TAG}"
 
 # --- Sync the public Homebrew tap. The public install path is
 # `brew tap 8bittts/jpthecat && brew trust 8bittts/jpthecat && brew install --cask jpthecat`; this
-# keeps that tap pinned to the same notarized DMG + SHA as `/download` and Sparkle.
+# keeps that tap pinned to the same notarized DMG + SHA as the GitHub Release and Sparkle.
 info "Sync Homebrew tap"
 TAP_WORKTREE="${TMPDIR:-/tmp}/jpthecat-homebrew-tap-$$"
 git clone -q "$HOMEBREW_TAP_URL" "$TAP_WORKTREE" \
@@ -268,8 +267,7 @@ git -C "$RROOT" checkout -- mac/Info.plist README.md Casks/jpthecat.rb feed/publ
 rm -f "$FEED_SHA_FILE"
 git -C "$RROOT" merge --ff-only origin/main -q 2>/dev/null || true
 
-# --- Verify: download URL 200. The live appcast changes only when Vercel promotes the
-# release commit, so it is proven after promotion by sparkle-upgrade-smoke.sh, not here. ---
+# --- Verify: download URL 200. The live appcast is proven by sparkle-upgrade-smoke.sh, not here. ---
 info "Verify download URL"
 ok=false
 for i in $(seq 1 10); do
@@ -296,4 +294,4 @@ echo ""
 info "RELEASE COMPLETE: ${APP_NAME} ${TAG}"
 echo "  Download: ${DOWNLOAD_URL}"
 echo "  Checksum: ${CHECKSUM}"
-echo "  Verify the Vercel production deploy of feed/ promoted to the release commit (.claude/commands/jp.md)."
+echo "  Verify the live feed: curl -sL https://jpthecat.com/stable/version.json (.claude/commands/jp.md)."

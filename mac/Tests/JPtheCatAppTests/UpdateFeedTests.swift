@@ -2,10 +2,12 @@ import CryptoKit
 import Foundation
 import XCTest
 
-/// `https://jpthecat.com/stable/*` is the update channel every installed copy reads: the Sparkle
-/// appcast (`Info.plist` `SUFeedURL`), the remote pricing table (`RemotePricingStore`), and the
-/// Homebrew livecheck. The website is retired and the rest of the domain redirects to GitHub, so
-/// `feed/` must keep serving these files byte-for-byte.
+@testable import JPtheCatCore
+
+/// `feed/public/stable/*` on `main` is the update channel, served by raw.githubusercontent.com: the
+/// Sparkle appcast (`Info.plist` `SUFeedURL`), the remote pricing table (`RemotePricingStore`), and the
+/// Homebrew livecheck. Apps up to v1.161 read `jpthecat.com/stable/*`, which a Cloudflare redirect
+/// rule sends to the same files, so the paths here must never move.
 final class UpdateFeedTests: XCTestCase {
 	/// `RemotePricingStore` merges the hosted table OVER the bundled one, so any drift reprices real
 	/// usage. Regenerate by copying `pricing-default.json`, never by hand-editing the hosted copy.
@@ -37,7 +39,7 @@ final class UpdateFeedTests: XCTestCase {
 		XCTAssertTrue(cask.contains(#"homepage "https://github.com/8bittts/JPtheCat""#))
 		XCTAssertTrue(
 			cask.contains(#"url "https://github.com/8bittts/JPtheCat/releases/download/v#{version}/JPtheCat-#{version}.dmg""#))
-		XCTAssertTrue(cask.contains(#"url "https://jpthecat.com/stable/appcast.xml""#))
+		XCTAssertTrue(cask.contains(#"url "https://raw.githubusercontent.com/8bittts/JPtheCat/main/feed/public/stable/appcast.xml""#))
 		XCTAssertTrue(cask.contains("strategy :sparkle, &:short_version"))
 	}
 
@@ -48,29 +50,23 @@ final class UpdateFeedTests: XCTestCase {
 		XCTAssertTrue(readme.contains("brew tap 8bittts/jpthecat\nbrew trust 8bittts/jpthecat\nbrew install --cask jpthecat"))
 	}
 
-	/// The feed serves `/stable/*` from disk and redirects everything else, so the filesystem route
-	/// must come before the catch-all redirect, and installed apps up to v1.160 must still get a real
-	/// failure from the retired support endpoint.
-	func testFeedRoutesServeStableFilesBeforeTheGitHubRedirect() throws {
-		let config = try XCTUnwrap(JSONSerialization.jsonObject(with: data("feed/vercel.json")) as? [String: Any])
-		XCTAssertEqual(config["outputDirectory"] as? String, "public")
-		let routes = try XCTUnwrap(config["routes"] as? [[String: Any]])
-
-		let filesystem = try XCTUnwrap(routes.firstIndex { $0["handle"] as? String == "filesystem" })
-		let catchAll = try XCTUnwrap(routes.lastIndex { $0["src"] as? String == "/(.*)" })
-		XCTAssertLessThan(filesystem, catchAll)
-		XCTAssertEqual(routes[catchAll]["status"] as? Int, 308)
-		XCTAssertEqual(
-			(routes[catchAll]["headers"] as? [String: String])?["Location"], "https://github.com/8bittts/JPtheCat")
-
-		let support = try XCTUnwrap(routes.first { ($0["src"] as? String)?.hasPrefix("/api/support-report") == true })
-		XCTAssertEqual(support["status"] as? Int, 410)
+	/// Every URL the app bakes in points at a file this repository actually serves from `main`.
+	func testBakedFeedURLsPointAtCommittedFeedFiles() throws {
+		let base = "https://raw.githubusercontent.com/8bittts/JPtheCat/main/"
+		let plist = try XCTUnwrap(
+			PropertyListSerialization.propertyList(from: data("mac/Info.plist"), format: nil) as? [String: Any])
+		let feedURL = try XCTUnwrap(plist["SUFeedURL"] as? String)
+		XCTAssertEqual(feedURL, base + "feed/public/stable/appcast.xml")
+		XCTAssertEqual(RemotePricingStore.defaultRemoteURL.absoluteString, base + "feed/public/stable/pricing-v1.json")
 
 		for file in ["appcast.xml", "version.json", "pricing-v1.json", "pricing.json", "jpthecat.rb"] {
 			XCTAssertTrue(
 				FileManager.default.fileExists(atPath: root().appendingPathComponent("feed/public/stable/\(file)").path),
 				"feed must serve stable/\(file)")
 		}
+		XCTAssertFalse(
+			FileManager.default.fileExists(atPath: root().appendingPathComponent("feed/vercel.json").path),
+			"the feed is GitHub-hosted; no Vercel deployment config remains")
 	}
 
 	private func data(_ path: String) throws -> Data {

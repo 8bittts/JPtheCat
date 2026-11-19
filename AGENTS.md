@@ -6,10 +6,10 @@ It ships as a native Swift app (`mac/`), alongside `feed/`, `Casks/`, `brand/`, 
 Directory-scoped rules load automatically beside the code and are not restated here:
 - [mac/AGENTS.md](mac/AGENTS.md) — Swift app, widget, release scripts, native correctness invariants.
 
-**The website is retired; `jpthecat.com` is now only the update channel.**
-`feed/` is a static Vercel deployment: it serves `/stable/*` (the Sparkle appcast in `Info.plist` `SUFeedURL`, `RemotePricingStore`'s `pricing-v1.json`, the frozen legacy `pricing.json`, `version.json`, the hosted cask), answers 410 on the retired `/api/support-report`, sends `/download` to the latest GitHub Release, and 308-redirects every other path to the GitHub repository.
-Every installed copy reads `/stable/*`, so never remove, move, or redirect it (guard: `UpdateFeedTests`).
-Do not rebuild a website or add pages to `feed/`.
+**The website is retired and nothing is hosted outside GitHub.**
+`feed/public/stable/*` on `main` is the update channel, served by raw.githubusercontent.com: the Sparkle appcast (`Info.plist` `SUFeedURL`), `RemotePricingStore`'s `pricing-v1.json`, the frozen legacy `pricing.json`, `version.json`, and the hosted cask.
+Apps up to v1.161 bake in `jpthecat.com/stable/*`; Cloudflare redirect rules on that zone send those paths to the same GitHub files and every other path to the repository ([05-infrastructure.md](_docs/05-infrastructure.md#update-feed-dns-and-email-routing)).
+Never move or rename `feed/public/stable/*`, because every installed copy reads it (guard: `UpdateFeedTests`), and never rebuild a website.
 
 ## Documentation
 
@@ -126,14 +126,14 @@ A bare dotfolder is not proof of install, a GUI app does not inherit shell `$PAT
 ## Git, Release & Worktree Workflow
 
 Worktrees live under this repo's `workstreams/` container, not the global `.worktrees/` default: `git worktree add workstreams/<task> -b <task-branch>` from the canonical checkout's root.
-`workstreams/` is local-only and must stay ignored by Git; the feed deploys from a Git clone, so an untracked worktree never reaches Vercel.
+`workstreams/` is local-only and must stay ignored by Git.
 Reuse an existing task worktree rather than nesting another inside it.
 Concurrent agents and automation hard-reset and stash the shared checkout, so editing it has repeatedly destroyed uncommitted work.
 
-The only deploy is the update feed: land the branch on `main` with `[deploy]` in the commit subject, then confirm Vercel promoted production to that commit and reached READY (not CANCELED); a release does this for you.
-Sync a worktree by REBASING, never merging: `ignoreCommand` reads only the tip commit, so a merge commit on top of your `[deploy]` commit cancels the build.
+There is no deploy: a push to `main` that changes `feed/public/stable/*` publishes it, so only a release or a pricing change may touch those files.
+Sync a worktree by REBASING, never merging.
 Review the shipped result — the live feed URLs, a real render for visual work, and green gates — BEFORE cleaning up, and never remove a worktree with unverified, uncommitted, or unmerged work.
-`mac/scripts/release-jpthecat.sh` makes its `release: … [deploy]` commit, tag, and push from a dedicated worktree at the current local `HEAD` after proving `HEAD` contains `origin/main` — do not move it back inline.
+`mac/scripts/release-jpthecat.sh` makes its `release: …` commit, tag, and push from a dedicated worktree at the current local `HEAD` after proving `HEAD` contains `origin/main` — do not move it back inline.
 The public install path is `brew tap 8bittts/jpthecat` + `brew trust 8bittts/jpthecat` + `brew install --cask jpthecat` (the README carries it; guard: `UpdateFeedTests`); `Casks/jpthecat.rb`, `feed/public/stable/jpthecat.rb`, and the public tap stay pinned to the same version and SHA (`release-jpthecat.sh` syncs all three).
 
 **Sparkle release notes are customer-facing ONLY, cover the LATEST release only, and must never contain documentation, process, or internal-implementation commits.**
@@ -151,7 +151,7 @@ Incidents: [_docs/00-foundation.md#sparkle-release-notes](_docs/00-foundation.md
 - **Docs-only:** manual review plus `git diff --check`, unless the touched doc has a renderer or test.
 - **Mac app:** smallest meaningful Swift gate first, broadening by risk — `cd mac && swift build`, `swift test --parallel`, `swift build -c release`.
   An unchanged `.o` is NOT proof the build skipped your file — prove a compile with a syntax error (non-zero exit) or a semantic change: [_docs/00-foundation.md#proving-a-swift-change-compiled](_docs/00-foundation.md#proving-a-swift-change-compiled).
-- **Update feed:** `UpdateFeedTests` (in the mac suite) checks the hosted pricing, legacy feed, casks, and routes; after a feed deploy, `curl` `https://jpthecat.com/stable/version.json` and the root redirect.
+- **Update feed:** `UpdateFeedTests` (in the mac suite) checks the hosted pricing, legacy feed, casks, and the URLs the app bakes in; after a release, `curl -sL https://jpthecat.com/stable/version.json` must show the new version through the redirect.
 - **Visible UI or asset work** (widget faces, themes, brand-fidelity changes) needs a real headless screenshot or the `ImageRenderer`/`JP_RENDER=1` harness, never eyeballed intent.
 - `.github/workflows/ci.yml` exists but is disabled on purpose; the local gates above are the gates.
 - **Before reporting done:** state which gates ran and why a broader one was not.

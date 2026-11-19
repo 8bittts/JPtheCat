@@ -21,10 +21,9 @@ One command owns it: `bash mac/scripts/release-jpthecat.sh [version]` (also `/jp
 - **Versions:** `CFBundleVersion` is a monotonic integer floored above the latest published `<sparkle:version>`, because Sparkle compares build numbers; the bump math is covered by `VersionBumpTests`.
 - **Appcast:** `generate-appcast.sh` publishes exactly one `<item>` (`--maximum-versions 1`), feeds the last five DMGs in only to build deltas, and purges Sparkle's never-pruned extraction cache on every run.
 - **Hosting:** each release is a GitHub Release on this public repository, tagged `v<version>`, holding `JPtheCat-<v>.dmg`, `JPtheCat-<v>.sha256`, and that release's Sparkle deltas; `mac/scripts/release-github.sh` owns the repository and the URL shape, and nothing is pruned because older DMGs are the delta sources.
-  The release uploads to a draft, proves the DMG bytes through an authenticated download, pushes the release commit and tag, then publishes the draft while Vercel is still deploying, so the assets are public before the feed points at them (guard: `ReleaseGitHubTests`).
-  `/download` is a static 302 to `github.com/8bittts/JPtheCat/releases/latest`; it records nothing.
-- **Source:** the public `github.com/8bittts/JPtheCat` repository, whose `main` the Vercel project `jpthecat` (root `feed/`, no framework, no build) is Git-connected to; the `[deploy]` subject marker gates its builds.
-- **Manifest:** the release rewrites `feed/public/stable/{version.json,appcast.xml}`, the README markers, and all three cask copies, then commits `release: JPtheCat vX [deploy]` plus a tag from a dedicated worktree (root `AGENTS.md`).
+  The release uploads to a draft, proves the DMG bytes through an authenticated download, pushes the release commit and tag, then publishes the draft seconds after the feed commit lands, inside raw.githubusercontent.com's 5-minute cache window (guard: `ReleaseGitHubTests`).
+- **Source and feed:** the public `github.com/8bittts/JPtheCat` repository; `feed/public/stable/*` on `main` is served by raw.githubusercontent.com, so the release push publishes the feed.
+- **Manifest:** the release rewrites `feed/public/stable/{version.json,appcast.xml}`, the README markers, and all three cask copies, then commits `release: JPtheCat vX` plus a tag from a dedicated worktree (root `AGENTS.md`).
 
 Invariants:
 
@@ -59,8 +58,10 @@ Post-release proofs:
 
 ## Update Feed, DNS, and Email Routing
 
-- The website is retired; `feed/vercel.json` is the whole deployment.
-  It serves `feed/public/stable/*` with open CORS, answers 410 on `/api/support-report` (apps up to v1.160 post there and must see a failure), sends `/download` to the latest GitHub Release, and 308-redirects every other path on both hosts to `https://github.com/8bittts/JPtheCat` (guard: `UpdateFeedTests`).
-  It reads no environment variable, and the project holds none.
-- `jpthecat.com` (`A 216.150.1.1`) and `www.jpthecat.com` (`CNAME *.vercel-dns-016.com`) stay DNS-only in Cloudflare behind the Vercel project `jpthecat`, with zone settings normalized to `ssl` `strict`, `always_use_https` `on`, `min_tls_version` `1.2`, `email_obfuscation` `off`, and `DNSSEC` `disabled`.
+- The website is retired and nothing is hosted outside GitHub.
+  New builds read `https://raw.githubusercontent.com/8bittts/JPtheCat/main/feed/public/stable/*` directly (`Info.plist` `SUFeedURL`, `RemotePricingStore.defaultRemoteURL`, the cask livecheck).
+- Apps up to v1.161 read `https://jpthecat.com/stable/*`, so the zone keeps a Cloudflare `http_request_dynamic_redirect` ruleset, in order:
+  `/stable/*` → 302 to the same file under the raw URL above; `/api/support-report*` → 308 to a missing GitHub path, which answers 422 so apps up to v1.160 report a lost support message as failed; `/download` → 302 to the latest GitHub Release; everything else → 301 to the repository.
+  Writing that ruleset needs the "Dynamic URL Redirects Write" zone permission, which no stored token holds; mint a short-lived zone-scoped token with the account token and delete it afterwards.
+- `jpthecat.com` and `www.jpthecat.com` are proxied `AAAA 100::` records, a placeholder origin that only the redirect rules answer, with zone settings normalized to `ssl` `strict`, `always_use_https` `on`, `min_tls_version` `1.2`, `email_obfuscation` `off`, and `DNSSEC` `disabled`.
 - Outbound mail authenticates through DNS-only Resend records (`mail.jpthecat.com -> send.forge.rmta.net`, `resend._domainkey`, `send.jpthecat.com` MX/SPF, and `_dmarc` `p=none`), and inbound mail uses Cloudflare Email Routing (`route1/2/3.mx.cloudflare.net`, subaddressing on, zero custom rules, and catch-all forwarding to the operator inbox).
