@@ -14,11 +14,11 @@ Native, local-first, private, free, and open source under the MIT license.
 `macOS 14+` · `Apple Silicon` · `Free` · `No account` · `MIT`
 
 <!-- version-badge -->
-**Stable release:** `v1.160`
+**Stable release:** `v1.161`
 <!-- /version-badge -->
 
 <!-- download-link -->
-**Download:** [JP the Cat v1.160 DMG](https://github.com/8bittts/JPtheCat/releases/download/v1.160/JPtheCat-1.160.dmg)
+**Download:** [JP the Cat v1.161 DMG](https://github.com/8bittts/JPtheCat/releases/download/v1.161/JPtheCat-1.161.dmg)
 <!-- /download-link -->
 
 **Homebrew:**
